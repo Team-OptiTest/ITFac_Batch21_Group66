@@ -25,3 +25,14 @@ replay_pid*
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+# Sensitive Config and Credentials
+*/application-local.properties
+*/application-dev.properties
+*/application-prod.properties
+*/application.properties
+*.env
+.env
+
+
+how-to-run.txt
