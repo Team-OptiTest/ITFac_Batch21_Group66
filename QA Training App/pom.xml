@@ -15,9 +15,10 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
-        <!-- Serenity BDD -->
-        <serenity.version>4.0.1</serenity.version>
-        <serenity.maven.version>4.0.1</serenity.maven.version>
+        <!-- Serenity BDD (Official Recommended Versions) -->
+        <serenity.version>4.1.4</serenity.version>
+        <cucumber.version>7.14.0</cucumber.version>
+        <junit-platform.version>1.10.0</junit-platform.version>
         
         <!-- Testing -->
         <junit.version>5.10.0</junit.version>
@@ -59,6 +60,26 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Serenity BDD -->
+        <dependency>
+            <groupId>net.serenity-bdd</groupId>
+            <artifactId>serenity-core</artifactId>
+            <version>${serenity.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.serenity-bdd</groupId>
+            <artifactId>serenity-cucumber</artifactId>
+            <version>${serenity.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.serenity-bdd</groupId>
+            <artifactId>serenity-screenplay-rest</artifactId>
+            <version>${serenity.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -74,11 +95,27 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- JUnit Platform Suite for Cucumber -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>${junit-platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Cucumber JUnit Platform Engine -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit-platform-engine</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- AssertJ for fluent assertions -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.24.2</version>
+            <version>3.25.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -145,7 +182,7 @@
             <plugin>
                 <groupId>net.serenity-bdd.maven.plugins</groupId>
                 <artifactId>serenity-maven-plugin</artifactId>
-                <version>${serenity.maven.version}</version>
+                <version>${serenity.version}</version>
                 <executions>
                     <execution>
                         <id>serenity-reports</id>
