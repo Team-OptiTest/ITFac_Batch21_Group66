@@ -31,8 +31,12 @@ replay_pid*
 */application-dev.properties
 */application-prod.properties
 */application.properties
+**/serenity.conf
 *.env
 .env
 
 
 how-to-run.txt
+
+# Maven output directory
+*/target
