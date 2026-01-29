@@ -1,0 +1,21 @@
+serenity {
+    project.name = "IS4600 Automation Project"
+    test.root = "stepdefinitions"
+    tag.failures = "true"
+    linked.tags = "issue"
+    restart.browser.for.each = "NEVER"
+}
+
+api {
+    base.url = "http://localhost:8080"
+}
+
+test {
+    user {
+        # Replace with actual test credentials
+        username = "user_username_here"
+        password = "user_password_here"
+    }
+}
+
+headless.mode = true
