@@ -73,4 +73,15 @@ public class CategoryStepDefinitions {
             .isIn(403, 404);
     }
 
+    @When("the admin deletes an existing category with ID {long}")
+    public void theAdminDeletesAnExistingCategoryWithId(long categoryId) {
+        categoryActions.deleteCategoryById(categoryId);
+    }
+
+    @Then("the category should be deleted successfully")
+    public void theCategoryShouldBeDeletedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Category deletion should succeed")
+            .isIn(204, 205);
+    }
 }
