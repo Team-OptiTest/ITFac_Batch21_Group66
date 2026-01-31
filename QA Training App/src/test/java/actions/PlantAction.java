@@ -13,6 +13,7 @@ public class PlantAction {
     private String username;
     private String password;
     private String token;
+    private int lastCreatedPlantId;
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -53,9 +54,45 @@ public class PlantAction {
             request.auth().preemptive().basic(username, password);
         }
 
-        request.body(plantData)
+        Response response = request.body(plantData)
                 .when()
                 .post(baseUrl + "/api/plants/category/" + categoryId);
+
+        if (response.getStatusCode() == 201) {
+            lastCreatedPlantId = response.jsonPath().getInt("id");
+        }
+    }
+
+    @Step("Delete a plant")
+    public void deletePlant(int id) {
+        var request = SerenityRest.given();
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        request.when()
+                .delete(baseUrl + "/api/plants/" + id);
+    }
+
+    @Step("Get a plant")
+    public void getPlant(int id) {
+        var request = SerenityRest.given();
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        request.when()
+                .get(baseUrl + "/api/plants/" + id);
+    }
+
+    public int getLastCreatedPlantId() {
+        return lastCreatedPlantId;
     }
 
     @Step("Verify response status code")

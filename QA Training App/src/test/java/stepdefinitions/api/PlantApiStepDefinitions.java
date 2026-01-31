@@ -58,6 +58,29 @@ public class PlantApiStepDefinitions {
         plantAction.createPlant(categoryId, body);
     }
 
+    @Given("a plant exists")
+    public void aPlantExists() {
+        // Create a plant to ensure one exists for deletion
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("name", "Plant to Delete");
+        body.put("price", 10.0);
+        body.put("quantity", 50);
+        plantAction.createPlant(5, body); // Assuming category 5 exists as per previous tests
+    }
+
+    @When("I delete the plant")
+    public void iDeleteThePlant() {
+        plantAction.deletePlant(plantAction.getLastCreatedPlantId());
+    }
+
+    @When("I DELETE to {string}")
+    public void iDELETETo(String endpoint) {
+        // Handle generic /api/plants/{id}
+        String[] parts = endpoint.split("/");
+        int id = Integer.parseInt(parts[parts.length - 1]);
+        plantAction.deletePlant(id);
+    }
+
     @Then("the response status should be {int}")
     public void theResponseStatusShouldBe(int statusCode) {
         plantAction.verifyStatusCode(statusCode);
@@ -71,5 +94,11 @@ public class PlantApiStepDefinitions {
     @Then("the plant name should be {string}")
     public void thePlantNameShouldBe(String name) {
         plantAction.verifyPlantName(name);
+    }
+
+    @Then("the plant should no longer exist")
+    public void thePlantShouldNoLongerExist() {
+        plantAction.getPlant(plantAction.getLastCreatedPlantId());
+        plantAction.verifyStatusCode(404);
     }
 }
