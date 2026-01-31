@@ -1,5 +1,5 @@
 Feature: Category Creation
-  As an admin user
+  As an authenticated user with appropriate permissions
   I want to create a category
   So that I can organize plants
 
