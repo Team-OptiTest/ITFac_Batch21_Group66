@@ -20,3 +20,9 @@ Feature: Category Creation
     Given the user is authenticated as admin
     When the admin creates a category with more than 10 characters "abcdefghijkl"
     Then the category should not be created
+
+  @simple
+  Scenario: Create category without name
+    Given the user is authenticated as admin
+    When the admin creates a category without name ""
+    Then the category should not be created

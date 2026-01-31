@@ -44,6 +44,11 @@ public class CategoryStepDefinitions {
         categoryActions.createCategory(categoryName);
     }
 
+    @When("the admin creates a category without name {string}")
+    public void theAdminCreatesACategoryWithoutName(String categoryName) {
+        categoryActions.createCategory(categoryName);
+    }
+
     @Then("the category should not be created")
     public void theCategoryShouldNotBeCreated() {
         assertThat(categoryActions.getLastResponseStatusCode())
