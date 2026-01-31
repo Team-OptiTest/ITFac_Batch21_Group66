@@ -14,9 +14,18 @@ public class PlantAction {
     private String password;
     private String token;
     private int lastCreatedPlantId;
+    private String lastCreatedPlantName;
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
+    }
+
+    public void setLastCreatedPlantName(String name) {
+        this.lastCreatedPlantName = name;
+    }
+
+    public String getLastCreatedPlantName() {
+        return this.lastCreatedPlantName;
     }
 
     @Step("Authenticate with credentials")
