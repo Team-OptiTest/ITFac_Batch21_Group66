@@ -118,4 +118,28 @@ public class PlantAction {
     public void verifyPlantName(String expectedName) {
         SerenityRest.then().body("name", org.hamcrest.Matchers.equalTo(expectedName));
     }
+
+    @Step("Get plants with pagination")
+    public void getPlants(int page, int size) {
+        var request = SerenityRest.given();
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        request.queryParam("page", page)
+                .queryParam("size", size)
+                .when()
+                .get(baseUrl + "/api/plants");
+    }
+
+    @Step("Verify pagination metadata")
+    public void verifyPaginationMetadata() {
+        SerenityRest.then()
+                .body("content", org.hamcrest.Matchers.notNullValue())
+                .body("pageable", org.hamcrest.Matchers.notNullValue())
+                .body("totalElements", org.hamcrest.Matchers.notNullValue());
+    }
 }

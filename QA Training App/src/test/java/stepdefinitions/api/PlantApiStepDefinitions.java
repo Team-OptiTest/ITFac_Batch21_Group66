@@ -114,4 +114,17 @@ public class PlantApiStepDefinitions {
         plantAction.getPlant(plantAction.getLastCreatedPlantId());
         plantAction.verifyStatusCode(404);
     }
+
+    @When("I GET to {string} with query params page={int}&size={int}")
+    public void iGETToWithQueryParamsPageSize(String endpoint, int page, int size) {
+        // endpoint is currently hardcoded in action as /api/plants, but checking if it
+        // matches expectation
+        // In the future we might want to pass endpoint to action if we need flexibility
+        plantAction.getPlants(page, size);
+    }
+
+    @Then("the response should contain a list of plants and pagination metadata")
+    public void theResponseShouldContainAListOfPlantsAndPaginationMetadata() {
+        plantAction.verifyPaginationMetadata();
+    }
 }
