@@ -19,6 +19,12 @@ public class PlantApiStepDefinitions {
 
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+        if (baseUrl != null) {
+            plantAction.setBaseUrl(baseUrl);
+        }
+
         String username = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("test.admin.username");
         String password = EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -28,6 +34,12 @@ public class PlantApiStepDefinitions {
 
     @Given("a regular user is authenticated")
     public void aRegularUserIsAuthenticated() {
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+        if (baseUrl != null) {
+            plantAction.setBaseUrl(baseUrl);
+        }
+
         String username = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("test.user.username");
         String password = EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -126,5 +138,15 @@ public class PlantApiStepDefinitions {
     @Then("the response should contain a list of plants and pagination metadata")
     public void theResponseShouldContainAListOfPlantsAndPaginationMetadata() {
         plantAction.verifyPaginationMetadata();
+    }
+
+    @When("I search for plants with name {string} and page={int}&size={int}")
+    public void iSearchForPlantsWithNameAndPageSize(String name, int page, int size) {
+        plantAction.getPlants(name, page, size);
+    }
+
+    @Then("the response should contain plants filtering by name {string}")
+    public void theResponseShouldContainPlantsFilteringByName(String name) {
+        plantAction.verifyPlantListContainsName(name);
     }
 }
