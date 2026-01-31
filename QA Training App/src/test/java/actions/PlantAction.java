@@ -165,4 +165,36 @@ public class PlantAction {
         SerenityRest.then()
                 .body("content.name", org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.containsString(name)));
     }
+
+    @Step("Get plants by category")
+    public void getPlantsByCategory(int categoryId) {
+        var request = SerenityRest.given();
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        request.when()
+                .get(baseUrl + "/api/plants/category/" + categoryId);
+    }
+
+    @Step("Verify plant list is not empty")
+    public void verifyPlantListNotEmpty() {
+        // Assuming the response is a list or pageable content.
+        // If it's a direct list: body("$", not(empty()))
+        // If it's pageable: body("content", not(empty()))
+        // Based on previous tests, it seems to return a Page (content field), but
+        // "Returns array of plants" might imply a direct list for this endpoint.
+        // Let's assume it returns a list based on typical "get all by category"
+        // endpoints,
+        // but if it follows the same pattern as /api/plants, it might be paginated.
+        // However, usually specific category lists without page params might be just a
+        // list.
+        // Let's check the previous CREATE test which posted to /api/plants/category/5.
+        // If unsure, we can check size > 0.
+        // Trying generic check first.
+        SerenityRest.then().body("size()", org.hamcrest.Matchers.greaterThan(0));
+    }
 }

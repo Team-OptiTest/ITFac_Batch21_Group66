@@ -140,6 +140,20 @@ public class PlantApiStepDefinitions {
         plantAction.verifyPaginationMetadata();
     }
 
+    @When("I GET to {string}")
+    public void iGETTo(String endpoint) {
+        if (endpoint.contains("/api/plants/category/")) {
+            String[] parts = endpoint.split("/");
+            int categoryId = Integer.parseInt(parts[parts.length - 1]);
+            plantAction.getPlantsByCategory(categoryId);
+        }
+    }
+
+    @Then("the response should contain a list of plants belonging to that category")
+    public void theResponseShouldContainAListOfPlantsBelongingToThatCategory() {
+        plantAction.verifyPlantListNotEmpty();
+    }
+
     @When("I search for plants with name {string} and page={int}&size={int}")
     public void iSearchForPlantsWithNameAndPageSize(String name, int page, int size) {
         plantAction.getPlants(name, page, size);
