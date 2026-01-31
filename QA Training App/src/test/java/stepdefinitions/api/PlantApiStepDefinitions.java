@@ -5,6 +5,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
+import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
+import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.Map;
 
@@ -13,9 +15,24 @@ public class PlantApiStepDefinitions {
     @Steps
     PlantAction plantAction;
 
+    private EnvironmentVariables environmentVariables;
+
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
-        plantAction.authenticateAsAdmin("admin", "admin123");
+        String username = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.admin.username");
+        String password = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.admin.password");
+        plantAction.authenticate(username, password);
+    }
+
+    @Given("a regular user is authenticated")
+    public void aRegularUserIsAuthenticated() {
+        String username = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.username");
+        String password = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.password");
+        plantAction.authenticate(username, password);
     }
 
     @Given("a valid category with ID {int} exists")

@@ -3,39 +3,73 @@ package actions;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.rest.SerenityRest;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import java.util.Map;
+import java.util.HashMap;
 
 public class PlantAction {
 
     private String baseUrl = "http://localhost:8080";
+    private String username;
+    private String password;
+    private String token;
 
-    @Step("Authenticate as admin")
-    public void authenticateAsAdmin(String username, String password) {
-        SerenityRest.given()
-                .auth().basic(username, password);
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 
-    @Step("Create a new plant in category {0} with data {1}")
-    public void createPlant(int categoryId, Map<String, Object> plantData) {
-        SerenityRest.given()
+    @Step("Authenticate with credentials")
+    public void authenticate(String username, String password) {
+        this.username = username;
+        this.password = password;
+
+        // Attempt to get JWT token
+        Map<String, String> loginData = new HashMap<>();
+        loginData.put("username", username);
+        loginData.put("password", password);
+
+        Response response = SerenityRest.given()
                 .contentType(ContentType.JSON)
-                .body(plantData)
+                .body(loginData)
+                .when()
+                .post(baseUrl + "/api/auth/login");
+
+        if (response.getStatusCode() == 200) {
+            this.token = response.jsonPath().getString("token");
+        } else {
+            this.token = null; // Reset token if login fails
+        }
+    }
+
+    @Step("Create a new plant")
+    public void createPlant(int categoryId, Map<String, Object> plantData) {
+        var request = SerenityRest.given()
+                .contentType(ContentType.JSON);
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            // Fallback for unauthorized tests or if token retrieval failed
+            request.auth().preemptive().basic(username, password);
+        }
+
+        request.body(plantData)
                 .when()
                 .post(baseUrl + "/api/plants/category/" + categoryId);
     }
 
-    @Step("Verify response status code is {0}")
-    public void verifyStatusCode(int expectedStatus) {
-        SerenityRest.restAssuredThat(response -> response.statusCode(expectedStatus));
+    @Step("Verify response status code")
+    public void verifyStatusCode(int statusCode) {
+        SerenityRest.then().statusCode(statusCode);
     }
 
-    @Step("Verify response contains assigned ID")
+    @Step("Verify assigned ID")
     public void verifyAssignedId() {
-        SerenityRest.restAssuredThat(response -> response.body("id", org.hamcrest.Matchers.notNullValue()));
+        SerenityRest.then().body("id", org.hamcrest.Matchers.notNullValue());
     }
 
-    @Step("Verify plant name is {0}")
+    @Step("Verify plant name")
     public void verifyPlantName(String expectedName) {
-        SerenityRest.restAssuredThat(response -> response.body("name", org.hamcrest.Matchers.equalTo(expectedName)));
+        SerenityRest.then().body("name", org.hamcrest.Matchers.equalTo(expectedName));
     }
 }
