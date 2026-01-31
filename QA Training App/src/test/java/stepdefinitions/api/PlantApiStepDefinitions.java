@@ -80,15 +80,33 @@ public class PlantApiStepDefinitions {
 
     @Given("a plant exists")
     public void aPlantExists() {
+        // Ensure admin is authenticated for creation
+        theAdminIsAuthenticated();
+
         // Create a plant to ensure one exists for deletion/update
         Map<String, Object> body = new java.util.HashMap<>();
-        String name = "Del " + System.currentTimeMillis();
+        String name = "Plant " + System.currentTimeMillis();
         body.put("name", name);
         body.put("price", 10.0);
         body.put("quantity", 50);
-        plantAction.createPlant(5, body); // Assuming category 5 exists as per previous tests
+        plantAction.createPlant(5, body);
         plantAction.verifyStatusCode(201);
         plantAction.setLastCreatedPlantName(name);
+    }
+
+    @When("I search for the last created plant")
+    public void iSearchForTheLastCreatedPlant() {
+        plantAction.getPlants(plantAction.getLastCreatedPlantName(), 0, 10);
+    }
+
+    @Then("the response should contain the last created plant")
+    public void theResponseShouldContainTheLastCreatedPlant() {
+        plantAction.verifyPlantListContainsName(plantAction.getLastCreatedPlantName());
+    }
+
+    @Then("the response error message for {string} should be {string}")
+    public void theResponseErrorMessageForShouldBe(String field, String message) {
+        plantAction.verifyDetailErrorMessage(field, message);
     }
 
     @When("I delete the plant")
@@ -175,5 +193,15 @@ public class PlantApiStepDefinitions {
     @Then("the plant price should be {double}")
     public void thePlantPriceShouldBe(double price) {
         plantAction.verifyPlantPrice(price);
+    }
+
+    @When("I update the plant quantity to {int}")
+    public void iUpdateThePlantQuantityTo(int quantity) {
+        plantAction.updatePlantQuantity(plantAction.getLastCreatedPlantId(), quantity);
+    }
+
+    @Then("the response error message should be {string}")
+    public void theResponseErrorMessageShouldBe(String message) {
+        plantAction.verifyResponseMessage(message);
     }
 }

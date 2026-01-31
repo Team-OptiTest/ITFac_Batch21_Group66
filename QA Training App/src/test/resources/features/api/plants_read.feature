@@ -10,11 +10,11 @@ Feature: Read Plant API
 
   @API_Plant_Read_007
   Scenario: Search Plant by Name
-    Given a regular user is authenticated
-    And a plant exists
-    When I search for plants with name "Plant to Delete" and page=0&size=10
+    Given a plant exists
+    And a regular user is authenticated
+    When I search for the last created plant
     Then the response status should be 200
-    And the response should contain plants filtering by name "Plant to Delete"
+    And the response should contain the last created plant
 
   @API_Plant_Read_008
   Scenario: Get Plant by Category

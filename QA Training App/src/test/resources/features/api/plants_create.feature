@@ -23,3 +23,12 @@ Feature: Plant Management API
       | name  | price | quantity |
       | Tulip | 12.00 | 50       |
     Then the response status should be 403
+
+  @API @Plant @Negative @API_Plant_Create_003
+  Scenario: API_Plant_Create_003 - Plant Name Length Validation
+    Given the admin is authenticated
+    When I POST to "/api/plants/category/5" with following data:
+      | name | price | quantity |
+      | R    | 15.50 | 100      |
+    Then the response status should be 400
+    And the response error message for "name" should be "Plant name must be between 3 and 25 characters"
