@@ -11,3 +11,11 @@ Feature: Plant Management API - Delete
     When I delete the plant
     Then the response status should be 204
     And the plant should no longer exist
+
+  @API @Plant @Delete
+  Scenario: API_Plant_Delete_002 - Unauthorized Delete Attempt
+    Given the admin is authenticated
+    And a plant exists
+    And a regular user is authenticated
+    When I delete the plant
+    Then the response status should be 403
