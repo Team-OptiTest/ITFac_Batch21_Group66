@@ -59,8 +59,8 @@ public class CategoryStepDefinitions {
         categoryActions.createCategory(categoryName);
     }
 
-    @Then("the category should not be created")
-    public void theCategoryShouldNotBeCreated() {
+    @Then("the category creation should fail")
+    public void theCategoryCreationShouldFail() {
         assertThat(categoryActions.getLastResponseStatusCode())
             .as("Category creation should not succeed")
             .isIn(400, 401);
