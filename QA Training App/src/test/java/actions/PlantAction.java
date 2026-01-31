@@ -69,6 +69,16 @@ public class PlantAction {
 
         if (response.getStatusCode() == 201) {
             lastCreatedPlantId = response.jsonPath().getInt("id");
+        } else {
+            System.out.println("FAILED TO CREATE PLANT. Status: " + response.getStatusCode());
+            System.out.println("Response Body: " + response.getBody().asString());
+            try {
+                java.nio.file.Files.writeString(
+                        java.nio.file.Paths.get("d:/Study/ITQA/ITFac_Batch21_Group66/QA Training App/error_log.txt"),
+                        response.getBody().asString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -178,6 +188,14 @@ public class PlantAction {
 
         request.when()
                 .get(baseUrl + "/api/plants/category/" + categoryId);
+
+        System.out.println("GET CATEGORY RESPONSE: " + SerenityRest.lastResponse().getBody().asString());
+        try {
+            java.nio.file.Files.writeString(
+                    java.nio.file.Paths.get("d:/Study/ITQA/ITFac_Batch21_Group66/QA Training App/get_log.txt"),
+                    SerenityRest.lastResponse().getBody().asString());
+        } catch (Exception e) {
+        }
     }
 
     @Step("Verify plant list is not empty")
@@ -196,5 +214,66 @@ public class PlantAction {
         // If unsure, we can check size > 0.
         // Trying generic check first.
         SerenityRest.then().body("size()", org.hamcrest.Matchers.greaterThan(0));
+    }
+
+    @Step("Update plant price")
+    public void updatePlantPrice(int id, double newPrice) {
+        var request = SerenityRest.given();
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        Map<String, Object> body = new HashMap<>();
+        if (lastCreatedPlantName != null) {
+            body.put("name", lastCreatedPlantName);
+        } else {
+            body.put("name", "Updated Plant " + System.currentTimeMillis());
+        }
+
+        // Debug: Get categories
+        try {
+            var catReq = SerenityRest.given();
+            if (token != null)
+                catReq.header("Authorization", "Bearer " + token);
+            Response cats = catReq.get(baseUrl + "/api/categories");
+            java.nio.file.Files.writeString(
+                    java.nio.file.Paths.get("d:/Study/ITQA/ITFac_Batch21_Group66/QA Training App/categories.txt"),
+                    cats.getBody().asString());
+        } catch (Exception e) {
+        }
+
+        body.put("price", newPrice);
+        body.put("quantity", 50);
+
+        // Include category to avoid 500 error (assuming category 5 is used as per
+        // setup)
+        Map<String, Object> category = new HashMap<>();
+        category.put("id", 5);
+        category.put("name", "Flowering");
+        body.put("category", category);
+
+        Response response = request.contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .put(baseUrl + "/api/plants/" + id);
+
+        if (response.getStatusCode() != 200) {
+            System.out.println("UPDATE FAILED. Status: " + response.getStatusCode());
+            System.out.println("Response: " + response.getBody().asString());
+            try {
+                java.nio.file.Files.writeString(
+                        java.nio.file.Paths.get("d:/Study/ITQA/ITFac_Batch21_Group66/QA Training App/update_error.txt"),
+                        response.getBody().asString());
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    @Step("Verify plant price")
+    public void verifyPlantPrice(double price) {
+        SerenityRest.then().body("price", org.hamcrest.Matchers.is((float) price));
     }
 }

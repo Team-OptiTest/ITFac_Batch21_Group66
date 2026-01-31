@@ -80,12 +80,15 @@ public class PlantApiStepDefinitions {
 
     @Given("a plant exists")
     public void aPlantExists() {
-        // Create a plant to ensure one exists for deletion
+        // Create a plant to ensure one exists for deletion/update
         Map<String, Object> body = new java.util.HashMap<>();
-        body.put("name", "Plant to Delete");
+        String name = "Del " + System.currentTimeMillis();
+        body.put("name", name);
         body.put("price", 10.0);
         body.put("quantity", 50);
         plantAction.createPlant(5, body); // Assuming category 5 exists as per previous tests
+        plantAction.verifyStatusCode(201);
+        plantAction.setLastCreatedPlantName(name);
     }
 
     @When("I delete the plant")
@@ -162,5 +165,15 @@ public class PlantApiStepDefinitions {
     @Then("the response should contain plants filtering by name {string}")
     public void theResponseShouldContainPlantsFilteringByName(String name) {
         plantAction.verifyPlantListContainsName(name);
+    }
+
+    @When("I update the plant price to {double}")
+    public void iUpdateThePlantPriceTo(double price) {
+        plantAction.updatePlantPrice(plantAction.getLastCreatedPlantId(), price);
+    }
+
+    @Then("the plant price should be {double}")
+    public void thePlantPriceShouldBe(double price) {
+        plantAction.verifyPlantPrice(price);
     }
 }
