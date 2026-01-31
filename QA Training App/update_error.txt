@@ -1,1 +1,0 @@
-{"status":400,"error":"BAD_REQUEST","message":"Plants can only belong to sub-categories","timestamp":"2026-01-31T16:52:03.373322"}
