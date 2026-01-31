@@ -22,6 +22,11 @@ public class CategoryStepDefinitions {
         authenticationActions.authenticateAsAdmin();
     }
 
+    @Given("the user is authenticated as user")
+    public void theUserIsAuthenticatedAsUser() {
+        authenticationActions.authenticateUser();
+    }
+
     @When("the admin creates a category with valid name {string}")
     public void theAdminCreatesACategoryWithName(String categoryName) {
         categoryActions.createCategoryWithValidData(categoryName);
@@ -49,11 +54,23 @@ public class CategoryStepDefinitions {
         categoryActions.createCategory(categoryName);
     }
 
+    @When("the user creates a category with name {string}")
+    public void theUserCreatesACategoryWithName(String categoryName) {
+        categoryActions.createCategory(categoryName);
+    }
+
     @Then("the category should not be created")
     public void theCategoryShouldNotBeCreated() {
         assertThat(categoryActions.getLastResponseStatusCode())
             .as("Category creation should not succeed")
-            .isIn(400, 499);
+            .isIn(400, 401);
+    }
+
+    @Then("the user should be denied permission to create a category")
+    public void theUserShouldBeDeniedPermissionToCreateACategory() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Category creation should not succeed")
+            .isIn(403, 404);
     }
 
 }
