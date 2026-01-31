@@ -112,4 +112,17 @@ public class CategoryActions {
         System.out.println("Response Body: " + lastResponse.getBody().asString());
         System.out.println("==============================================");
     }
+
+    @Step("Delete category with ID: {0}")
+    public void deleteCategoryById(long categoryId) {
+
+        String token = getAuthToken();
+
+        lastResponse = SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .delete(getBaseUrl() + "/api/categories/" + categoryId);
+
+        System.out.println("Status Code: " + lastResponse.getStatusCode());
+    }
 }
