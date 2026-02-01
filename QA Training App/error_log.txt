@@ -1,1 +1,0 @@
-{"details":{"name":"Plant name must be between 3 and 25 characters"},"error":"BAD_REQUEST","message":"Validation failed","status":400,"timestamp":"2026-01-31T17:25:50.2690136"}

@@ -6,10 +6,13 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.util.Map;
 import java.util.HashMap;
+import net.thucydides.model.util.EnvironmentVariables;
+import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 
 public class PlantAction {
 
-    private String baseUrl = "http://localhost:8080";
+    private EnvironmentVariables environmentVariables;
+    private String baseUrl;
     private String username;
     private String password;
     private String token;
@@ -18,6 +21,19 @@ public class PlantAction {
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
+    }
+
+    private String getBaseUrl() {
+        if (baseUrl == null) {
+            baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                    .getProperty("api.base.url");
+        }
+        return baseUrl;
+    }
+
+    private String getEndpoint(String key) {
+        return EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.endpoints." + key);
     }
 
     public void setLastCreatedPlantName(String name) {
@@ -33,7 +49,6 @@ public class PlantAction {
         this.username = username;
         this.password = password;
 
-        // Attempt to get JWT token
         Map<String, String> loginData = new HashMap<>();
         loginData.put("username", username);
         loginData.put("password", password);
@@ -42,12 +57,12 @@ public class PlantAction {
                 .contentType(ContentType.JSON)
                 .body(loginData)
                 .when()
-                .post(baseUrl + "/api/auth/login");
+                .post(getBaseUrl() + getEndpoint("auth.login"));
 
         if (response.getStatusCode() == 200) {
             this.token = response.jsonPath().getString("token");
         } else {
-            this.token = null; // Reset token if login fails
+            this.token = null;
         }
     }
 
@@ -59,13 +74,12 @@ public class PlantAction {
         if (token != null) {
             request.header("Authorization", "Bearer " + token);
         } else {
-            // Fallback for unauthorized tests or if token retrieval failed
             request.auth().preemptive().basic(username, password);
         }
 
         Response response = request.body(plantData)
                 .when()
-                .post(baseUrl + "/api/plants/category/" + categoryId);
+                .post(getBaseUrl() + getEndpoint("plants.category") + categoryId);
 
         if (response.getStatusCode() == 201) {
             lastCreatedPlantId = response.jsonPath().getInt("id");
@@ -93,7 +107,7 @@ public class PlantAction {
         }
 
         request.when()
-                .delete(baseUrl + "/api/plants/" + id);
+                .delete(getBaseUrl() + getEndpoint("plants.base") + "/" + id);
     }
 
     @Step("Get a plant")
@@ -107,7 +121,7 @@ public class PlantAction {
         }
 
         request.when()
-                .get(baseUrl + "/api/plants/" + id);
+                .get(getBaseUrl() + getEndpoint("plants.base") + "/" + id);
     }
 
     public int getLastCreatedPlantId() {
@@ -142,7 +156,7 @@ public class PlantAction {
         request.queryParam("page", page)
                 .queryParam("size", size)
                 .when()
-                .get(baseUrl + "/api/plants");
+                .get(getBaseUrl() + getEndpoint("plants.base"));
     }
 
     @Step("Get plants with name filter")
@@ -159,7 +173,7 @@ public class PlantAction {
                 .queryParam("page", page)
                 .queryParam("size", size)
                 .when()
-                .get(baseUrl + "/api/plants");
+                .get(getBaseUrl() + getEndpoint("plants.base"));
     }
 
     @Step("Verify pagination metadata")
@@ -187,7 +201,7 @@ public class PlantAction {
         }
 
         request.when()
-                .get(baseUrl + "/api/plants/category/" + categoryId);
+                .get(getBaseUrl() + getEndpoint("plants.category") + categoryId);
 
         System.out.println("GET CATEGORY RESPONSE: " + SerenityRest.lastResponse().getBody().asString());
         try {
@@ -200,19 +214,6 @@ public class PlantAction {
 
     @Step("Verify plant list is not empty")
     public void verifyPlantListNotEmpty() {
-        // Assuming the response is a list or pageable content.
-        // If it's a direct list: body("$", not(empty()))
-        // If it's pageable: body("content", not(empty()))
-        // Based on previous tests, it seems to return a Page (content field), but
-        // "Returns array of plants" might imply a direct list for this endpoint.
-        // Let's assume it returns a list based on typical "get all by category"
-        // endpoints,
-        // but if it follows the same pattern as /api/plants, it might be paginated.
-        // However, usually specific category lists without page params might be just a
-        // list.
-        // Let's check the previous CREATE test which posted to /api/plants/category/5.
-        // If unsure, we can check size > 0.
-        // Trying generic check first.
         SerenityRest.then().body("size()", org.hamcrest.Matchers.greaterThan(0));
     }
 
@@ -234,7 +235,7 @@ public class PlantAction {
         request.contentType(ContentType.JSON)
                 .body(body)
                 .when()
-                .put(baseUrl + "/api/plants/" + id);
+                .put(getBaseUrl() + getEndpoint("plants.base") + "/" + id);
     }
 
     @Step("Verify detailed error message for {0}")
@@ -262,7 +263,6 @@ public class PlantAction {
         body.put("price", 10.0);
         body.put("quantity", quantity);
 
-        // Include category to avoid 500 error
         Map<String, Object> category = new HashMap<>();
         category.put("id", 5);
         category.put("name", "Flowering");
@@ -271,7 +271,7 @@ public class PlantAction {
         request.contentType(ContentType.JSON)
                 .body(body)
                 .when()
-                .put(baseUrl + "/api/plants/" + id);
+                .put(getBaseUrl() + getEndpoint("plants.base") + "/" + id);
     }
 
     @Step("Verify response message")

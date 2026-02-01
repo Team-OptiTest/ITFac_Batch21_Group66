@@ -19,12 +19,6 @@ public class PlantApiStepDefinitions {
 
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
-        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("api.base.url");
-        if (baseUrl != null) {
-            plantAction.setBaseUrl(baseUrl);
-        }
-
         String username = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("test.admin.username");
         String password = EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -34,12 +28,6 @@ public class PlantApiStepDefinitions {
 
     @Given("a regular user is authenticated")
     public void aRegularUserIsAuthenticated() {
-        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("api.base.url");
-        if (baseUrl != null) {
-            plantAction.setBaseUrl(baseUrl);
-        }
-
         String username = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("test.user.username");
         String password = EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -47,21 +35,29 @@ public class PlantApiStepDefinitions {
         plantAction.authenticate(username, password);
     }
 
+    @When("I GET to {string}")
+    public void iGETTo(String endpoint) {
+        String categoryEndpoint = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.endpoints.plants.category");
+
+        if (endpoint.contains(categoryEndpoint)) {
+            String[] parts = endpoint.split("/");
+            int categoryId = Integer.parseInt(parts[parts.length - 1]);
+            plantAction.getPlantsByCategory(categoryId);
+        }
+    }
+
     @Given("a valid category with ID {int} exists")
     public void aValidCategoryWithIDExists(int id) {
-        // Implementation for checking category existence if needed
     }
 
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> data = dataTable.asMaps().get(0);
 
-        // Convert to Map<String, Object> to ensure proper JSON types (numbers vs
-        // strings)
         Map<String, Object> body = new java.util.HashMap<>();
 
         String name = data.get("name");
-        // Ensure unique name for "Rose FINAL" to avoid DUPLICATE errors
         if ("Rose FINAL".equals(name)) {
             name = name + " " + System.currentTimeMillis();
         }
@@ -70,7 +66,6 @@ public class PlantApiStepDefinitions {
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));
 
-        // Extracting category ID from endpoint /api/plants/category/{id}
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
 
@@ -80,10 +75,8 @@ public class PlantApiStepDefinitions {
 
     @Given("a plant exists")
     public void aPlantExists() {
-        // Ensure admin is authenticated for creation
         theAdminIsAuthenticated();
 
-        // Create a plant to ensure one exists for deletion/update
         Map<String, Object> body = new java.util.HashMap<>();
         String name = "Plant " + System.currentTimeMillis();
         body.put("name", name);
@@ -116,7 +109,6 @@ public class PlantApiStepDefinitions {
 
     @When("I DELETE to {string}")
     public void iDELETETo(String endpoint) {
-        // Handle generic /api/plants/{id}
         String[] parts = endpoint.split("/");
         int id = Integer.parseInt(parts[parts.length - 1]);
         plantAction.deletePlant(id);
@@ -134,7 +126,6 @@ public class PlantApiStepDefinitions {
 
     @Then("the plant name should be {string}")
     public void thePlantNameShouldBe(String name) {
-        // If we randomized the name, verify against the actual name used
         if ("Rose FINAL".equals(name)) {
             plantAction.verifyPlantName(plantAction.getLastCreatedPlantName());
         } else {
@@ -150,24 +141,12 @@ public class PlantApiStepDefinitions {
 
     @When("I GET to {string} with query params page={int}&size={int}")
     public void iGETToWithQueryParamsPageSize(String endpoint, int page, int size) {
-        // endpoint is currently hardcoded in action as /api/plants, but checking if it
-        // matches expectation
-        // In the future we might want to pass endpoint to action if we need flexibility
         plantAction.getPlants(page, size);
     }
 
     @Then("the response should contain a list of plants and pagination metadata")
     public void theResponseShouldContainAListOfPlantsAndPaginationMetadata() {
         plantAction.verifyPaginationMetadata();
-    }
-
-    @When("I GET to {string}")
-    public void iGETTo(String endpoint) {
-        if (endpoint.contains("/api/plants/category/")) {
-            String[] parts = endpoint.split("/");
-            int categoryId = Integer.parseInt(parts[parts.length - 1]);
-            plantAction.getPlantsByCategory(categoryId);
-        }
     }
 
     @Then("the response should contain a list of plants belonging to that category")
