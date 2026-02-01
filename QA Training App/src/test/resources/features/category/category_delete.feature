@@ -6,5 +6,6 @@ Feature: Category Deletion
   @simple
   Scenario: Delete category as admin
     Given the user is authenticated as admin
-    When the admin deletes an existing category with ID 3
+    And a category exists with name "Temp"
+    When the admin deletes that category
     Then the category should be deleted successfully

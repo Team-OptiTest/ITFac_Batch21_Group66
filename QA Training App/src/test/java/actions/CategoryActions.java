@@ -13,6 +13,7 @@ import java.util.List;
 public class CategoryActions {
 
     private Response lastResponse;
+    private Integer lastCreatedCategoryId;
     private List<Integer> existingCategoryIds;
     
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
@@ -69,6 +70,11 @@ public class CategoryActions {
         return lastResponse.getBody().asString();
     }
 
+    @Step("Get last created category ID")
+    public Integer getLastCreatedCategoryId() {
+        return lastCreatedCategoryId;
+    }
+
     private long generateNonExistentId() {
         long nonExistentId = 999999L;
         if (existingCategoryIds != null && !existingCategoryIds.isEmpty()) {
@@ -82,7 +88,6 @@ public class CategoryActions {
 
     @Step("Create category with valid name: {0}")
     public void createCategoryWithValidData(String categoryName) {
-
         int randomSuffix = (int)(Math.random() * 100);
         String uniqueCategoryName = categoryName.substring(0, Math.min(categoryName.length(), 8)) + randomSuffix;
         createCategory(uniqueCategoryName);
@@ -91,14 +96,7 @@ public class CategoryActions {
     @Step("Create category with name: {0}")
     public void createCategory(String categoryName) {
         String requestBody = String.format("{\"name\":\"%s\"}", categoryName);
-        
         String token = getAuthToken();
-        
-        System.out.println("=== CREATE CATEGORY DEBUG (BEFORE REQUEST) ===");
-        System.out.println("Request Body: " + requestBody);
-        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
-        System.out.println("Base URL: " + getBaseUrl());
-        System.out.println("==============================================");
         
         lastResponse = SerenityRest.given()
             .header("Authorization", "Bearer " + token)
@@ -107,16 +105,38 @@ public class CategoryActions {
             .when()
             .post(getBaseUrl() + "/api/categories");
         
-        System.out.println("=== CREATE CATEGORY DEBUG (AFTER REQUEST) ===");
-        System.out.println("Status Code: " + lastResponse.getStatusCode());
-        System.out.println("Response Body: " + lastResponse.getBody().asString());
-        System.out.println("==============================================");
+        // Only try to extract ID if the request was successful
+        if (lastResponse.getStatusCode() == 201 || lastResponse.getStatusCode() == 200) {
+            try {
+                lastCreatedCategoryId = lastResponse.jsonPath().getInt("id");
+            } catch (Exception e) {
+                System.out.println("Could not extract category ID: " + e.getMessage());
+            }
+        } else {
+            // Request failed - don't try to extract ID
+            lastCreatedCategoryId = null;
+            System.out.println("Category creation failed with status: " + lastResponse.getStatusCode());
+        }
+        
+        System.out.println("=== CREATE CATEGORY RESULT ===");
+        System.out.println("Input: " + categoryName);
+        System.out.println("Used: " + categoryName);
+        System.out.println("Status: " + lastResponse.getStatusCode());
+        System.out.println("Response: " + lastResponse.getBody().asString());
+        System.out.println("==============================");
     }
 
     @Step("Delete category with ID: {0}")
-    public void deleteCategoryById(long categoryId) {
+    public void deleteCategoryById(Integer categoryId) {
 
         String token = getAuthToken();
+        String deleteUrl = getBaseUrl() + "/api/categories/" + categoryId;
+        
+        System.out.println("=== DELETE CATEGORY DEBUG ===");
+        System.out.println("Category ID: " + categoryId);
+        System.out.println("Delete URL: " + deleteUrl);
+        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
+        System.out.println("=============================");
 
         lastResponse = SerenityRest.given()
             .header("Authorization", "Bearer " + token)
