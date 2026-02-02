@@ -11,18 +11,18 @@
     <name>QA Training App - Serenity BDD Tests</name>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- Serenity BDD (Official Recommended Versions) -->
-        <serenity.version>4.2.1</serenity.version>
+        <serenity.version>4.1.4</serenity.version>
         <cucumber.version>7.14.0</cucumber.version>
         <junit-platform.version>1.10.0</junit-platform.version>
         
         <!-- Testing -->
         <junit.version>5.10.0</junit.version>
-        <!-- <rest-assured.version>5.3.2</rest-assured.version> -->
+        <rest-assured.version>5.3.2</rest-assured.version>
         
         <!-- WebDriver -->
         <webdriver.driver>chrome</webdriver.driver>
@@ -169,7 +169,6 @@
                     </includes>
                     <systemPropertyVariables>
                         <webdriver.driver>${webdriver.driver}</webdriver.driver>
-                        <cucumber.filter.tags>${cucumber.filter.tags}</cucumber.filter.tags>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
@@ -204,8 +203,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
         </plugins>
