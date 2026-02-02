@@ -277,4 +277,23 @@ public class PlantAction {
                 SerenityRest.restAssuredThat(response -> response.body("price",
                                 org.hamcrest.Matchers.equalTo((float) expectedPrice)));
         }
+
+        @Step("Update plant quantity: {0}")
+        public void updatePlantQuantity(String endpoint, Map<String, Object> updateData) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
+
+                // Create complete plant object with updated quantity
+                Map<String, Object> completeBody = new java.util.HashMap<>(this.createdPlantData);
+                completeBody.put("quantity", updateData.get("quantity"));
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(completeBody)
+                                .when()
+                                .put(fullUrl);
+        }
 }
