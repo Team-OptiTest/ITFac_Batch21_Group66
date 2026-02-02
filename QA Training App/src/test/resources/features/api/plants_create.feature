@@ -28,7 +28,7 @@ Feature: Plant Management API
   Scenario: API_Plant_Create_003 - Plant Name Length Validation
     Given the admin is authenticated
     And a valid category with ID 5 exists
-    When I POST to "/api/plants/category/5" with following data:
+    When I POST to "/api/plants/category/5" with invalid data:
       | name | price | quantity |
       | Ab   | 10.00 | 50       |
     Then the response status should be 400

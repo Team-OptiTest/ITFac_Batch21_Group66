@@ -43,8 +43,7 @@ public class PlantApiStepDefinitions {
         Map<String, String> data = dataTable.asMaps().get(0);
 
         Map<String, Object> body = new java.util.HashMap<>();
-        // Use exact name for validation tests, append timestamp for success tests
-        String plantName = data.get("name");
+        String plantName = data.get("name") + "_" + System.currentTimeMillis();
         body.put("name", plantName);
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));
@@ -72,5 +71,19 @@ public class PlantApiStepDefinitions {
     @Then("the response error message should contain {string}")
     public void theResponseErrorMessageShouldContain(String expectedMessage) {
         plantAction.verifyErrorMessage(expectedMessage);
+    }
+
+    @When("I POST to {string} with invalid data:")
+    public void iPOSTToWithInvalidData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> data = dataTable.asMaps().get(0);
+
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("name", data.get("name"));
+        body.put("price", Double.parseDouble(data.get("price")));
+        body.put("quantity", Integer.parseInt(data.get("quantity")));
+        String[] parts = endpoint.split("/");
+        int categoryId = Integer.parseInt(parts[parts.length - 1]);
+
+        plantAction.createPlantWithInvalidData(categoryId, body);
     }
 }

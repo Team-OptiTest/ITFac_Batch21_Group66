@@ -105,4 +105,22 @@ public class PlantAction {
                                         "' but got message: '" + messageField + "' and error: '" + errorField + "'");
                 }
         }
+
+        @Step("Create a new plant in category {0} with invalid data {1}")
+        public void createPlantWithInvalidData(int categoryId, Map<String, Object> plantData) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+                String categoryEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.endpoints.plants.category");
+
+                String fullUrl = baseUrl + categoryEndpoint + categoryId;
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(plantData)
+                                .when()
+                                .post(fullUrl);
+        }
 }
