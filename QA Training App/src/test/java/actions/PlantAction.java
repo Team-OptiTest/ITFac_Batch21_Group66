@@ -174,4 +174,25 @@ public class PlantAction {
                         }
                 }
         }
+
+        @Step("Get plants by category: {0}")
+        public void getPlantsByCategory(String endpoint) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint;
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .get(fullUrl);
+        }
+
+        @Step("Verify response contains an array of plants")
+        public void verifyPlantsArrayExists() {
+                SerenityRest.restAssuredThat(response -> response.body("$", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(
+                                response -> response.body("$", org.hamcrest.Matchers.instanceOf(java.util.List.class)));
+        }
 }
