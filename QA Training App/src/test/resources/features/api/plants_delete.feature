@@ -11,3 +11,11 @@ Feature: Plant Deletion API
     When I DELETE to "/api/plants/{id}"
     Then the response status should be 204
     And the plant should no longer exist when retrieved
+
+  @API @Plant @Delete @Authorization
+  Scenario: Unauthorized Delete Attempt
+    Given the admin is authenticated
+    And a plant with ID exists in the system
+    And the user is authenticated with ROLE_USER
+    When I DELETE to "/api/plants/{id}"
+    Then the response status should be 403
