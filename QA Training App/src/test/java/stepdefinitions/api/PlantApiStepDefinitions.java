@@ -43,7 +43,8 @@ public class PlantApiStepDefinitions {
         Map<String, String> data = dataTable.asMaps().get(0);
 
         Map<String, Object> body = new java.util.HashMap<>();
-        String plantName = data.get("name") + "_" + System.currentTimeMillis();
+        // Use exact name for validation tests, append timestamp for success tests
+        String plantName = data.get("name");
         body.put("name", plantName);
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));
@@ -66,5 +67,10 @@ public class PlantApiStepDefinitions {
     @Then("the plant name should be {string}")
     public void thePlantNameShouldBe(String name) {
         plantAction.verifyPlantName(name);
+    }
+
+    @Then("the response error message should contain {string}")
+    public void theResponseErrorMessageShouldContain(String expectedMessage) {
+        plantAction.verifyErrorMessage(expectedMessage);
     }
 }
