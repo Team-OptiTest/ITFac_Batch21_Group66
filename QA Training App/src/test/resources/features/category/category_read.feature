@@ -26,3 +26,15 @@ Feature: Category Read Operations
     Given the user is authenticated as admin
     When the admin searches for categories with name "Temp"
     Then the search results should be returned successfully
+
+  @API @Category
+  Scenario: Verify user can filter categories by parent category
+    Given the user is authenticated as user
+    When the user filters categories by parent ID "1"
+    Then the filtered categories should be retrieved successfully
+
+  @API @Category
+  Scenario: Verify admin can filter categories by parent category
+    Given the user is authenticated as admin
+    When the admin filters categories by parent ID "1"
+    Then the filtered categories should be retrieved successfully

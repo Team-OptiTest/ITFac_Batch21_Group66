@@ -140,4 +140,21 @@ public class CategoryStepDefinitions {
             .as("Search categories should return HTTP 200")
             .isEqualTo(200);
     }
+
+    @When("the user filters categories by parent ID {string}")
+    public void theUserFiltersCategoriesByParentId(String parentId) {
+        categoryActions.searchCategories(null, parentId);
+    }
+
+    @When("the admin filters categories by parent ID {string}")
+    public void theAdminFiltersCategoriesByParentId(String parentId) {
+        categoryActions.searchCategories(null, parentId);
+    }
+
+    @Then("the filtered categories should be retrieved successfully")
+    public void theFilteredCategoriesShouldBeRetrievedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Filtered categories should be retrieved successfully with HTTP 200")
+            .isEqualTo(200);
+    }
 }
