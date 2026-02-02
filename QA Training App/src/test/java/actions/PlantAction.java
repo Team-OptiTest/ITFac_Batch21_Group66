@@ -32,6 +32,28 @@ public class PlantAction {
         this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
     }
 
+    @Step("Authenticate as normal user")
+    public void authenticateAsUser(String username, String password) {
+        String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+        String loginEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                .from(environmentVariables)
+                .getProperty("api.endpoints.auth.login");
+
+        Map<String, String> credentials = new java.util.HashMap<>();
+        credentials.put("username", username);
+        credentials.put("password", password);
+
+        String token = SerenityRest.given()
+                .contentType(ContentType.JSON)
+                .body(credentials)
+                .post(baseUrl + loginEndpoint)
+                .jsonPath()
+                .getString("token");
+
+        this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+    }
+
     @Step("Create a new plant in category {0} with data {1}")
     public void createPlant(int categoryId, Map<String, Object> plantData) {
         String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)

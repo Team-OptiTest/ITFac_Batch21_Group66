@@ -14,3 +14,12 @@ Feature: Plant Management API
     Then the response status should be 201
     And the response should contain a plant object with an assigned ID
     And the plant name should be "Sunrose"
+
+  @API @Plant @Authorization
+  Scenario: API_Plant_Create_002 - Unauthorized Create Attempt
+    Given the user is authenticated with ROLE_USER
+    And a valid category with ID 5 exists
+    When I POST to "/api/plants/category/5" with following data:
+      | name     | price | quantity |
+      | TestPlant | 20.00 | 50       |
+    Then the response status should be 403
