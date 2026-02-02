@@ -86,4 +86,19 @@ public class PlantApiStepDefinitions {
 
         plantAction.createPlantWithInvalidData(categoryId, body);
     }
+
+    @When("I GET to {string} with query params {string}")
+    public void iGETToWithQueryParams(String endpoint, String queryParams) {
+        plantAction.getPlantsWithPagination(endpoint, queryParams);
+    }
+
+    @Then("the response should contain a list of plants")
+    public void theResponseShouldContainAListOfPlants() {
+        plantAction.verifyPlantListExists();
+    }
+
+    @Then("the response should contain pagination metadata")
+    public void theResponseShouldContainPaginationMetadata() {
+        plantAction.verifyPaginationMetadata();
+    }
 }
