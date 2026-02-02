@@ -101,4 +101,9 @@ public class PlantApiStepDefinitions {
     public void theResponseShouldContainPaginationMetadata() {
         plantAction.verifyPaginationMetadata();
     }
+
+    @Then("the response should contain plants with name containing {string}")
+    public void theResponseShouldContainPlantsWithNameContaining(String searchTerm) {
+        plantAction.verifyPlantsContainName(searchTerm);
+    }
 }

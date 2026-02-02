@@ -157,4 +157,21 @@ public class PlantAction {
                 SerenityRest.restAssuredThat(response -> response.body("size", org.hamcrest.Matchers.notNullValue()));
                 SerenityRest.restAssuredThat(response -> response.body("number", org.hamcrest.Matchers.notNullValue()));
         }
+
+        @Step("Verify plants contain name: {0}")
+        public void verifyPlantsContainName(String searchTerm) {
+                java.util.List<String> plantNames = SerenityRest.lastResponse().jsonPath().getList("content.name",
+                                String.class);
+
+                if (plantNames == null || plantNames.isEmpty()) {
+                        throw new AssertionError("No plants found in response");
+                }
+
+                for (String name : plantNames) {
+                        if (!name.toLowerCase().contains(searchTerm.toLowerCase())) {
+                                throw new AssertionError(
+                                                "Plant name '" + name + "' does not contain '" + searchTerm + "'");
+                        }
+                }
+        }
 }
