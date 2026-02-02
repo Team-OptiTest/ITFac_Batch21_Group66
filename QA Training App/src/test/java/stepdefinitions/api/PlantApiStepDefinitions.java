@@ -10,31 +10,34 @@ import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
+    private net.thucydides.model.util.EnvironmentVariables environmentVariables;
+
     @Steps
     PlantAction plantAction;
 
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
-        plantAction.authenticateAsAdmin("admin", "admin123");
+        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.admin.username");
+        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.admin.password");
+
+        plantAction.authenticateAsAdmin(username, password);
     }
 
     @Given("a valid category with ID {int} exists")
     public void aValidCategoryWithIDExists(int id) {
-        // Implementation for checking category existence if needed
     }
 
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> data = dataTable.asMaps().get(0);
 
-        // Convert to Map<String, Object> to ensure proper JSON types (numbers vs
-        // strings)
         Map<String, Object> body = new java.util.HashMap<>();
-        body.put("name", data.get("name"));
+        String plantName = data.get("name") + "_" + System.currentTimeMillis();
+        body.put("name", plantName);
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));
-
-        // Extracting category ID from endpoint /api/plants/category/{id}
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
 
