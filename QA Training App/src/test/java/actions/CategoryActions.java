@@ -161,4 +161,21 @@ public class CategoryActions {
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
     }
+
+    @Step("Get category list")
+    public void getCategoryList() {
+        String token = getAuthToken();
+        
+        System.out.println("=== GET CATEGORY LIST DEBUG ===");
+        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
+        System.out.println("================================");
+
+        lastResponse = SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .get(getBaseUrl() + "/api/categories");
+
+        System.out.println("Status Code: " + lastResponse.getStatusCode());
+        System.out.println("Response: " + lastResponse.getBody().asString());
+    }
 }
