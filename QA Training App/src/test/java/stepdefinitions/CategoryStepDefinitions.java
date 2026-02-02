@@ -95,6 +95,11 @@ public class CategoryStepDefinitions {
         categoryActions.deleteCategoryById(categoryActions.getLastCreatedCategoryId());
     }
 
+    @When("the admin deletes a category with non-existent ID")
+    public void theAdminDeletesACategoryWithNonExistentId() {
+        categoryActions.deleteCategoryWithNonExistentId();
+    }
+
     @Then("the category deletion should fail")
     public void theCategoryDeletionShouldFail() {
         assertThat(categoryActions.getLastResponseStatusCode())
