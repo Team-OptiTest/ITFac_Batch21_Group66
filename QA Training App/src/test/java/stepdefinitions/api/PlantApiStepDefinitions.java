@@ -116,4 +116,23 @@ public class PlantApiStepDefinitions {
     public void theResponseShouldContainAnArrayOfPlants() {
         plantAction.verifyPlantsArrayExists();
     }
+
+    @Given("a plant with ID exists in the system")
+    public void aPlantWithIDExistsInTheSystem() {
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("name", "TestPlant_" + System.currentTimeMillis());
+        body.put("price", 25.00);
+        body.put("quantity", 100);
+        plantAction.createPlantAndStoreId(5, body);
+    }
+
+    @When("I DELETE to {string}")
+    public void iDELETETo(String endpoint) {
+        plantAction.deletePlant(endpoint);
+    }
+
+    @Then("the plant should no longer exist when retrieved")
+    public void thePlantShouldNoLongerExistWhenRetrieved() {
+        plantAction.verifyPlantNoLongerExists();
+    }
 }
