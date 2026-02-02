@@ -175,6 +175,11 @@ public class CategoryStepDefinitions {
         categoryActions.updateCategory(categoryActions.getLastCreatedCategoryId(), updatedName);
     }
 
+    @When("the admin updates a category with non-existent ID")
+    public void theAdminUpdatesACategoryWithNonExistentId() {
+        categoryActions.updateCategoryWithNonExistentId();
+    }
+
     @Then("the category update should fail")
     public void theCategoryUpdateShouldFail() {
         assertThat(categoryActions.getLastResponseStatusCode())

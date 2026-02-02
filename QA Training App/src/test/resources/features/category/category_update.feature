@@ -17,3 +17,9 @@ Feature: Category Update
     And the user is authenticated as user
     When the user updates that category with name "updatedAbc"
     Then the category update should fail
+
+  @API @Category
+  Scenario: Update category with an invalid ID
+    Given the user is authenticated as admin
+    When the admin updates a category with non-existent ID
+    Then the category update should fail

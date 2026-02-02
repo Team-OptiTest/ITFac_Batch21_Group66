@@ -162,6 +162,32 @@ public class CategoryActions {
         System.out.println("Response: " + lastResponse.getBody().asString());
     }
 
+    @Step("Update category with non-existent ID")
+    public void updateCategoryWithNonExistentId() {
+        fetchExistingCategoryIds();
+        long nonExistentId = generateNonExistentId();
+        
+        String token = getAuthToken();
+        String updateUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
+        String requestBody = String.format("{\"name\":\"%s\"}", "UpdatedName");
+        
+        System.out.println("=== UPDATE NON-EXISTENT CATEGORY DEBUG ===");
+        System.out.println("Non-existent Category ID: " + nonExistentId);
+        System.out.println("Update URL: " + updateUrl);
+        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
+        System.out.println("=========================================");
+
+        lastResponse = SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .header("Content-Type", "application/json")
+            .body(requestBody)
+            .when()
+            .put(updateUrl);
+
+        System.out.println("Status Code: " + lastResponse.getStatusCode());
+        System.out.println("Response: " + lastResponse.getBody().asString());
+    }
+
     @Step("Get category list")
     public void getCategoryList() {
         String token = getAuthToken();
