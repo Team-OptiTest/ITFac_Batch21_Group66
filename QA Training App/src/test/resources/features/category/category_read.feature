@@ -7,6 +7,15 @@ Feature: Category Read Operations
 
   @simple @API_Category_Read_004 @dashboard @summary
   Scenario: Categories summary API returns aggregated data
-  Given the user is authenticated as admin
-  When the admin requests categories summary
-  Then the API should return 200 OK
+    Given the user has a valid JWT token
+    When the user requests categories summary
+    Then the API should return 200 OK
+
+  @simple @API_Category_Read_005 @security @authentication
+  Scenario: Categories summary API rejects invalid JWT token
+    Given the user has an expired JWT token:
+    """
+    eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNTc3ODM2MDAwLCJleHAiOjE1Nzc4MzYwMDB9.expired_signature_123
+    """
+    When the user requests categories summary
+    Then the API should return 401 Unauthorized
