@@ -26,7 +26,18 @@ public class CategoryStepDefinitions {
     public void theUserIsAuthenticatedAsUser() {
         authenticationActions.authenticateUser();
     }
-
+    @Given("a category named {string} exists")
+    public void aCategoryNamedExists(String categoryName) {
+    categoryActions.createCategory(categoryName);
+    
+    // If creation fails (maybe duplicate), that's OK for our test setup
+    System.out.println("Setup: Category '" + categoryName + "' should exist now");
+}
+@When("the admin attempts to create another category with name {string}")
+public void theAdminAttemptsToCreateAnotherCategoryWithName(String categoryName) {
+    // Try to create the same category again
+    categoryActions.createCategory(categoryName);
+}
     @When("the admin creates a category with valid name {string}")
     public void theAdminCreatesACategoryWithName(String categoryName) {
         categoryActions.createCategoryWithValidData(categoryName);
@@ -38,6 +49,12 @@ public class CategoryStepDefinitions {
             .as("Category creation should succeed")
             .isIn(200, 201);
     }
+@Then("the API should return 400 Bad Request")
+public void theAPIShouldReturn400BadRequest() {
+    assertThat(categoryActions.getLastResponseStatusCode())
+        .as("API should return 400 for duplicate")
+        .isEqualTo(400);
+}
 
     @When("the admin creates a category with less than 3 characters {string}")
     public void theAdminCreatesACategoryWithLessCharacters(String categoryName) {
@@ -78,15 +95,15 @@ public class CategoryStepDefinitions {
         .isNotEmpty();
     
     System.out.println("=== VERIFICATION COMPLETE ===\n");
-}
+    }
 
-@Then("the error message should contain {string}")
-public void theErrorMessageShouldContain(String expectedMessage) {
-    String responseBody = categoryActions.getLastResponseBody();
+    @Then("the error message should contain {string}")
+        public void theErrorMessageShouldContain(String expectedMessage) {
+        String responseBody = categoryActions.getLastResponseBody();
     
-    System.out.println("\n=== VERIFYING ERROR MESSAGE ===");
-    System.out.println("Expected message: " + expectedMessage);
-    System.out.println("Actual response: " + responseBody);
+        System.out.println("\n=== VERIFYING ERROR MESSAGE ===");
+        System.out.println("Expected message: " + expectedMessage);
+        System.out.println("Actual response: " + responseBody);
     
     assertThat(responseBody.toLowerCase())
         .as("Error message should contain: " + expectedMessage)
@@ -94,7 +111,7 @@ public void theErrorMessageShouldContain(String expectedMessage) {
     
     System.out.println("=== VERIFICATION COMPLETE ===\n");
     //@API_Category_Create_005 - Verify that the error message contains specific text
-}
+    }
 
     @Then("the user should be denied permission to create a category")
     public void theUserShouldBeDeniedPermissionToCreateACategory() {
