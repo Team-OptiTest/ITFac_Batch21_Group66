@@ -2,15 +2,19 @@ package actions;
 
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.rest.SerenityRest;
+import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
+import net.thucydides.model.environment.SystemEnvironmentVariables;
+import net.thucydides.model.util.EnvironmentVariables;
 import static org.hamcrest.Matchers.*;
 
 public class SalesAction {
 
-    private String baseUrl = "http://localhost:8080";
+    private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
     private String token;
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
+    private String getBaseUrl() {
+        return EnvironmentSpecificConfiguration.from(environmentVariables)
+            .getProperty("api.base.url");
     }
 
     public void setToken(String token) {
@@ -22,7 +26,7 @@ public class SalesAction {
         SerenityRest.given()
             .header("Authorization", "Bearer " + token)
             .when()
-            .post(baseUrl + "/api/sales/plant/" + plantId + "?quantity=" + quantity);
+            .post(getBaseUrl() + "/api/sales/plant/" + plantId + "?quantity=" + quantity);
     }
 
     @Step("Verify creation success")
@@ -52,7 +56,7 @@ public class SalesAction {
         SerenityRest.given()
             .header("Authorization", "Bearer " + token)
             .when()
-            .get(baseUrl + "/api/sales");
+            .get(getBaseUrl() + "/api/sales");
     }
 
     @Step("Verify sales list is returned")
@@ -73,7 +77,7 @@ public class SalesAction {
         SerenityRest.given()
             .header("Authorization", "Bearer " + token)
             .when()
-            .delete(baseUrl + "/api/sales/" + saleId);
+            .delete(getBaseUrl() + "/api/sales/" + saleId);
     }
 
     @Step("Get a sale by ID")
@@ -81,7 +85,7 @@ public class SalesAction {
         SerenityRest.given()
             .header("Authorization", "Bearer " + token)
             .when()
-            .get(baseUrl + "/api/sales/" + saleId);
+            .get(getBaseUrl() + "/api/sales/" + saleId);
     }
 
     public int getLastCreatedSaleId() {
