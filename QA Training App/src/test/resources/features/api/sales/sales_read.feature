@@ -13,3 +13,10 @@ Feature: Sales API - Read Sales
     Given user is authenticated
     When user retrieves all sales
     Then all sales should be returned successfully
+
+  Scenario: API_Sales_Read_004 - Retrieve Sale by Valid ID - User
+    Given admin is authenticated
+    And a sale exists with a known valid saleId
+    Given user is authenticated
+    When user retrieves the sale with valid saleId
+    Then the sale details should be returned successfully

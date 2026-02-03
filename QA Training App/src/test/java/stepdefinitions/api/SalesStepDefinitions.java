@@ -191,4 +191,20 @@ public class SalesStepDefinitions {
     public void user_retrieves_all_sales() {
         salesAction.getAllSales();
     }
+
+    @When("user retrieves the sale with valid saleId")
+    public void user_retrieves_the_sale_with_valid_sale_id() {
+        salesAction.getSaleById(saleId);
+    }
+
+    @Then("the sale details should be returned successfully")
+    public void the_sale_details_should_be_returned_successfully() {
+        salesAction.verifySaleReturned(saleId);
+        
+        // Cleanup plant
+        if (plantId != 0) {
+            plantAction.deletePlant(plantId);
+            plantId = 0;
+        }
+    }
 }

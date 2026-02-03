@@ -87,4 +87,16 @@ public class SalesAction {
     public int getLastCreatedSaleId() {
         return SerenityRest.lastResponse().jsonPath().getInt("id");
     }
+
+    @Step("Verify sale object is returned")
+    public void verifySaleReturned(int expectedSaleId) {
+        SerenityRest.then()
+            .statusCode(200)
+            .body("id", equalTo(expectedSaleId))
+            .body("plant", notNullValue())
+            .body("plant.id", notNullValue())
+            .body("quantity", notNullValue())
+            .body("totalPrice", notNullValue())
+            .body("soldAt", notNullValue());
+    }
 }
