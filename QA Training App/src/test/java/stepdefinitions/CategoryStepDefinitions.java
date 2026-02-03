@@ -157,4 +157,33 @@ public class CategoryStepDefinitions {
             .as("Filtered categories should be retrieved successfully with HTTP 200")
             .isEqualTo(200);
     }
+
+    @When("the admin updates that category with name {string}")
+    public void theAdminUpdatesThatCategoryWithName(String updatedName) {
+        categoryActions.updateCategory(categoryActions.getLastCreatedCategoryId(), updatedName);
+    }
+
+    @Then("the category should be updated successfully")
+    public void theCategoryShouldBeUpdatedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Category update should succeed with HTTP 200")
+            .isEqualTo(200);
+    }
+
+    @When("the user updates that category with name {string}")
+    public void theUserUpdatesThatCategoryWithName(String updatedName) {
+        categoryActions.updateCategory(categoryActions.getLastCreatedCategoryId(), updatedName);
+    }
+
+    @When("the admin updates a category with non-existent ID")
+    public void theAdminUpdatesACategoryWithNonExistentId() {
+        categoryActions.updateCategoryWithNonExistentId();
+    }
+
+    @Then("the category update should fail")
+    public void theCategoryUpdateShouldFail() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Category update should not succeed")
+            .isIn(403, 404);
+    }
 }
