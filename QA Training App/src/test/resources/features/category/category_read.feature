@@ -1,8 +1,16 @@
 Feature: Category Read Operations
+
   As an authenticated user
   I want to view categories
   So that I can see category details
 
+
+  @simple @API_Category_Read_004 @dashboard @summary
+  Scenario: Categories summary API returns aggregated data
+  Given the user is authenticated as admin
+  When the admin requests categories summary
+  Then the API should return 200 OK
+  
   @API @Category
   Scenario: Verify admin can fetch category list
     Given the user is authenticated as admin
