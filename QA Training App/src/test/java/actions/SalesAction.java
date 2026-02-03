@@ -40,4 +40,10 @@ public class SalesAction {
     public void verifyStatusCode(int statusCode) {
         SerenityRest.then().statusCode(statusCode);
     }
+
+    @Step("Verify error message")
+    public void verifyErrorMessage(String expectedMessage) {
+        SerenityRest.then()
+            .body("message", equalTo(expectedMessage));
+    }
 }

@@ -95,4 +95,25 @@ public class SalesStepDefinitions {
         plantAction.deletePlant(plantId);
         // categoryActions.deleteCategoryById(categoryId); // Do not delete the shared category
     }
+
+    @When("admin creates a sale with quantity {int}")
+    public void admin_creates_sale_with_quantity(int quantity) {
+        quantitySold = quantity;
+        salesAction.createSale(plantId, quantity);
+    }
+
+    @Then("sale creation should fail with status {int}")
+    public void sale_creation_should_fail_with_status(int statusCode) {
+        salesAction.verifyStatusCode(statusCode);
+    }
+
+    @Then("error message should be {string}")
+    public void error_message_should_be(String message) {
+        salesAction.verifyErrorMessage(message);
+        
+        // Cleanup plant ensures we don't leave data behind even on negative tests
+        if (plantId != 0) {
+            plantAction.deletePlant(plantId);
+        }
+    }
 }
