@@ -3,7 +3,7 @@ Feature: Category Creation
   I want to create a category
   So that I can organize plants
 
-  @simple
+  @API @Category
   Scenario: Create category with valid name
     Given the user is authenticated as admin
     When the admin creates a category with valid name "Flowers"
@@ -16,19 +16,19 @@ Feature: Category Creation
     Then the category creation should fail with validation error
     And the error message should contain "Category name must be between 3 and 10 characters"
 
-  @simple
+  @API @Category
   Scenario: Create category with more than 10 characters
     Given the user is authenticated as admin
     When the admin creates a category with more than 10 characters "abcdefghijkl"
     Then the category creation should fail with validation error
 
-  @simple
+  @API @Category
   Scenario: Create category without name
     Given the user is authenticated as admin
     When the admin creates a category without name ""
     Then the category creation should fail with validation error
 
-  @simple
+  @API @Category
   Scenario: Create category as user
     Given the user is authenticated as user
     When the user creates a category with name "abcd"

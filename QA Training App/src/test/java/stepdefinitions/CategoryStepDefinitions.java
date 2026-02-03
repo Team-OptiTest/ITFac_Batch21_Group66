@@ -27,9 +27,14 @@ public class CategoryStepDefinitions {
         authenticationActions.authenticateUser();
     }
 
+    @Given("a category exists with name {string}")
+    public void aCategoryCreatesWithName(String name) {
+        categoryActions.createCategory(name);
+    }
+
     @When("the admin creates a category with valid name {string}")
     public void theAdminCreatesACategoryWithName(String categoryName) {
-        categoryActions.createCategoryWithValidData(categoryName);
+        categoryActions.createCategory(categoryName);
     }
 
     @Then("the category should be created successfully")
@@ -103,9 +108,9 @@ public void theErrorMessageShouldContain(String expectedMessage) {
             .isIn(403, 404);
     }
 
-    @When("the admin deletes an existing category with ID {long}")
-    public void theAdminDeletesAnExistingCategoryWithId(long categoryId) {
-        categoryActions.deleteCategoryById(categoryId);
+    @When("the admin deletes that category")
+    public void theAdminDeletesThatCategory() {
+        categoryActions.deleteCategoryById(categoryActions.getLastCreatedCategoryId());
     }
 
     @Then("the category should be deleted successfully")
@@ -113,5 +118,73 @@ public void theErrorMessageShouldContain(String expectedMessage) {
         assertThat(categoryActions.getLastResponseStatusCode())
             .as("Category deletion should succeed")
             .isIn(204, 205);
+    }
+    
+    @When("the user deletes that category")
+    public void theUserDeletesThatCategory() {
+        categoryActions.deleteCategoryById(categoryActions.getLastCreatedCategoryId());
+    }
+
+    @When("the admin deletes a category with non-existent ID")
+    public void theAdminDeletesACategoryWithNonExistentId() {
+        categoryActions.deleteCategoryWithNonExistentId();
+    }
+
+    @Then("the category deletion should fail")
+    public void theCategoryDeletionShouldFail() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Category deletion should not succeed")
+            .isIn(403, 404);
+    }
+
+    @When("the admin fetches the category list")
+    public void theAdminFetchesTheCategoryList() {
+        categoryActions.getCategoryList();
+    }
+
+    @When("the user fetches the category list")
+    public void theUserFetchesTheCategoryList() {
+        categoryActions.getCategoryList();
+    }
+
+    @Then("the category list should be retrieved successfully")
+    public void theCategoryListShouldBeRetrievedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("the category list should be retrieved successfully")
+            .isEqualTo(200);
+    }
+
+    @When("the user searches for categories with name {string}")
+    public void theUserSearchesForCategoriesWithName(String categoryName) {
+        categoryActions.searchCategories(categoryName, null);
+    }
+
+    @When("the admin searches for categories with name {string}")
+    public void theAdminSearchesForCategoriesWithName(String categoryName) {
+        categoryActions.searchCategories(categoryName, null);
+    }
+
+    @Then("the search results should be returned successfully")
+    public void theSearchResultsShouldBeReturnedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Search categories should return HTTP 200")
+            .isEqualTo(200);
+    }
+
+    @When("the user filters categories by parent ID {string}")
+    public void theUserFiltersCategoriesByParentId(String parentId) {
+        categoryActions.searchCategories(null, parentId);
+    }
+
+    @When("the admin filters categories by parent ID {string}")
+    public void theAdminFiltersCategoriesByParentId(String parentId) {
+        categoryActions.searchCategories(null, parentId);
+    }
+
+    @Then("the filtered categories should be retrieved successfully")
+    public void theFilteredCategoriesShouldBeRetrievedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Filtered categories should be retrieved successfully with HTTP 200")
+            .isEqualTo(200);
     }
 }
