@@ -106,4 +106,21 @@ public class CategoryStepDefinitions {
             .as("Category deletion should not succeed")
             .isIn(403, 404);
     }
+
+    @When("the admin fetches the category list")
+    public void theAdminFetchesTheCategoryList() {
+        categoryActions.getCategoryList();
+    }
+
+    @When("the user fetches the category list")
+    public void theUserFetchesTheCategoryList() {
+        categoryActions.getCategoryList();
+    }
+
+    @Then("the category list should be retrieved successfully")
+    public void theCategoryListShouldBeRetrievedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("the category list should be retrieved successfully")
+            .isEqualTo(200);
+    }
 }
