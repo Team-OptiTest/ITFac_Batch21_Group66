@@ -74,7 +74,7 @@ public class CategoryActions {
     public Integer getLastCreatedCategoryId() {
         return lastCreatedCategoryId;
     }
-
+    
     private long generateNonExistentId() {
         long nonExistentId = 999999L;
         if (existingCategoryIds != null && !existingCategoryIds.isEmpty()) {
@@ -84,13 +84,6 @@ public class CategoryActions {
                     .orElse(0) + 99999;
         }
         return nonExistentId;
-    }
-
-    @Step("Create category with valid name: {0}")
-    public void createCategoryWithValidData(String categoryName) {
-        int randomSuffix = (int)(Math.random() * 100);
-        String uniqueCategoryName = categoryName.substring(0, Math.min(categoryName.length(), 8)) + randomSuffix;
-        createCategory(uniqueCategoryName);
     }
 
     @Step("Create category with name: {0}")
@@ -141,8 +134,31 @@ public class CategoryActions {
         lastResponse = SerenityRest.given()
             .header("Authorization", "Bearer " + token)
             .when()
-            .delete(getBaseUrl() + "/api/categories/" + categoryId);
+            .delete(deleteUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
+    }
+
+    @Step("Delete category with non-existent ID")
+    public void deleteCategoryWithNonExistentId() {
+        fetchExistingCategoryIds();
+        long nonExistentId = generateNonExistentId();
+        
+        String token = getAuthToken();
+        String deleteUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
+        
+        System.out.println("=== DELETE NON-EXISTENT CATEGORY DEBUG ===");
+        System.out.println("Non-existent Category ID: " + nonExistentId);
+        System.out.println("Delete URL: " + deleteUrl);
+        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
+        System.out.println("=========================================");
+
+        lastResponse = SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .delete(deleteUrl);
+
+        System.out.println("Status Code: " + lastResponse.getStatusCode());
+        System.out.println("Response: " + lastResponse.getBody().asString());
     }
 }

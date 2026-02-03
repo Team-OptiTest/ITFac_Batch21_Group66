@@ -34,7 +34,7 @@ public class CategoryStepDefinitions {
 
     @When("the admin creates a category with valid name {string}")
     public void theAdminCreatesACategoryWithName(String categoryName) {
-        categoryActions.createCategoryWithValidData(categoryName);
+        categoryActions.createCategory(categoryName);
     }
 
     @Then("the category should be created successfully")
@@ -88,5 +88,22 @@ public class CategoryStepDefinitions {
         assertThat(categoryActions.getLastResponseStatusCode())
             .as("Category deletion should succeed")
             .isIn(204, 205);
+    }
+    
+    @When("the user deletes that category")
+    public void theUserDeletesThatCategory() {
+        categoryActions.deleteCategoryById(categoryActions.getLastCreatedCategoryId());
+    }
+
+    @When("the admin deletes a category with non-existent ID")
+    public void theAdminDeletesACategoryWithNonExistentId() {
+        categoryActions.deleteCategoryWithNonExistentId();
+    }
+
+    @Then("the category deletion should fail")
+    public void theCategoryDeletionShouldFail() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Category deletion should not succeed")
+            .isIn(403, 404);
     }
 }
