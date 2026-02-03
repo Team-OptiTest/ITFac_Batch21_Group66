@@ -169,16 +169,4 @@ public class CategoryStepDefinitions {
             .as("Category update should succeed with HTTP 200")
             .isEqualTo(200);
     }
-
-    @When("the user updates that category with name {string}")
-    public void theUserUpdatesThatCategoryWithName(String updatedName) {
-        categoryActions.updateCategory(categoryActions.getLastCreatedCategoryId(), updatedName);
-    }
-
-    @Then("the category update should fail")
-    public void theCategoryUpdateShouldFail() {
-        assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Category update should not succeed")
-            .isIn(403, 404);
-    }
 }
