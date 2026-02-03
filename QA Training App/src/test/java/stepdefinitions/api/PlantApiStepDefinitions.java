@@ -147,4 +147,11 @@ public class PlantApiStepDefinitions {
     public void theResponseShouldShowUpdatedPrice(String expectedPrice) {
         plantAction.verifyUpdatedPrice(Double.parseDouble(expectedPrice));
     }
+
+    @When("I PUT to {string} with new quantity {string}")
+    public void iPUTToWithNewQuantity(String endpoint, String newQuantity) {
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("quantity", Integer.parseInt(newQuantity));
+        plantAction.updatePlantQuantity(endpoint, body);
+    }
 }
