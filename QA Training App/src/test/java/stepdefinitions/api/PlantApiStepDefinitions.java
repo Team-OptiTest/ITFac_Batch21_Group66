@@ -5,88 +5,52 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
-import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
+    private net.thucydides.model.util.EnvironmentVariables environmentVariables;
+
     @Steps
     PlantAction plantAction;
 
-    private EnvironmentVariables environmentVariables;
-
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
-        String username = EnvironmentSpecificConfiguration.from(environmentVariables)
+        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("test.admin.username");
-        String password = EnvironmentSpecificConfiguration.from(environmentVariables)
+        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("test.admin.password");
-        plantAction.authenticate(username, password);
-    }
 
-    @Given("a regular user is authenticated")
-    public void aRegularUserIsAuthenticated() {
-        String username = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.username");
-        String password = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.password");
-        plantAction.authenticate(username, password);
+        plantAction.authenticateAsAdmin(username, password);
     }
 
     @Given("a valid category with ID {int} exists")
     public void aValidCategoryWithIDExists(int id) {
-        // Implementation for checking category existence if needed
+    }
+
+    @Given("the user is authenticated with ROLE_USER")
+    public void theUserIsAuthenticatedWithROLE_USER() {
+        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.username");
+        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.password");
+        plantAction.authenticateAsUser(username, password);
     }
 
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> data = dataTable.asMaps().get(0);
 
-        // Convert to Map<String, Object> to ensure proper JSON types (numbers vs
-        // strings)
         Map<String, Object> body = new java.util.HashMap<>();
-
-        String name = data.get("name");
-        // Ensure unique name for "Rose FINAL" to avoid DUPLICATE errors
-        if ("Rose FINAL".equals(name)) {
-            name = name + " " + System.currentTimeMillis();
-        }
-
-        body.put("name", name);
+        String plantName = data.get("name") + "_" + System.currentTimeMillis();
+        body.put("name", plantName);
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));
-
-        // Extracting category ID from endpoint /api/plants/category/{id}
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
 
         plantAction.createPlant(categoryId, body);
-        plantAction.setLastCreatedPlantName(name);
-    }
-
-    @Given("a plant exists")
-    public void aPlantExists() {
-        // Create a plant to ensure one exists for deletion
-        Map<String, Object> body = new java.util.HashMap<>();
-        body.put("name", "Plant to Delete");
-        body.put("price", 10.0);
-        body.put("quantity", 50);
-        plantAction.createPlant(5, body); // Assuming category 5 exists as per previous tests
-    }
-
-    @When("I delete the plant")
-    public void iDeleteThePlant() {
-        plantAction.deletePlant(plantAction.getLastCreatedPlantId());
-    }
-
-    @When("I DELETE to {string}")
-    public void iDELETETo(String endpoint) {
-        // Handle generic /api/plants/{id}
-        String[] parts = endpoint.split("/");
-        int id = Integer.parseInt(parts[parts.length - 1]);
-        plantAction.deletePlant(id);
     }
 
     @Then("the response status should be {int}")
@@ -101,17 +65,93 @@ public class PlantApiStepDefinitions {
 
     @Then("the plant name should be {string}")
     public void thePlantNameShouldBe(String name) {
-        // If we randomized the name, verify against the actual name used
-        if ("Rose FINAL".equals(name)) {
-            plantAction.verifyPlantName(plantAction.getLastCreatedPlantName());
-        } else {
-            plantAction.verifyPlantName(name);
-        }
+        plantAction.verifyPlantName(name);
     }
 
-    @Then("the plant should no longer exist")
-    public void thePlantShouldNoLongerExist() {
-        plantAction.getPlant(plantAction.getLastCreatedPlantId());
-        plantAction.verifyStatusCode(404);
+    @Then("the response error message should contain {string}")
+    public void theResponseErrorMessageShouldContain(String expectedMessage) {
+        plantAction.verifyErrorMessage(expectedMessage);
+    }
+
+    @When("I POST to {string} with invalid data:")
+    public void iPOSTToWithInvalidData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> data = dataTable.asMaps().get(0);
+
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("name", data.get("name"));
+        body.put("price", Double.parseDouble(data.get("price")));
+        body.put("quantity", Integer.parseInt(data.get("quantity")));
+        String[] parts = endpoint.split("/");
+        int categoryId = Integer.parseInt(parts[parts.length - 1]);
+
+        plantAction.createPlantWithInvalidData(categoryId, body);
+    }
+
+    @When("I GET to {string} with query params {string}")
+    public void iGETToWithQueryParams(String endpoint, String queryParams) {
+        plantAction.getPlantsWithPagination(endpoint, queryParams);
+    }
+
+    @Then("the response should contain a list of plants")
+    public void theResponseShouldContainAListOfPlants() {
+        plantAction.verifyPlantListExists();
+    }
+
+    @Then("the response should contain pagination metadata")
+    public void theResponseShouldContainPaginationMetadata() {
+        plantAction.verifyPaginationMetadata();
+    }
+
+    @Then("the response should contain plants with name containing {string}")
+    public void theResponseShouldContainPlantsWithNameContaining(String searchTerm) {
+        plantAction.verifyPlantsContainName(searchTerm);
+    }
+
+    @When("I GET to {string}")
+    public void iGETTo(String endpoint) {
+        plantAction.getPlantsByCategory(endpoint);
+    }
+
+    @Then("the response should contain an array of plants")
+    public void theResponseShouldContainAnArrayOfPlants() {
+        plantAction.verifyPlantsArrayExists();
+    }
+
+    @Given("a plant with ID exists in the system")
+    public void aPlantWithIDExistsInTheSystem() {
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("name", "TestPlant_" + System.currentTimeMillis());
+        body.put("price", 25.00);
+        body.put("quantity", 100);
+        plantAction.createPlantAndStoreId(5, body);
+    }
+
+    @When("I DELETE to {string}")
+    public void iDELETETo(String endpoint) {
+        plantAction.deletePlant(endpoint);
+    }
+
+    @Then("the plant should no longer exist when retrieved")
+    public void thePlantShouldNoLongerExistWhenRetrieved() {
+        plantAction.verifyPlantNoLongerExists();
+    }
+
+    @When("I PUT to {string} with new price {string}")
+    public void iPUTToWithNewPrice(String endpoint, String newPrice) {
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("price", Double.parseDouble(newPrice));
+        plantAction.updatePlantPrice(endpoint, body);
+    }
+
+    @Then("the response should show updated price {string}")
+    public void theResponseShouldShowUpdatedPrice(String expectedPrice) {
+        plantAction.verifyUpdatedPrice(Double.parseDouble(expectedPrice));
+    }
+
+    @When("I PUT to {string} with new quantity {string}")
+    public void iPUTToWithNewQuantity(String endpoint, String newQuantity) {
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("quantity", Integer.parseInt(newQuantity));
+        plantAction.updatePlantQuantity(endpoint, body);
     }
 }
