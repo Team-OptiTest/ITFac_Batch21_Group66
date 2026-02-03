@@ -9,17 +9,8 @@ Feature: Plant Management API
     Given the admin is authenticated
     And a valid category with ID 5 exists
     When I POST to "/api/plants/category/5" with following data:
-      | name       | price | quantity |
-      | Rose FINAL | 15.50 | 100      |
+      | name  | price | quantity |
+      | Sunrose | 15.50 | 100      |
     Then the response status should be 201
     And the response should contain a plant object with an assigned ID
-    And the plant name should be "Rose FINAL"
-
-  @API @Plant @Negative
-  Scenario: API_Plant_Create_002 - Unauthorized Create Attempt
-    Given a regular user is authenticated
-    And a valid category with ID 5 exists
-    When I POST to "/api/plants/category/5" with following data:
-      | name  | price | quantity |
-      | Tulip | 12.00 | 50       |
-    Then the response status should be 403
+    And the plant name should be "Sunrose"

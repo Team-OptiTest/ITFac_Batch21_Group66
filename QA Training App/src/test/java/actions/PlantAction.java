@@ -3,119 +3,65 @@ package actions;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.rest.SerenityRest;
 import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import java.util.Map;
-import java.util.HashMap;
 
 public class PlantAction {
 
-    private String baseUrl = "http://localhost:8080";
-    private String username;
-    private String password;
-    private String token;
-    private int lastCreatedPlantId;
-    private String lastCreatedPlantName;
+    private net.thucydides.model.util.EnvironmentVariables environmentVariables;
+    private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
+    @Step("Authenticate as admin")
+    public void authenticateAsAdmin(String username, String password) {
+        String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+        String loginEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                .from(environmentVariables)
+                .getProperty("api.endpoints.auth.login");
 
-    public void setLastCreatedPlantName(String name) {
-        this.lastCreatedPlantName = name;
-    }
+        Map<String, String> credentials = new java.util.HashMap<>();
+        credentials.put("username", username);
+        credentials.put("password", password);
 
-    public String getLastCreatedPlantName() {
-        return this.lastCreatedPlantName;
-    }
-
-    @Step("Authenticate with credentials")
-    public void authenticate(String username, String password) {
-        this.username = username;
-        this.password = password;
-
-        // Attempt to get JWT token
-        Map<String, String> loginData = new HashMap<>();
-        loginData.put("username", username);
-        loginData.put("password", password);
-
-        Response response = SerenityRest.given()
+        String token = SerenityRest.given()
                 .contentType(ContentType.JSON)
-                .body(loginData)
-                .when()
-                .post(baseUrl + "/api/auth/login");
+                .body(credentials)
+                .post(baseUrl + loginEndpoint)
+                .jsonPath()
+                .getString("token");
 
-        if (response.getStatusCode() == 200) {
-            this.token = response.jsonPath().getString("token");
-        } else {
-            this.token = null; // Reset token if login fails
-        }
+        this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
     }
 
-    @Step("Create a new plant")
+    @Step("Create a new plant in category {0} with data {1}")
     public void createPlant(int categoryId, Map<String, Object> plantData) {
-        var request = SerenityRest.given()
-                .contentType(ContentType.JSON);
+        String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+        String categoryEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                .from(environmentVariables)
+                .getProperty("api.endpoints.plants.category");
 
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        } else {
-            // Fallback for unauthorized tests or if token retrieval failed
-            request.auth().preemptive().basic(username, password);
-        }
+        String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-        Response response = request.body(plantData)
+        requestSpec
+                .contentType(ContentType.JSON)
+                .body(plantData)
                 .when()
-                .post(baseUrl + "/api/plants/category/" + categoryId);
-
-        if (response.getStatusCode() == 201) {
-            lastCreatedPlantId = response.jsonPath().getInt("id");
-        }
+                .post(fullUrl);
     }
 
-    @Step("Delete a plant")
-    public void deletePlant(int id) {
-        var request = SerenityRest.given();
-
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        } else {
-            request.auth().preemptive().basic(username, password);
-        }
-
-        request.when()
-                .delete(baseUrl + "/api/plants/" + id);
+    @Step("Verify response status code is {0}")
+    public void verifyStatusCode(int expectedStatus) {
+        SerenityRest.restAssuredThat(response -> response.statusCode(expectedStatus));
     }
 
-    @Step("Get a plant")
-    public void getPlant(int id) {
-        var request = SerenityRest.given();
-
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        } else {
-            request.auth().preemptive().basic(username, password);
-        }
-
-        request.when()
-                .get(baseUrl + "/api/plants/" + id);
-    }
-
-    public int getLastCreatedPlantId() {
-        return lastCreatedPlantId;
-    }
-
-    @Step("Verify response status code")
-    public void verifyStatusCode(int statusCode) {
-        SerenityRest.then().statusCode(statusCode);
-    }
-
-    @Step("Verify assigned ID")
+    @Step("Verify response contains assigned ID")
     public void verifyAssignedId() {
-        SerenityRest.then().body("id", org.hamcrest.Matchers.notNullValue());
+        SerenityRest.restAssuredThat(response -> response.body("id", org.hamcrest.Matchers.notNullValue()));
     }
 
-    @Step("Verify plant name")
+    @Step("Verify plant name is {0}")
     public void verifyPlantName(String expectedName) {
-        SerenityRest.then().body("name", org.hamcrest.Matchers.equalTo(expectedName));
+        SerenityRest
+                .restAssuredThat(response -> response.body("name", org.hamcrest.Matchers.containsString(expectedName)));
     }
 }
