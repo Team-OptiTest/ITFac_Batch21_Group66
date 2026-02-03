@@ -106,4 +106,14 @@ public class PlantApiStepDefinitions {
     public void theResponseShouldContainPlantsWithNameContaining(String searchTerm) {
         plantAction.verifyPlantsContainName(searchTerm);
     }
+
+    @When("I GET to {string}")
+    public void iGETTo(String endpoint) {
+        plantAction.getPlantsByCategory(endpoint);
+    }
+
+    @Then("the response should contain an array of plants")
+    public void theResponseShouldContainAnArrayOfPlants() {
+        plantAction.verifyPlantsArrayExists();
+    }
 }

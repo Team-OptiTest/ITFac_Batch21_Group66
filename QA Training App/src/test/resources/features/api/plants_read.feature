@@ -18,3 +18,11 @@ Feature: Plant Retrieval API
     When I GET to "/api/plants/paged" with query params "name=Rose"
     Then the response status should be 200
     And the response should contain plants with name containing "Rose"
+
+  @API @Plant @Category
+  Scenario: Get Plant by Category
+    Given the user is authenticated with ROLE_USER
+    And a valid category with ID 5 exists
+    When I GET to "/api/plants/category/5"
+    Then the response status should be 200
+    And the response should contain an array of plants
