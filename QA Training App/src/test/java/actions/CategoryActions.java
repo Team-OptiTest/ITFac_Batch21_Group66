@@ -121,6 +121,13 @@ public class CategoryActions {
 
     @Step("Delete category with ID: {0}")
     public void deleteCategoryById(Integer categoryId) {
+        if (categoryId == null) {
+            System.out.println("=== DELETE CATEGORY DEBUG ===");
+            System.out.println("Category ID is NULL - cannot delete");
+            System.out.println("=============================");
+            // Create a mock failed response by attempting to delete with invalid ID
+            categoryId = -1;
+        }
 
         String token = getAuthToken();
         String deleteUrl = getBaseUrl() + "/api/categories/" + categoryId;
@@ -213,6 +220,14 @@ public void getCategoriesSummary() {
 
     @Step("Update category with ID: {0} and name: {1}")
     public void updateCategory(Integer categoryId, String updatedName) {
+        if (categoryId == null) {
+            System.out.println("=== UPDATE CATEGORY DEBUG ===");
+            System.out.println("Category ID is NULL - cannot update");
+            System.out.println("=============================");
+            // Use invalid ID to trigger expected failure
+            categoryId = -1;
+        }
+
         String token = getAuthToken();
         String updateUrl = getBaseUrl() + "/api/categories/" + categoryId;
         String requestBody = String.format("{\"name\":\"%s\"}", updatedName);
