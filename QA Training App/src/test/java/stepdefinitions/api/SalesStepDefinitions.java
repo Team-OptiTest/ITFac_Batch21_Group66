@@ -116,4 +116,12 @@ public class SalesStepDefinitions {
             plantAction.deletePlant(plantId);
         }
     }
+    @When("admin creates a sale for plant {int} with quantity {int}")
+    public void admin_creates_sale_for_plant_with_quantity(int plantId, int quantity) {
+        // Set local fields just in case they are used elsewhere, though not strictly needed for this specific test
+        this.plantId = plantId;
+        this.quantitySold = quantity;
+        
+        salesAction.createSale(plantId, quantity);
+    }
 }
