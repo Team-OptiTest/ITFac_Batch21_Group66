@@ -74,7 +74,7 @@ public class CategoryActions {
     public Integer getLastCreatedCategoryId() {
         return lastCreatedCategoryId;
     }
-
+    
     private long generateNonExistentId() {
         long nonExistentId = 999999L;
         if (existingCategoryIds != null && !existingCategoryIds.isEmpty()) {
@@ -84,13 +84,6 @@ public class CategoryActions {
                     .orElse(0) + 99999;
         }
         return nonExistentId;
-    }
-
-    @Step("Create category with valid name: {0}")
-    public void createCategoryWithValidData(String categoryName) {
-        int randomSuffix = (int)(Math.random() * 100);
-        String uniqueCategoryName = categoryName.substring(0, Math.min(categoryName.length(), 8)) + randomSuffix;
-        createCategory(uniqueCategoryName);
     }
 
     @Step("Create category with name: {0}")
