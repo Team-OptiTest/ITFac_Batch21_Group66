@@ -34,3 +34,10 @@ Feature: Sales API - Read Sales
     When an unauthenticated user retrieves the sale with valid saleId
     Then the retrieval should fail with status 401
     And error message should be "Unauthorized - Use Basic Auth or JWT"
+
+  Scenario: API_Sales_Read_007 - Retrieve Sales with Pagination and Sorting - User
+    Given admin is authenticated
+    And multiple sales exist in the system
+    And user is authenticated
+    When user retrieves the sales with page 0, size 10, and sort "soldAt,desc"
+    Then the paginated sales should be returned successfully with page size 10

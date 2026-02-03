@@ -116,4 +116,33 @@ public class SalesAction {
             .when()
             .get(getBaseUrl() + "/api/sales/" + saleId);
     }
+
+    @Step("Get paginated and sorted sales")
+    public void getPaginatedSales(int page, int size, String sort) {
+        SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .queryParam("page", page)
+            .queryParam("size", size)
+            .queryParam("sort", sort)
+            .when()
+            .get(getBaseUrl() + "/api/sales/page");
+    }
+
+    @Step("Verify paginated sales response")
+    public void verifyPaginatedSalesResponse(int expectedSize) {
+        SerenityRest.then()
+            .statusCode(200)
+            .body("totalPages", notNullValue())
+            .body("totalElements", notNullValue())
+            .body("size", equalTo(expectedSize))
+            .body("content", notNullValue())
+            .body("content", instanceOf(java.util.List.class))
+            .body("content[0].id", notNullValue())
+            .body("content[0].plant", notNullValue())
+            .body("content[0].quantity", notNullValue())
+            .body("content[0].totalPrice", notNullValue())
+            .body("content[0].soldAt", notNullValue())
+            .body("sort", notNullValue())
+            .body("pageable", notNullValue());
+    }
 }

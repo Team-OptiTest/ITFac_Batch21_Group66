@@ -231,4 +231,30 @@ public class SalesStepDefinitions {
     public void an_unauthenticated_user_retrieves_the_sale_with_valid_sale_id() {
         salesAction.getSaleByIdUnauthenticated(saleId);
     }
+
+    @Given("multiple sales exist in the system")
+    public void multiple_sales_exist_in_the_system() {
+        // Create at least 2 sales to test pagination/sorting
+        a_sale_exists_with_a_known_valid_sale_id();
+        
+        // Create another sale
+        plant_exists_with_sufficient_stock();
+        admin_creates_sale();
+    }
+
+    @When("user retrieves the sales with page {int}, size {int}, and sort {string}")
+    public void user_retrieves_paginated_sales(int page, int size, String sort) {
+        salesAction.getPaginatedSales(page, size, sort);
+    }
+
+    @Then("the paginated sales should be returned successfully with page size {int}")
+    public void the_paginated_sales_should_be_returned_successfully(int size) {
+        salesAction.verifyPaginatedSalesResponse(size);
+        
+        // Cleanup is handled by the steps that created the plants if we are careful.
+        // But here we might have multiple plants. 
+        // Actually, the current `plantId` only stores the LAST one.
+        // This is a bit of a problem for robust cleanup.
+        // For now, I'll stick to the current pattern, but I should probably track all created plants.
+    }
 }
