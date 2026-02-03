@@ -48,6 +48,10 @@ public class CategoryStepDefinitions {
         System.out.println("Expired token provided: " + expiredToken.substring(0, 50) + "...");
         // We'll just NOT authenticate - CategoryActions will use whatever token is set
     }
+    @Given("a category with ID {int} exists")
+    public void aCategoryWithIDExists(int categoryId) {
+        System.out.println("Assuming category with ID " + categoryId + " exists for testing");
+    }
 
     // ============================================
     // WHEN STEPS
@@ -102,6 +106,19 @@ public class CategoryStepDefinitions {
     @When("the user requests categories summary with invalid token")
     public void theUserRequestsCategoriesSummaryWithInvalidToken() {
         // Same as above - just a different name
+        categoryActions.getCategoriesSummary();
+    }
+    @When("a request is made to get category with ID {int} without JWT token")
+    public void aRequestIsMadeToGetCategoryWithIDWithoutJWTToken(int categoryId) {
+    // Just call the existing method - if no token is set, it should fail
+    // Your CategoryActions.getCategoryById() should use getAuthToken() which might be null
+        categoryActions.getCategoryById(categoryId);
+    }
+
+    @When("a request is made to get categories without JWT token")
+    public void aRequestIsMadeToGetCategoriesWithoutJWTToken() {
+    // Call the summary endpoint without authenticating first
+    // Make sure NOT to call authenticationActions.authenticateAsAdmin() before this
         categoryActions.getCategoriesSummary();
     }
 
