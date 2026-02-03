@@ -11,3 +11,10 @@ Feature: Plant Retrieval API
     Then the response status should be 200
     And the response should contain a list of plants
     And the response should contain pagination metadata
+
+  @API @Plant @Search
+  Scenario: Search Plant by Name
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "name=Rose"
+    Then the response status should be 200
+    And the response should contain plants with name containing "Rose"
