@@ -178,4 +178,17 @@ public class SalesStepDefinitions {
             plantId = 0;
         }
     }
+
+    @Given("user is authenticated")
+    public void user_is_authenticated() {
+        authenticationActions.authenticateUser();
+        String token = Serenity.sessionVariableCalled("authToken");
+        plantAction.setToken(token);
+        salesAction.setToken(token);
+    }
+
+    @When("user retrieves all sales")
+    public void user_retrieves_all_sales() {
+        salesAction.getAllSales();
+    }
 }
