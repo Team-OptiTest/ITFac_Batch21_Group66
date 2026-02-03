@@ -9,7 +9,7 @@ Feature: Category Creation
     When the admin creates a category with valid name "Flowers"
     Then the category should be created successfully
 
-  @API @Category
+  @API_Category_Create_005 @validation @boundary
   Scenario: Create category with less than 3 characters
     Given the user is authenticated as admin
     When the admin creates a category with less than 3 characters "Ab"
