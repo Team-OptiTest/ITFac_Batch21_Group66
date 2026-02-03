@@ -178,4 +178,37 @@ public class CategoryActions {
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
     }
+
+    @Step("Search categories with name: {0} and parentId: {1}")
+    public void searchCategories(String categoryName, String parentId) {
+        String token = getAuthToken();
+        
+        String searchUrl = getBaseUrl() + "/api/categories";
+        if (categoryName != null || parentId != null) {
+            searchUrl += "?";
+            if (categoryName != null) {
+                searchUrl += "name=" + categoryName;
+                if (parentId != null) {
+                    searchUrl += "&parentId=" + parentId;
+                }
+            } else if (parentId != null) {
+                searchUrl += "parentId=" + parentId;
+            }
+        }
+        
+        System.out.println("=== SEARCH CATEGORIES DEBUG ===");
+        System.out.println("Search URL: " + searchUrl);
+        System.out.println("Category Name: " + categoryName);
+        System.out.println("Parent ID: " + parentId);
+        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
+        System.out.println("===============================");
+
+        lastResponse = SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .get(searchUrl);
+
+        System.out.println("Status Code: " + lastResponse.getStatusCode());
+        System.out.println("Response: " + lastResponse.getBody().asString());
+    }
 }
