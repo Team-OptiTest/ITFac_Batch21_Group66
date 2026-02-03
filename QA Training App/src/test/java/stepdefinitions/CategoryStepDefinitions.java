@@ -62,19 +62,6 @@ public class CategoryStepDefinitions {
     public void theAdminCreatesACategoryWithName(String categoryName) {
         categoryActions.createCategory(categoryName);
     }
-    @When("the admin requests categories summary")
-public void theAdminRequestsCategoriesSummary() {
-    categoryActions.getCategoriesSummary();
-}
-
-    @Then("the API should return {int} OK")
-    public void theAPIShouldReturnOK(int expectedStatusCode) {
-        int actualStatusCode = categoryActions.getLastResponseStatusCode();
-        
-        assertThat(actualStatusCode)
-            .as("API should return " + expectedStatusCode + " status code")
-            .isEqualTo(expectedStatusCode);
-    }
 
     @When("the admin creates a category with less than 3 characters {string}")
     public void theAdminCreatesACategoryWithLessCharacters(String categoryName) {
