@@ -135,4 +135,16 @@ public class PlantApiStepDefinitions {
     public void thePlantShouldNoLongerExistWhenRetrieved() {
         plantAction.verifyPlantNoLongerExists();
     }
+
+    @When("I PUT to {string} with new price {string}")
+    public void iPUTToWithNewPrice(String endpoint, String newPrice) {
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("price", Double.parseDouble(newPrice));
+        plantAction.updatePlantPrice(endpoint, body);
+    }
+
+    @Then("the response should show updated price {string}")
+    public void theResponseShouldShowUpdatedPrice(String expectedPrice) {
+        plantAction.verifyUpdatedPrice(Double.parseDouble(expectedPrice));
+    }
 }

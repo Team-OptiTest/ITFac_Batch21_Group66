@@ -10,6 +10,7 @@ public class PlantAction {
         private net.thucydides.model.util.EnvironmentVariables environmentVariables;
         private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
         private Integer createdPlantId;
+        private Map<String, Object> createdPlantData;
 
         @Step("Authenticate as admin")
         public void authenticateAsAdmin(String username, String password) {
@@ -215,6 +216,7 @@ public class PlantAction {
                                 .post(fullUrl);
 
                 this.createdPlantId = response.jsonPath().getInt("id");
+                this.createdPlantData = new java.util.HashMap<>(plantData);
         }
 
         @Step("Delete plant: {0}")
@@ -249,5 +251,30 @@ public class PlantAction {
                         throw new AssertionError(
                                         "Expected plant to not exist (404), but got status code: " + statusCode);
                 }
+        }
+
+        @Step("Update plant price: {0}")
+        public void updatePlantPrice(String endpoint, Map<String, Object> updateData) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
+
+                // Create complete plant object with updated price
+                Map<String, Object> completeBody = new java.util.HashMap<>(this.createdPlantData);
+                completeBody.put("price", updateData.get("price"));
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(completeBody)
+                                .when()
+                                .put(fullUrl);
+        }
+
+        @Step("Verify updated price is {0}")
+        public void verifyUpdatedPrice(double expectedPrice) {
+                SerenityRest.restAssuredThat(response -> response.body("price",
+                                org.hamcrest.Matchers.equalTo((float) expectedPrice)));
         }
 }
