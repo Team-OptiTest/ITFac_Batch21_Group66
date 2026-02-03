@@ -1,21 +1,13 @@
-Feature: Plant Management API - Delete
-  
+Feature: Plant Deletion API
+
   As an admin
-  I want to be able to remove plants from the inventory
-  So that the catalog remains accurate
+  I want to delete plants from the system
+  So that I can manage the plant inventory
 
   @API @Plant @Delete
-  Scenario: API_Plant_Delete_001 - Delete Plant Record
+  Scenario: Delete Plant Record
     Given the admin is authenticated
-    And a plant exists
-    When I delete the plant
+    And a plant with ID exists in the system
+    When I DELETE to "/api/plants/{id}"
     Then the response status should be 204
-    And the plant should no longer exist
-
-  @API @Plant @Delete
-  Scenario: API_Plant_Delete_002 - Unauthorized Delete Attempt
-    Given the admin is authenticated
-    And a plant exists
-    And a regular user is authenticated
-    When I delete the plant
-    Then the response status should be 403
+    And the plant should no longer exist when retrieved

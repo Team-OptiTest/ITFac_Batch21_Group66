@@ -9,6 +9,7 @@ public class PlantAction {
 
         private net.thucydides.model.util.EnvironmentVariables environmentVariables;
         private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
+        private Integer createdPlantId;
 
         @Step("Authenticate as admin")
         public void authenticateAsAdmin(String username, String password) {
@@ -194,5 +195,59 @@ public class PlantAction {
                 SerenityRest.restAssuredThat(response -> response.body("$", org.hamcrest.Matchers.notNullValue()));
                 SerenityRest.restAssuredThat(
                                 response -> response.body("$", org.hamcrest.Matchers.instanceOf(java.util.List.class)));
+        }
+
+        @Step("Create a new plant in category {0} and store its ID")
+        public void createPlantAndStoreId(int categoryId, Map<String, Object> plantData) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+                String categoryEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.endpoints.plants.category");
+
+                String fullUrl = baseUrl + categoryEndpoint + categoryId;
+
+                io.restassured.response.Response response = requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(plantData)
+                                .when()
+                                .post(fullUrl);
+
+                this.createdPlantId = response.jsonPath().getInt("id");
+        }
+
+        @Step("Delete plant: {0}")
+        public void deletePlant(String endpoint) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .delete(fullUrl);
+        }
+
+        @Step("Verify plant no longer exists")
+        public void verifyPlantNoLongerExists() {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + "/api/plants/" + this.createdPlantId;
+
+                io.restassured.response.Response response = requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .get(fullUrl);
+
+                int statusCode = response.getStatusCode();
+                if (statusCode != 404) {
+                        throw new AssertionError(
+                                        "Expected plant to not exist (404), but got status code: " + statusCode);
+                }
         }
 }
