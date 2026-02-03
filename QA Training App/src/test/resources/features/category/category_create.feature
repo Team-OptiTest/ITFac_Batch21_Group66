@@ -34,3 +34,11 @@ Feature: Category Creation
     Given the user is authenticated as user
     When the user creates a category with name "abcd"
     Then the user should be denied permission to create a category
+
+  @simple @API_Category_Create_006 @validation @duplicate
+  Scenario: Create duplicate category name
+    Given the user is authenticated as admin
+    And a category named "Roses" exists
+    When the admin attempts to create another category with name "Roses"
+    Then the API should return 400 Bad Request
+    And the error message should contain "already exists"
