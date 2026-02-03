@@ -235,10 +235,8 @@ public class PlantAction {
         @Step("Delete plant: {0}")
         public void deletePlant(String endpoint) {
                 if (this.createdPlantId == null) {
-                        System.out.println("=== DELETE PLANT DEBUG ===");
-                        System.out.println("Plant ID is NULL - using -1 as fallback");
-                        System.out.println("==========================");
-                        this.createdPlantId = -1;
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with deletion");
                 }
 
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -256,10 +254,8 @@ public class PlantAction {
         @Step("Verify plant no longer exists")
         public void verifyPlantNoLongerExists() {
                 if (this.createdPlantId == null) {
-                        System.out.println("=== VERIFY PLANT DEBUG ===");
-                        System.out.println("Plant ID is NULL - using -1 as fallback");
-                        System.out.println("==========================");
-                        this.createdPlantId = -1;
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with verification");
                 }
 
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -283,10 +279,8 @@ public class PlantAction {
         @Step("Update plant price: {0}")
         public void updatePlantPrice(String endpoint, Map<String, Object> updateData) {
                 if (this.createdPlantId == null) {
-                        System.out.println("=== UPDATE PLANT PRICE DEBUG ===");
-                        System.out.println("Plant ID is NULL - using -1 as fallback");
-                        System.out.println("=================================");
-                        this.createdPlantId = -1;
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with price update");
                 }
 
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -317,10 +311,8 @@ public class PlantAction {
         @Step("Update plant quantity: {0}")
         public void updatePlantQuantity(String endpoint, Map<String, Object> updateData) {
                 if (this.createdPlantId == null) {
-                        System.out.println("=== UPDATE PLANT QUANTITY DEBUG ===");
-                        System.out.println("Plant ID is NULL - using -1 as fallback");
-                        System.out.println("====================================");
-                        this.createdPlantId = -1;
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with quantity update");
                 }
 
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
