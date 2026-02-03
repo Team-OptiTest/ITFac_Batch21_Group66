@@ -42,6 +42,19 @@ public void theAdminAttemptsToCreateAnotherCategoryWithName(String categoryName)
     public void theAdminCreatesACategoryWithName(String categoryName) {
         categoryActions.createCategoryWithValidData(categoryName);
     }
+    @When("the admin requests categories summary")
+public void theAdminRequestsCategoriesSummary() {
+    categoryActions.getCategoriesSummary();
+}
+
+    @Then("the API should return {int} OK")
+    public void theAPIShouldReturnOK(int expectedStatusCode) {
+        int actualStatusCode = categoryActions.getLastResponseStatusCode();
+        
+        assertThat(actualStatusCode)
+            .as("API should return " + expectedStatusCode + " status code")
+            .isEqualTo(expectedStatusCode);
+    }
 
     @Then("the category should be created successfully")
     public void theCategoryShouldBeCreatedSuccessfully() {
@@ -131,4 +144,5 @@ public void theAPIShouldReturn400BadRequest() {
             .as("Category deletion should succeed")
             .isIn(204, 205);
     }
+    
 }

@@ -1,14 +1,14 @@
 package actions;
 
+import java.util.List;
+
 import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.rest.SerenityRest;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
-import net.thucydides.model.util.EnvironmentVariables;
+import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
-
-import java.util.List;
+import net.thucydides.model.util.EnvironmentVariables;
 
 public class CategoryActions {
 
@@ -125,4 +125,10 @@ public class CategoryActions {
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
     }
+    @Step("Get categories summary")
+public void getCategoriesSummary() {
+    lastResponse = SerenityRest.given()
+            .header("Authorization", "Bearer " + getAuthToken())
+            .get(getBaseUrl() + "/api/categories/summary");
+}
 }
