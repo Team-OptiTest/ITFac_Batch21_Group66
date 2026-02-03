@@ -9,23 +9,24 @@ Feature: Category Creation
     When the admin creates a category with valid name "Flowers"
     Then the category should be created successfully
 
-  @API @Category
+  @API_Category_Create_005 @validation @boundary
   Scenario: Create category with less than 3 characters
     Given the user is authenticated as admin
-    When the admin creates a category with less than 3 characters "a"
-    Then the category creation should fail
+    When the admin creates a category with less than 3 characters "Ab"
+    Then the category creation should fail with validation error
+    And the error message should contain "Category name must be between 3 and 10 characters"
 
   @API @Category
   Scenario: Create category with more than 10 characters
     Given the user is authenticated as admin
     When the admin creates a category with more than 10 characters "abcdefghijkl"
-    Then the category creation should fail
+    Then the category creation should fail with validation error
 
   @API @Category
   Scenario: Create category without name
     Given the user is authenticated as admin
     When the admin creates a category without name ""
-    Then the category creation should fail
+    Then the category creation should fail with validation error
 
   @API @Category
   Scenario: Create category as user

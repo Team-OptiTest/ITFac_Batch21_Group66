@@ -1,13 +1,13 @@
 package stepdefinitions;
 
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
-import io.cucumber.java.en.Then;
-import net.serenitybdd.annotations.Steps;
-import actions.CategoryActions;
-import actions.AuthenticationActions;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import actions.AuthenticationActions;
+import actions.CategoryActions;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import net.serenitybdd.annotations.Steps;
 
 public class CategoryStepDefinitions {
 
@@ -64,12 +64,42 @@ public class CategoryStepDefinitions {
         categoryActions.createCategory(categoryName);
     }
 
-    @Then("the category creation should fail")
-    public void theCategoryCreationShouldFail() {
-        assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Category creation should not succeed")
-            .isIn(400, 401);
-    }
+    @Then("the category creation should fail with validation error")
+    public void theCategoryCreationShouldFailWithValidationError() {
+        int statusCode = categoryActions.getLastResponseStatusCode();
+            String responseBody = categoryActions.getLastResponseBody();
+    
+            System.out.println("\n=== VERIFYING VALIDATION ERROR ===");
+            System.out.println("Status code: " + statusCode);
+            System.out.println("Response: " + responseBody);
+    
+    // @API_Category_Create_004 - Verify that creating a category with invalid data fails
+    assertThat(statusCode)
+        .as("Category creation should fail with 400 Bad Request")
+        .isEqualTo(400);
+    
+    assertThat(responseBody)
+        .as("Response should contain error details")
+        .isNotEmpty();
+    
+    System.out.println("=== VERIFICATION COMPLETE ===\n");
+}
+
+@Then("the error message should contain {string}")
+public void theErrorMessageShouldContain(String expectedMessage) {
+    String responseBody = categoryActions.getLastResponseBody();
+    
+    System.out.println("\n=== VERIFYING ERROR MESSAGE ===");
+    System.out.println("Expected message: " + expectedMessage);
+    System.out.println("Actual response: " + responseBody);
+    
+    assertThat(responseBody.toLowerCase())
+        .as("Error message should contain: " + expectedMessage)
+        .contains(expectedMessage.toLowerCase());
+    
+    System.out.println("=== VERIFICATION COMPLETE ===\n");
+    //@API_Category_Create_005 - Verify that the error message contains specific text
+}
 
     @Then("the user should be denied permission to create a category")
     public void theUserShouldBeDeniedPermissionToCreateACategory() {
