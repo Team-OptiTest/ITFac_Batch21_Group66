@@ -103,4 +103,12 @@ public class SalesAction {
             .body("totalPrice", notNullValue())
             .body("soldAt", notNullValue());
     }
+    @Step("Verify error response schema")
+    public void verifyErrorSchema() {
+        SerenityRest.then()
+            .body("timestamp", notNullValue())
+            .body("status", notNullValue())
+            .body("error", notNullValue())
+            .body("message", notNullValue());
+    }
 }

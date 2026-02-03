@@ -109,10 +109,12 @@ public class SalesStepDefinitions {
     @Then("error message should be {string}")
     public void error_message_should_be(String message) {
         salesAction.verifyErrorMessage(message);
+        salesAction.verifyErrorSchema();
         
         // Cleanup plant ensures we don't leave data behind even on negative tests
         if (plantId != 0) {
-            plantActions.deletePlant(plantId);
+            plantAction.deletePlant(plantId);
+            plantId = 0;
         }
     }
     @When("admin creates a sale for plant {int} with quantity {int}")
@@ -204,5 +206,15 @@ public class SalesStepDefinitions {
             plantActions.deletePlant(plantId);
             plantId = 0;
         }
+    }
+
+    @When("user retrieves the sale with non-existent saleId {int}")
+    public void user_retrieves_the_sale_with_non_existent_saleId(int id) {
+        salesAction.getSaleById(id);
+    }
+
+    @Then("the retrieval should fail with status {int}")
+    public void the_retrieval_should_fail_with_status(int statusCode) {
+        salesAction.verifyStatusCode(statusCode);
     }
 }
