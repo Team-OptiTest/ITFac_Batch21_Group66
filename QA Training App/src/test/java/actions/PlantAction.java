@@ -304,8 +304,11 @@ public class PlantAction {
 
         @Step("Verify updated price is {0}")
         public void verifyUpdatedPrice(double expectedPrice) {
-                SerenityRest.restAssuredThat(response -> response.body("price",
-                                org.hamcrest.Matchers.equalTo((float) expectedPrice)));
+                Double actualPrice = SerenityRest.lastResponse().jsonPath().getDouble("price");
+                org.hamcrest.MatcherAssert.assertThat(
+                                "Price should match expected value",
+                                actualPrice,
+                                org.hamcrest.Matchers.closeTo(expectedPrice, 0.001));
         }
 
         @Step("Update plant quantity: {0}")
