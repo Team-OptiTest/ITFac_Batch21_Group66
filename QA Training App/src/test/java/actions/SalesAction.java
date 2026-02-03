@@ -67,4 +67,24 @@ public class SalesAction {
             .body("[0].totalPrice", notNullValue())
             .body("[0].soldAt", notNullValue());
     }
+
+    @Step("Delete a sale")
+    public void deleteSale(int saleId) {
+        SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .delete(baseUrl + "/api/sales/" + saleId);
+    }
+
+    @Step("Get a sale by ID")
+    public void getSaleById(int saleId) {
+        SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .get(baseUrl + "/api/sales/" + saleId);
+    }
+
+    public int getLastCreatedSaleId() {
+        return SerenityRest.lastResponse().jsonPath().getInt("id");
+    }
 }

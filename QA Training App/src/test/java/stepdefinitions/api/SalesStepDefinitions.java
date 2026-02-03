@@ -35,6 +35,7 @@ public class SalesStepDefinitions {
     private int quantitySold;
     private int initialStock;
     private int categoryId;
+    private int saleId;
 
     @Given("admin is authenticated")
     public void admin_is_authenticated() {
@@ -145,6 +146,36 @@ public class SalesStepDefinitions {
         if (plantId != 0) {
             plantAction.deletePlant(plantId);
             plantId = 0; // Reset to avoid double deletion
+        }
+    }
+
+    @Given("a sale exists with a known valid saleId")
+    public void a_sale_exists_with_a_known_valid_sale_id() {
+        plant_exists_with_sufficient_stock();
+        admin_creates_sale();
+        sale_created_successfully();
+        saleId = salesAction.getLastCreatedSaleId();
+    }
+
+    @When("admin deletes the sale with valid saleId")
+    public void admin_deletes_the_sale_with_valid_sale_id() {
+        salesAction.deleteSale(saleId);
+    }
+
+    @Then("the sale should be deleted successfully with status {int}")
+    public void the_sale_should_be_deleted_successfully_with_status_custom(int statusCode) {
+        salesAction.verifyStatusCode(statusCode);
+    }
+
+    @Then("the deleted sale should not be retrievable")
+    public void the_deleted_sale_should_not_be_retrievable() {
+        salesAction.getSaleById(saleId);
+        salesAction.verifyStatusCode(404);
+        
+        // Cleanup plant
+        if (plantId != 0) {
+            plantAction.deletePlant(plantId);
+            plantId = 0;
         }
     }
 }
