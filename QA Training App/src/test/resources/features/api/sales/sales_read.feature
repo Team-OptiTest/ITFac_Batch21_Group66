@@ -20,3 +20,9 @@ Feature: Sales API - Read Sales
     Given user is authenticated
     When user retrieves the sale with valid saleId
     Then the sale details should be returned successfully
+
+  Scenario: API_Sales_Read_005 - Retrieve Sale with Invalid ID - User
+    Given user is authenticated
+    When user retrieves the sale with non-existent saleId 99999
+    Then the retrieval should fail with status 404
+    And error message should be "Sale not found: 99999"
