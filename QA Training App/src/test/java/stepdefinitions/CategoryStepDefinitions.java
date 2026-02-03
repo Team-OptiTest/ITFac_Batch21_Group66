@@ -123,4 +123,38 @@ public class CategoryStepDefinitions {
             .as("the category list should be retrieved successfully")
             .isEqualTo(200);
     }
+
+    @When("the user searches for categories with name {string}")
+    public void theUserSearchesForCategoriesWithName(String categoryName) {
+        categoryActions.searchCategories(categoryName, null);
+    }
+
+    @When("the admin searches for categories with name {string}")
+    public void theAdminSearchesForCategoriesWithName(String categoryName) {
+        categoryActions.searchCategories(categoryName, null);
+    }
+
+    @Then("the search results should be returned successfully")
+    public void theSearchResultsShouldBeReturnedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Search categories should return HTTP 200")
+            .isEqualTo(200);
+    }
+
+    @When("the user filters categories by parent ID {string}")
+    public void theUserFiltersCategoriesByParentId(String parentId) {
+        categoryActions.searchCategories(null, parentId);
+    }
+
+    @When("the admin filters categories by parent ID {string}")
+    public void theAdminFiltersCategoriesByParentId(String parentId) {
+        categoryActions.searchCategories(null, parentId);
+    }
+
+    @Then("the filtered categories should be retrieved successfully")
+    public void theFilteredCategoriesShouldBeRetrievedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Filtered categories should be retrieved successfully with HTTP 200")
+            .isEqualTo(200);
+    }
 }
