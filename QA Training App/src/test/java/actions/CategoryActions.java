@@ -72,6 +72,10 @@ public class CategoryActions {
 
     @Step("Get last created category ID")
     public Integer getLastCreatedCategoryId() {
+        Integer sessionId = Serenity.sessionVariableCalled("lastCreatedCategoryId");
+        if (sessionId != null) {
+            return sessionId;
+        }
         return lastCreatedCategoryId;
     }
     
@@ -102,8 +106,10 @@ public class CategoryActions {
         if (lastResponse.getStatusCode() == 201 || lastResponse.getStatusCode() == 200) {
             try {
                 lastCreatedCategoryId = lastResponse.jsonPath().getInt("id");
+                Serenity.setSessionVariable("lastCreatedCategoryId").to(lastCreatedCategoryId);
             } catch (Exception e) {
                 System.out.println("Could not extract category ID: " + e.getMessage());
+                lastCreatedCategoryId = null;
             }
         } else {
             // Request failed - don't try to extract ID
