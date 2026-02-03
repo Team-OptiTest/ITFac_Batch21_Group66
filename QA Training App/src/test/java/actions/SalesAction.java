@@ -46,4 +46,25 @@ public class SalesAction {
         SerenityRest.then()
             .body("message", equalTo(expectedMessage));
     }
+
+    @Step("Retrieve all sales")
+    public void getAllSales() {
+        SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .when()
+            .get(baseUrl + "/api/sales");
+    }
+
+    @Step("Verify sales list is returned")
+    public void verifySalesListReturned() {
+        SerenityRest.then()
+            .statusCode(200)
+            .body("$", instanceOf(java.util.List.class))
+            .body("[0].id", notNullValue())
+            .body("[0].plant", notNullValue())
+            .body("[0].plant.id", notNullValue())
+            .body("[0].quantity", notNullValue())
+            .body("[0].totalPrice", notNullValue())
+            .body("[0].soldAt", notNullValue());
+    }
 }

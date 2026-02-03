@@ -124,4 +124,27 @@ public class SalesStepDefinitions {
         
         salesAction.createSale(plantId, quantity);
     }
+
+    @Given("at least one sale exists in the system")
+    public void at_least_one_sale_exists_in_the_system() {
+        plant_exists_with_sufficient_stock();
+        admin_creates_sale();
+        sale_created_successfully();
+    }
+
+    @When("admin retrieves all sales")
+    public void admin_retrieves_all_sales() {
+        salesAction.getAllSales();
+    }
+
+    @Then("all sales should be returned successfully")
+    public void all_sales_should_be_returned_successfully() {
+        salesAction.verifySalesListReturned();
+        
+        // Cleanup the plant created in at_least_one_sale_exists_in_the_system
+        if (plantId != 0) {
+            plantAction.deletePlant(plantId);
+            plantId = 0; // Reset to avoid double deletion
+        }
+    }
 }
