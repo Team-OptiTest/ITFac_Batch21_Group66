@@ -29,6 +29,15 @@ public class PlantApiStepDefinitions {
     public void aValidCategoryWithIDExists(int id) {
     }
 
+    @Given("the user is authenticated with ROLE_USER")
+    public void theUserIsAuthenticatedWithROLE_USER() {
+        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.username");
+        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.password");
+        plantAction.authenticateAsUser(username, password);
+    }
+
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> data = dataTable.asMaps().get(0);
