@@ -27,6 +27,11 @@ public class CategoryStepDefinitions {
         authenticationActions.authenticateUser();
     }
 
+    @Given("a category exists with name {string}")
+    public void aCategoryCreatesWithName(String name) {
+        categoryActions.createCategory(name);
+    }
+
     @When("the admin creates a category with valid name {string}")
     public void theAdminCreatesACategoryWithName(String categoryName) {
         categoryActions.createCategoryWithValidData(categoryName);
@@ -73,9 +78,9 @@ public class CategoryStepDefinitions {
             .isIn(403, 404);
     }
 
-    @When("the admin deletes an existing category with ID {long}")
-    public void theAdminDeletesAnExistingCategoryWithId(long categoryId) {
-        categoryActions.deleteCategoryById(categoryId);
+    @When("the admin deletes that category")
+    public void theAdminDeletesThatCategory() {
+        categoryActions.deleteCategoryById(categoryActions.getLastCreatedCategoryId());
     }
 
     @Then("the category should be deleted successfully")
