@@ -26,3 +26,11 @@ Feature: Sales API - Read Sales
     When user retrieves the sale with non-existent saleId 99999
     Then the retrieval should fail with status 404
     And error message should be "Sale not found: 99999"
+
+  Scenario: API_Sales_Read_006 - Retrieve Sale - Unauthorized Access
+    Given admin is authenticated
+    And a sale exists with a known valid saleId
+    And no user is logged in
+    When an unauthenticated user retrieves the sale with valid saleId
+    Then the retrieval should fail with status 401
+    And error message should be "Unauthorized - Use Basic Auth or JWT"

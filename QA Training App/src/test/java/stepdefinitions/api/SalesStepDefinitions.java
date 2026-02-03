@@ -217,4 +217,16 @@ public class SalesStepDefinitions {
     public void the_retrieval_should_fail_with_status(int statusCode) {
         salesAction.verifyStatusCode(statusCode);
     }
+
+    @Given("no user is logged in")
+    public void no_user_is_logged_in() {
+        // We only clear salesAction token to simulate unauthenticated access to sales API.
+        // We keep plantAction token so we can still cleanup the plant record with admin rights.
+        salesAction.setToken(null);
+    }
+
+    @When("an unauthenticated user retrieves the sale with valid saleId")
+    public void an_unauthenticated_user_retrieves_the_sale_with_valid_sale_id() {
+        salesAction.getSaleByIdUnauthenticated(saleId);
+    }
 }

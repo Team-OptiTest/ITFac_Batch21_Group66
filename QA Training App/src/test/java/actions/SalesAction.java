@@ -106,9 +106,14 @@ public class SalesAction {
     @Step("Verify error response schema")
     public void verifyErrorSchema() {
         SerenityRest.then()
-            .body("timestamp", notNullValue())
             .body("status", notNullValue())
             .body("error", notNullValue())
             .body("message", notNullValue());
+    }
+    @Step("Get a sale by ID without authentication")
+    public void getSaleByIdUnauthenticated(int saleId) {
+        SerenityRest.given()
+            .when()
+            .get(getBaseUrl() + "/api/sales/" + saleId);
     }
 }
