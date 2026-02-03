@@ -123,4 +123,38 @@ public class PlantAction {
                                 .when()
                                 .post(fullUrl);
         }
+
+        @Step("Get plants with pagination: {0}?{1}")
+        public void getPlantsWithPagination(String endpoint, String queryParams) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint + "?" + queryParams;
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .get(fullUrl);
+        }
+
+        @Step("Verify response contains a list of plants")
+        public void verifyPlantListExists() {
+                SerenityRest.restAssuredThat(
+                                response -> response.body("content", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(response -> response.body("content",
+                                org.hamcrest.Matchers.instanceOf(java.util.List.class)));
+        }
+
+        @Step("Verify response contains pagination metadata")
+        public void verifyPaginationMetadata() {
+                SerenityRest.restAssuredThat(
+                                response -> response.body("pageable", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(
+                                response -> response.body("totalElements", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(
+                                response -> response.body("totalPages", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(response -> response.body("size", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(response -> response.body("number", org.hamcrest.Matchers.notNullValue()));
+        }
 }
