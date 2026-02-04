@@ -1,5 +1,7 @@
 package stepdefinitions.api;
 
+import java.util.Map;
+
 import actions.PlantAction;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -7,8 +9,6 @@ import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.thucydides.model.util.EnvironmentVariables;
-
-import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
@@ -39,17 +39,21 @@ public class PlantApiStepDefinitions {
     public void aValidCategoryWithIDExists(int id) {
         // Implementation for checking category existence if needed
     }
+    @Given("the user is authenticated with ROLE_USER")
+    public void theUserIsAuthenticatedWithROLE_USER() {
+        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.username");
+        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.password");
+        plantAction.authenticateAsUser(username, password);
+    }
 
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> data = dataTable.asMaps().get(0);
-
-        // Convert to Map<String, Object> to ensure proper JSON types (numbers vs
-        // strings)
         Map<String, Object> body = new java.util.HashMap<>();
 
         String name = data.get("name");
-        // Ensure unique name for "Rose FINAL" to avoid DUPLICATE errors
         if ("Rose FINAL".equals(name)) {
             name = name + " " + System.currentTimeMillis();
         }
@@ -58,7 +62,6 @@ public class PlantApiStepDefinitions {
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));
 
-        // Extracting category ID from endpoint /api/plants/category/{id}
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
 
@@ -68,13 +71,13 @@ public class PlantApiStepDefinitions {
 
     @Given("a plant exists")
     public void aPlantExists() {
-        // Create a plant to ensure one exists for deletion
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("name", "Plant to Delete");
         body.put("price", 10.0);
         body.put("quantity", 50);
         plantAction.createPlant(5, body); // Assuming category 5 exists as per previous tests
     }
+    
 
     @When("I delete the plant")
     public void iDeleteThePlant() {
@@ -83,7 +86,6 @@ public class PlantApiStepDefinitions {
 
     @When("I DELETE to {string}")
     public void iDELETETo(String endpoint) {
-        // Handle generic /api/plants/{id}
         String[] parts = endpoint.split("/");
         int id = Integer.parseInt(parts[parts.length - 1]);
         plantAction.deletePlant(id);
@@ -101,7 +103,6 @@ public class PlantApiStepDefinitions {
 
     @Then("the plant name should be {string}")
     public void thePlantNameShouldBe(String name) {
-        // If we randomized the name, verify against the actual name used
         if ("Rose FINAL".equals(name)) {
             plantAction.verifyPlantName(plantAction.getLastCreatedPlantName());
         } else {
@@ -114,4 +115,13 @@ public class PlantApiStepDefinitions {
         plantAction.getPlant(plantAction.getLastCreatedPlantId());
         plantAction.verifyStatusCode(404);
     }
+    @When("I GET to {string}")
+public void iGETTo(String endpoint) {
+    plantAction.getRequest(endpoint);
+}
+
+@Then("the response should contain inventory statistics")
+public void theResponseShouldContainInventoryStatistics() {
+    plantAction.verifyInventoryStatistics();
+}
 }

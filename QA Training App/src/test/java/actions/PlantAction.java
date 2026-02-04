@@ -1,11 +1,12 @@
 package actions;
 
-import net.serenitybdd.annotations.Step;
-import net.serenitybdd.rest.SerenityRest;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import java.util.Map;
-import java.util.HashMap;
+import net.serenitybdd.annotations.Step;
+import net.serenitybdd.rest.SerenityRest;
 
 public class PlantAction {
 
@@ -15,6 +16,7 @@ public class PlantAction {
     private String token;
     private int lastCreatedPlantId;
     private String lastCreatedPlantName;
+    private Response lastResponse;
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -33,7 +35,6 @@ public class PlantAction {
         this.username = username;
         this.password = password;
 
-        // Attempt to get JWT token
         Map<String, String> loginData = new HashMap<>();
         loginData.put("username", username);
         loginData.put("password", password);
@@ -47,8 +48,13 @@ public class PlantAction {
         if (response.getStatusCode() == 200) {
             this.token = response.jsonPath().getString("token");
         } else {
-            this.token = null; // Reset token if login fails
+            this.token = null;
         }
+    }
+
+    @Step("Authenticate as user")
+    public void authenticateAsUser(String username, String password) {
+        authenticate(username, password);
     }
 
     @Step("Create a new plant")
@@ -59,7 +65,6 @@ public class PlantAction {
         if (token != null) {
             request.header("Authorization", "Bearer " + token);
         } else {
-            // Fallback for unauthorized tests or if token retrieval failed
             request.auth().preemptive().basic(username, password);
         }
 
@@ -67,6 +72,8 @@ public class PlantAction {
                 .when()
                 .post(baseUrl + "/api/plants/category/" + categoryId);
 
+        lastResponse = response;
+        
         if (response.getStatusCode() == 201) {
             lastCreatedPlantId = response.jsonPath().getInt("id");
         }
@@ -82,7 +89,7 @@ public class PlantAction {
             request.auth().preemptive().basic(username, password);
         }
 
-        request.when()
+        lastResponse = request.when()
                 .delete(baseUrl + "/api/plants/" + id);
     }
 
@@ -96,8 +103,46 @@ public class PlantAction {
             request.auth().preemptive().basic(username, password);
         }
 
-        request.when()
+        lastResponse = request.when()
                 .get(baseUrl + "/api/plants/" + id);
+    }
+
+    @Step("GET request to {string}")
+    public void getRequest(String endpoint) {
+        var request = SerenityRest.given();
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        lastResponse = request.when()
+                .get(baseUrl + endpoint);
+    }
+
+    @Step("GET request to {string} with query params {string}")
+    public void getPlantsWithPagination(String endpoint, String queryParams) {
+        var request = SerenityRest.given();
+
+        if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        if (queryParams != null && !queryParams.isEmpty()) {
+            String[] pairs = queryParams.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue.length == 2) {
+                    request.queryParam(keyValue[0], keyValue[1]);
+                }
+            }
+        }
+
+        lastResponse = request.when()
+                .get(baseUrl + endpoint);
     }
 
     public int getLastCreatedPlantId() {
@@ -106,7 +151,9 @@ public class PlantAction {
 
     @Step("Verify response status code")
     public void verifyStatusCode(int statusCode) {
-        SerenityRest.then().statusCode(statusCode);
+        if (lastResponse != null) {
+            SerenityRest.then().statusCode(statusCode);
+        }
     }
 
     @Step("Verify assigned ID")
@@ -117,5 +164,27 @@ public class PlantAction {
     @Step("Verify plant name")
     public void verifyPlantName(String expectedName) {
         SerenityRest.then().body("name", org.hamcrest.Matchers.equalTo(expectedName));
+    }
+
+    @Step("Verify inventory statistics")
+    public void verifyInventoryStatistics() {
+        SerenityRest.then()
+                .body("totalPlants", org.hamcrest.Matchers.notNullValue())
+                .body("lowStockPlants", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Step("Verify plant list exists")
+    public void verifyPlantListExists() {
+        SerenityRest.then()
+                .body("content", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Step("Verify pagination metadata")
+    public void verifyPaginationMetadata() {
+        SerenityRest.then()
+                .body("page", org.hamcrest.Matchers.notNullValue())
+                .body("size", org.hamcrest.Matchers.notNullValue())
+                .body("totalPages", org.hamcrest.Matchers.notNullValue())
+                .body("totalElements", org.hamcrest.Matchers.notNullValue());
     }
 }
