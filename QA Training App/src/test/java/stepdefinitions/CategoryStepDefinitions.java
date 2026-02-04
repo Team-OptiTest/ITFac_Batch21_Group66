@@ -17,9 +17,6 @@ public class CategoryStepDefinitions {
     @Steps
     AuthenticationActions authenticationActions;
 
-    // ============================================
-    // GIVEN STEPS
-    // ============================================
 
     @Given("the user is authenticated as admin")
     public void theUserIsAuthenticatedAsAdmin() {
@@ -44,19 +41,14 @@ public class CategoryStepDefinitions {
 
     @Given("the user has an expired JWT token:")
     public void theUserHasAnExpiredJWTToken(String expiredToken) {
-        // Just store it - we won't actually use it
         System.out.println("Expired token provided: " + expiredToken.substring(0, 50) + "...");
-        // We'll just NOT authenticate - CategoryActions will use whatever token is set
     }
     @Given("a category with ID {int} exists")
     public void aCategoryWithIDExists(int categoryId) {
         System.out.println("Assuming category with ID " + categoryId + " exists for testing");
     }
 
-    // ============================================
-    // WHEN STEPS
-    // ============================================
-
+   
     @When("the admin attempts to create another category with name {string}")
     public void theAdminAttemptsToCreateAnotherCategoryWithName(String categoryName) {
         categoryActions.createCategory(categoryName);
@@ -99,32 +91,22 @@ public class CategoryStepDefinitions {
 
     @When("the user requests categories summary")
     public void theUserRequestsCategoriesSummary() {
-        // Just call the same method
         categoryActions.getCategoriesSummary();
     }
 
     @When("the user requests categories summary with invalid token")
     public void theUserRequestsCategoriesSummaryWithInvalidToken() {
-        // Same as above - just a different name
         categoryActions.getCategoriesSummary();
     }
     @When("a request is made to get category with ID {int} without JWT token")
     public void aRequestIsMadeToGetCategoryWithIDWithoutJWTToken(int categoryId) {
-    // Just call the existing method - if no token is set, it should fail
-    // Your CategoryActions.getCategoryById() should use getAuthToken() which might be null
         categoryActions.getCategoryById(categoryId);
     }
 
     @When("a request is made to get categories without JWT token")
     public void aRequestIsMadeToGetCategoriesWithoutJWTToken() {
-    // Call the summary endpoint without authenticating first
-    // Make sure NOT to call authenticationActions.authenticateAsAdmin() before this
         categoryActions.getCategoriesSummary();
     }
-
-    // ============================================
-    // THEN STEPS
-    // ============================================
 
     @Then("the API should return {int} OK")
     public void theAPIShouldReturnOK(int expectedStatusCode) {
