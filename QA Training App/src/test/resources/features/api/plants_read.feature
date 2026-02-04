@@ -50,3 +50,13 @@ Feature: Plant Read Operations
     Given the user is authenticated with ROLE_USER
     When I GET to "/api/plants/paged" with query params "page=0&size=1001&sort=name"
     Then the response status should be 400
+
+  @simple @API_Plant_Read_004 @pagination @default
+  Scenario: Get paginated plant list with default values
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "page=0&size=10&sort=name"
+    Then the response status should be 200
+    And the response should contain a content array
+    And the response page number should be 0
+    And the response page size should be 10
+    And the response should contain pagination metadata

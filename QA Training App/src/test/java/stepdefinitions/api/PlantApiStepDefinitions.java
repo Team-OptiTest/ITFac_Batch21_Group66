@@ -138,4 +138,8 @@ public void theResponsePageNumberShouldBe(int expectedPage) {
 public void theResponsePageSizeShouldBe(int expectedSize) {
     plantAction.verifyPageSize(expectedSize);
 }
+@Then("the response should contain pagination metadata")
+public void theResponseShouldContainPaginationMetadata() {
+    plantAction.verifyPaginationMetadata();
+}
 }
