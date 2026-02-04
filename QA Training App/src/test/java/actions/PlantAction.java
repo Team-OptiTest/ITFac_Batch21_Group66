@@ -149,7 +149,6 @@ public class PlantAction {
     public void getPlantsWithPagination(String endpoint, String queryParams) {
         var request = SerenityRest.given();
 
-        // Get token from Serenity session (set by AuthenticationActions)
         String sessionToken = Serenity.sessionVariableCalled("authToken");
         
         if (sessionToken != null) {
@@ -159,7 +158,6 @@ public class PlantAction {
         } else if (username != null && password != null) {
             request.auth().preemptive().basic(username, password);
         }
-        // No authentication added if none of the above
 
         if (queryParams != null && !queryParams.isEmpty()) {
             String[] pairs = queryParams.split("&");
@@ -175,7 +173,6 @@ public class PlantAction {
                 .get(baseUrl + endpoint);
     }
 
-    // Also update the other methods similarly:
     @Step("GET request to {string}")
     public void getRequest(String endpoint) {
         var request = SerenityRest.given();
@@ -263,4 +260,65 @@ public void verifyPaginationMetadata() {
             .body("size", org.hamcrest.Matchers.notNullValue())
             .body("number", org.hamcrest.Matchers.notNullValue());
 }
+@Step("Update plant at {0} with data {1}")
+    public void updatePlant(String endpoint, Map<String, Object> plantData) {
+        var request = SerenityRest.given()
+                .contentType(ContentType.JSON);
+
+        String sessionToken = Serenity.sessionVariableCalled("authToken");
+        
+        if (sessionToken != null) {
+            request.header("Authorization", "Bearer " + sessionToken);
+        } else if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else if (username != null && password != null) {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        request.body(plantData);
+        lastResponse = request.when()
+                .put(baseUrl + endpoint);
+    }
+    @Step("Update plant price at {0} with data {1}")
+    public void updatePlantPrice(String endpoint, Map<String, Object> updateData) {
+        var request = SerenityRest.given();
+
+        String sessionToken = Serenity.sessionVariableCalled("authToken");
+        
+        if (sessionToken != null) {
+            request.header("Authorization", "Bearer " + sessionToken);
+        } else if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else if (username != null && password != null) {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        request.contentType(ContentType.JSON)
+               .body(updateData);
+               
+        lastResponse = request.when()
+                .put(baseUrl + endpoint);
+    }
+    @Step("Verify error message contains {0}")
+    public void verifyErrorMessage(String expectedMessage) {
+        if (lastResponse != null) {
+            String messageField = lastResponse.jsonPath().getString("message");
+            String errorField = lastResponse.jsonPath().getString("error");
+
+            boolean messageContains = messageField != null && messageField.toLowerCase().contains(expectedMessage.toLowerCase());
+            boolean errorContains = errorField != null && errorField.toLowerCase().contains(expectedMessage.toLowerCase());
+
+            if (!messageContains && !errorContains) {
+                throw new AssertionError("Expected error message containing '" + expectedMessage +
+                        "' but got message: '" + messageField + "' and error: '" + errorField + "'");
+            }
+        }
+    }
+
+    @Step("Clear authentication")
+    public void clearAuthentication() {
+        this.token = null;
+        this.username = null;
+        this.password = null;
+    }
 }
