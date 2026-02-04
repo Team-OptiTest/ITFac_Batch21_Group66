@@ -6,6 +6,7 @@ import java.util.Map;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
+import net.serenitybdd.core.Serenity;
 import net.serenitybdd.rest.SerenityRest;
 
 public class PlantAction {
@@ -107,29 +108,58 @@ public class PlantAction {
                 .get(baseUrl + "/api/plants/" + id);
     }
 
-    @Step("GET request to {string}")
-    public void getRequest(String endpoint) {
-        var request = SerenityRest.given();
+    // @Step("GET request to {string}")
+    // public void getRequest(String endpoint) {
+    //     var request = SerenityRest.given();
 
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        } else {
-            request.auth().preemptive().basic(username, password);
-        }
+    //     if (token != null) {
+    //         request.header("Authorization", "Bearer " + token);
+    //     } else {
+    //         request.auth().preemptive().basic(username, password);
+    //     }
 
-        lastResponse = request.when()
-                .get(baseUrl + endpoint);
-    }
+    //     lastResponse = request.when()
+    //             .get(baseUrl + endpoint);
+    // }
 
-    @Step("GET request to {string} with query params {string}")
+    // @Step("GET request to {string} with query params {string}")
+    // public void getPlantsWithPagination(String endpoint, String queryParams) {
+    //     var request = SerenityRest.given();
+
+    //     if (token != null) {
+    //         request.header("Authorization", "Bearer " + token);
+    //     } else {
+    //         request.auth().preemptive().basic(username, password);
+    //     }
+
+    //     if (queryParams != null && !queryParams.isEmpty()) {
+    //         String[] pairs = queryParams.split("&");
+    //         for (String pair : pairs) {
+    //             String[] keyValue = pair.split("=");
+    //             if (keyValue.length == 2) {
+    //                 request.queryParam(keyValue[0], keyValue[1]);
+    //             }
+    //         }
+    //     }
+
+    //     lastResponse = request.when()
+    //             .get(baseUrl + endpoint);
+    // }
+@Step("GET request to {string} with query params {string}")
     public void getPlantsWithPagination(String endpoint, String queryParams) {
         var request = SerenityRest.given();
 
-        if (token != null) {
+        // Get token from Serenity session (set by AuthenticationActions)
+        String sessionToken = Serenity.sessionVariableCalled("authToken");
+        
+        if (sessionToken != null) {
+            request.header("Authorization", "Bearer " + sessionToken);
+        } else if (token != null) {
             request.header("Authorization", "Bearer " + token);
-        } else {
+        } else if (username != null && password != null) {
             request.auth().preemptive().basic(username, password);
         }
+        // No authentication added if none of the above
 
         if (queryParams != null && !queryParams.isEmpty()) {
             String[] pairs = queryParams.split("&");
@@ -145,6 +175,24 @@ public class PlantAction {
                 .get(baseUrl + endpoint);
     }
 
+    // Also update the other methods similarly:
+    @Step("GET request to {string}")
+    public void getRequest(String endpoint) {
+        var request = SerenityRest.given();
+
+        String sessionToken = Serenity.sessionVariableCalled("authToken");
+        
+        if (sessionToken != null) {
+            request.header("Authorization", "Bearer " + sessionToken);
+        } else if (token != null) {
+            request.header("Authorization", "Bearer " + token);
+        } else if (username != null && password != null) {
+            request.auth().preemptive().basic(username, password);
+        }
+
+        lastResponse = request.when()
+                .get(baseUrl + endpoint);
+    }
     public int getLastCreatedPlantId() {
         return lastCreatedPlantId;
     }

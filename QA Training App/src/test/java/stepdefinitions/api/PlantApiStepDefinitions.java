@@ -14,6 +14,8 @@ public class PlantApiStepDefinitions {
 
     @Steps
     PlantAction plantAction;
+    @Steps
+    actions.AuthenticationActions authenticationActions;
 
     private EnvironmentVariables environmentVariables;
 
@@ -43,6 +45,10 @@ public class PlantApiStepDefinitions {
 public void theUserIsAuthenticatedWithROLE_USER() {
     aRegularUserIsAuthenticated(); 
     }
+    @Given("the user has an invalid JWT token")
+public void theUserHasAnInvalidJWTToken() {
+    authenticationActions.setInvalidJWTToken();
+}
 
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
@@ -141,5 +147,9 @@ public void theResponsePageSizeShouldBe(int expectedSize) {
 @Then("the response should contain pagination metadata")
 public void theResponseShouldContainPaginationMetadata() {
     plantAction.verifyPaginationMetadata();
+}
+@Then("the response status should be {int} Unauthorized")
+public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
+    plantAction.verifyStatusCode(expectedStatusCode);
 }
 }
