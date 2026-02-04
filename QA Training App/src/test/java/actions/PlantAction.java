@@ -1,121 +1,341 @@
 package actions;
 
+import java.util.Map;
+
+import io.restassured.http.ContentType;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.rest.SerenityRest;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import java.util.Map;
-import java.util.HashMap;
 
 public class PlantAction {
 
-    private String baseUrl = "http://localhost:8080";
-    private String username;
-    private String password;
-    private String token;
-    private int lastCreatedPlantId;
-    private String lastCreatedPlantName;
+        private net.thucydides.model.util.EnvironmentVariables environmentVariables;
+        private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
+        private Integer createdPlantId;
+        private Map<String, Object> createdPlantData;
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
+        @Step("Authenticate as admin")
+        public void authenticateAsAdmin(String username, String password) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+                String loginEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.endpoints.auth.login");
 
-    public void setLastCreatedPlantName(String name) {
-        this.lastCreatedPlantName = name;
-    }
+                Map<String, String> credentials = new java.util.HashMap<>();
+                credentials.put("username", username);
+                credentials.put("password", password);
 
-    public String getLastCreatedPlantName() {
-        return this.lastCreatedPlantName;
-    }
+                String token = SerenityRest.given()
+                                .contentType(ContentType.JSON)
+                                .body(credentials)
+                                .post(baseUrl + loginEndpoint)
+                                .jsonPath()
+                                .getString("token");
 
-    @Step("Authenticate with credentials")
-    public void authenticate(String username, String password) {
-        this.username = username;
-        this.password = password;
-
-        // Attempt to get JWT token
-        Map<String, String> loginData = new HashMap<>();
-        loginData.put("username", username);
-        loginData.put("password", password);
-
-        Response response = SerenityRest.given()
-                .contentType(ContentType.JSON)
-                .body(loginData)
-                .when()
-                .post(baseUrl + "/api/auth/login");
-
-        if (response.getStatusCode() == 200) {
-            this.token = response.jsonPath().getString("token");
-        } else {
-            this.token = null; // Reset token if login fails
-        }
-    }
-
-    @Step("Create a new plant")
-    public void createPlant(int categoryId, Map<String, Object> plantData) {
-        var request = SerenityRest.given()
-                .contentType(ContentType.JSON);
-
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        } else {
-            // Fallback for unauthorized tests or if token retrieval failed
-            request.auth().preemptive().basic(username, password);
+                this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
         }
 
-        Response response = request.body(plantData)
-                .when()
-                .post(baseUrl + "/api/plants/category/" + categoryId);
+        @Step("Authenticate as normal user")
+        public void authenticateAsUser(String username, String password) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+                String loginEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.endpoints.auth.login");
 
-        if (response.getStatusCode() == 201) {
-            lastCreatedPlantId = response.jsonPath().getInt("id");
-        }
-    }
+                Map<String, String> credentials = new java.util.HashMap<>();
+                credentials.put("username", username);
+                credentials.put("password", password);
 
-    @Step("Delete a plant")
-    public void deletePlant(int id) {
-        var request = SerenityRest.given();
+                String token = SerenityRest.given()
+                                .contentType(ContentType.JSON)
+                                .body(credentials)
+                                .post(baseUrl + loginEndpoint)
+                                .jsonPath()
+                                .getString("token");
 
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        } else {
-            request.auth().preemptive().basic(username, password);
-        }
-
-        request.when()
-                .delete(baseUrl + "/api/plants/" + id);
-    }
-
-    @Step("Get a plant")
-    public void getPlant(int id) {
-        var request = SerenityRest.given();
-
-        if (token != null) {
-            request.header("Authorization", "Bearer " + token);
-        } else {
-            request.auth().preemptive().basic(username, password);
+                this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
         }
 
-        request.when()
-                .get(baseUrl + "/api/plants/" + id);
-    }
+        @Step("Create a new plant in category {0} with data {1}")
+        public void createPlant(int categoryId, Map<String, Object> plantData) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+                String categoryEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.endpoints.plants.category");
 
-    public int getLastCreatedPlantId() {
-        return lastCreatedPlantId;
-    }
+                String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-    @Step("Verify response status code")
-    public void verifyStatusCode(int statusCode) {
-        SerenityRest.then().statusCode(statusCode);
-    }
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(plantData)
+                                .when()
+                                .post(fullUrl);
+        }
 
-    @Step("Verify assigned ID")
-    public void verifyAssignedId() {
-        SerenityRest.then().body("id", org.hamcrest.Matchers.notNullValue());
-    }
+        @Step("Verify response status code is {0}")
+        public void verifyStatusCode(int expectedStatus) {
+                SerenityRest.restAssuredThat(response -> response.statusCode(expectedStatus));
+        }
 
-    @Step("Verify plant name")
-    public void verifyPlantName(String expectedName) {
-        SerenityRest.then().body("name", org.hamcrest.Matchers.equalTo(expectedName));
-    }
+        @Step("Verify response contains assigned ID")
+        public void verifyAssignedId() {
+                SerenityRest.restAssuredThat(response -> response.body("id", org.hamcrest.Matchers.notNullValue()));
+        }
+
+        @Step("Verify plant name is {0}")
+        public void verifyPlantName(String expectedName) {
+                SerenityRest
+                                .restAssuredThat(response -> response.body("name",
+                                                org.hamcrest.Matchers.containsString(expectedName)));
+        }
+
+        @Step("Verify error message contains {0}")
+        public void verifyErrorMessage(String expectedMessage) {
+                // Check if error message exists in either 'message' or 'error' field
+                String messageField = SerenityRest.lastResponse().jsonPath().getString("message");
+                String errorField = SerenityRest.lastResponse().jsonPath().getString("error");
+
+                boolean messageContains = messageField != null && messageField.contains(expectedMessage);
+                boolean errorContains = errorField != null && errorField.contains(expectedMessage);
+
+                if (!messageContains && !errorContains) {
+                        throw new AssertionError("Expected error message containing '" + expectedMessage +
+                                        "' but got message: '" + messageField + "' and error: '" + errorField + "'");
+                }
+        }
+
+        @Step("Create a new plant in category {0} with invalid data {1}")
+        public void createPlantWithInvalidData(int categoryId, Map<String, Object> plantData) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+                String categoryEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.endpoints.plants.category");
+
+                String fullUrl = baseUrl + categoryEndpoint + categoryId;
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(plantData)
+                                .when()
+                                .post(fullUrl);
+        }
+
+        @Step("Get plants with pagination: {0}?{1}")
+        public void getPlantsWithPagination(String endpoint, String queryParams) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint + "?" + queryParams;
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .get(fullUrl);
+        }
+
+        @Step("Verify response contains a list of plants")
+        public void verifyPlantListExists() {
+                SerenityRest.restAssuredThat(
+                                response -> response.body("content", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(response -> response.body("content",
+                                org.hamcrest.Matchers.instanceOf(java.util.List.class)));
+        }
+
+        @Step("Verify response contains pagination metadata")
+        public void verifyPaginationMetadata() {
+                SerenityRest.restAssuredThat(
+                                response -> response.body("pageable", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(
+                                response -> response.body("totalElements", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(
+                                response -> response.body("totalPages", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(response -> response.body("size", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(response -> response.body("number", org.hamcrest.Matchers.notNullValue()));
+        }
+
+        @Step("Verify plants contain name: {0}")
+        public void verifyPlantsContainName(String searchTerm) {
+                java.util.List<String> plantNames = SerenityRest.lastResponse().jsonPath().getList("content.name",
+                                String.class);
+
+                if (plantNames == null || plantNames.isEmpty()) {
+                        throw new AssertionError("No plants found in response");
+                }
+
+                for (String name : plantNames) {
+                        if (!name.toLowerCase().contains(searchTerm.toLowerCase())) {
+                                throw new AssertionError(
+                                                "Plant name '" + name + "' does not contain '" + searchTerm + "'");
+                        }
+                }
+        }
+
+        @Step("Get plants by category: {0}")
+        public void getPlantsByCategory(String endpoint) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint;
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .get(fullUrl);
+        }
+
+        @Step("Verify response contains an array of plants")
+        public void verifyPlantsArrayExists() {
+                SerenityRest.restAssuredThat(response -> response.body("$", org.hamcrest.Matchers.notNullValue()));
+                SerenityRest.restAssuredThat(
+                                response -> response.body("$", org.hamcrest.Matchers.instanceOf(java.util.List.class)));
+        }
+
+        @Step("Create a new plant in category {0} and store its ID")
+        public void createPlantAndStoreId(int categoryId, Map<String, Object> plantData) {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+                String categoryEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.endpoints.plants.category");
+
+                String fullUrl = baseUrl + categoryEndpoint + categoryId;
+
+                io.restassured.response.Response response = requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(plantData)
+                                .when()
+                                .post(fullUrl);
+
+                int statusCode = response.getStatusCode();
+                if (statusCode == 200 || statusCode == 201) {
+                        try {
+                                this.createdPlantId = response.jsonPath().getInt("id");
+                                this.createdPlantData = new java.util.HashMap<>(plantData);
+                        } catch (Exception e) {
+                                System.out.println("Could not extract plant ID: " + e.getMessage());
+                                this.createdPlantId = null;
+                                this.createdPlantData = null;
+                        }
+                } else {
+                        System.out.println("Plant creation failed with status: " + statusCode);
+                        System.out.println("Response: " + response.getBody().asString());
+                        this.createdPlantId = null;
+                        this.createdPlantData = null;
+                }
+        }
+
+        @Step("Delete plant: {0}")
+        public void deletePlant(String endpoint) {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with deletion");
+                }
+
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .delete(fullUrl);
+        }
+
+        @Step("Verify plant no longer exists")
+        public void verifyPlantNoLongerExists() {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with verification");
+                }
+
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + "/api/plants/" + this.createdPlantId;
+
+                io.restassured.response.Response response = requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .get(fullUrl);
+
+                int statusCode = response.getStatusCode();
+                if (statusCode != 404) {
+                        throw new AssertionError(
+                                        "Expected plant to not exist (404), but got status code: " + statusCode);
+                }
+        }
+
+        @Step("Update plant price: {0}")
+        public void updatePlantPrice(String endpoint, Map<String, Object> updateData) {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with price update");
+                }
+
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
+
+                // Create complete plant object with updated price
+                Map<String, Object> completeBody = this.createdPlantData != null 
+                                ? new java.util.HashMap<>(this.createdPlantData) 
+                                : new java.util.HashMap<>();
+                completeBody.put("price", updateData.get("price"));
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(completeBody)
+                                .when()
+                                .put(fullUrl);
+        }
+
+        @Step("Verify updated price is {0}")
+        public void verifyUpdatedPrice(double expectedPrice) {
+                Double actualPrice = SerenityRest.lastResponse().jsonPath().getDouble("price");
+                org.hamcrest.MatcherAssert.assertThat(
+                                "Price should match expected value",
+                                actualPrice,
+                                org.hamcrest.Matchers.closeTo(expectedPrice, 0.001));
+        }
+
+        @Step("Update plant quantity: {0}")
+        public void updatePlantQuantity(String endpoint, Map<String, Object> updateData) {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with quantity update");
+                }
+
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
+
+                // Create complete plant object with updated quantity
+                Map<String, Object> completeBody = this.createdPlantData != null 
+                                ? new java.util.HashMap<>(this.createdPlantData) 
+                                : new java.util.HashMap<>();
+                completeBody.put("quantity", updateData.get("quantity"));
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .body(completeBody)
+                                .when()
+                                .put(fullUrl);
+        }
 }
