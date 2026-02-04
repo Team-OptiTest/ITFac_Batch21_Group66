@@ -1,9 +1,10 @@
 package actions;
 
+import java.util.Map;
+
+import io.restassured.http.ContentType;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.rest.SerenityRest;
-import io.restassured.http.ContentType;
-import java.util.Map;
 
 public class PlantAction {
 
@@ -215,12 +216,31 @@ public class PlantAction {
                                 .when()
                                 .post(fullUrl);
 
-                this.createdPlantId = response.jsonPath().getInt("id");
-                this.createdPlantData = new java.util.HashMap<>(plantData);
+                int statusCode = response.getStatusCode();
+                if (statusCode == 200 || statusCode == 201) {
+                        try {
+                                this.createdPlantId = response.jsonPath().getInt("id");
+                                this.createdPlantData = new java.util.HashMap<>(plantData);
+                        } catch (Exception e) {
+                                System.out.println("Could not extract plant ID: " + e.getMessage());
+                                this.createdPlantId = null;
+                                this.createdPlantData = null;
+                        }
+                } else {
+                        System.out.println("Plant creation failed with status: " + statusCode);
+                        System.out.println("Response: " + response.getBody().asString());
+                        this.createdPlantId = null;
+                        this.createdPlantData = null;
+                }
         }
 
         @Step("Delete plant: {0}")
         public void deletePlant(String endpoint) {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with deletion");
+                }
+
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
                                 .from(environmentVariables)
                                 .getProperty("api.base.url");
@@ -235,6 +255,11 @@ public class PlantAction {
 
         @Step("Verify plant no longer exists")
         public void verifyPlantNoLongerExists() {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with verification");
+                }
+
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
                                 .from(environmentVariables)
                                 .getProperty("api.base.url");
@@ -255,6 +280,11 @@ public class PlantAction {
 
         @Step("Update plant price: {0}")
         public void updatePlantPrice(String endpoint, Map<String, Object> updateData) {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with price update");
+                }
+
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
                                 .from(environmentVariables)
                                 .getProperty("api.base.url");
@@ -262,7 +292,9 @@ public class PlantAction {
                 String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
                 // Create complete plant object with updated price
-                Map<String, Object> completeBody = new java.util.HashMap<>(this.createdPlantData);
+                Map<String, Object> completeBody = this.createdPlantData != null 
+                                ? new java.util.HashMap<>(this.createdPlantData) 
+                                : new java.util.HashMap<>();
                 completeBody.put("price", updateData.get("price"));
 
                 requestSpec
@@ -274,12 +306,20 @@ public class PlantAction {
 
         @Step("Verify updated price is {0}")
         public void verifyUpdatedPrice(double expectedPrice) {
-                SerenityRest.restAssuredThat(response -> response.body("price",
-                                org.hamcrest.Matchers.equalTo((float) expectedPrice)));
+                Double actualPrice = SerenityRest.lastResponse().jsonPath().getDouble("price");
+                org.hamcrest.MatcherAssert.assertThat(
+                                "Price should match expected value",
+                                actualPrice,
+                                org.hamcrest.Matchers.closeTo(expectedPrice, 0.001));
         }
 
         @Step("Update plant quantity: {0}")
         public void updatePlantQuantity(String endpoint, Map<String, Object> updateData) {
+                if (this.createdPlantId == null) {
+                        throw new IllegalStateException(
+                                        "createdPlantId is null — plant creation failed; cannot proceed with quantity update");
+                }
+
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
                                 .from(environmentVariables)
                                 .getProperty("api.base.url");
@@ -287,7 +327,9 @@ public class PlantAction {
                 String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
                 // Create complete plant object with updated quantity
-                Map<String, Object> completeBody = new java.util.HashMap<>(this.createdPlantData);
+                Map<String, Object> completeBody = this.createdPlantData != null 
+                                ? new java.util.HashMap<>(this.createdPlantData) 
+                                : new java.util.HashMap<>();
                 completeBody.put("quantity", updateData.get("quantity"));
 
                 requestSpec
