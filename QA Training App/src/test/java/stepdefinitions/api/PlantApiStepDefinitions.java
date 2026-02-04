@@ -40,12 +40,8 @@ public class PlantApiStepDefinitions {
         // Implementation for checking category existence if needed
     }
     @Given("the user is authenticated with ROLE_USER")
-    public void theUserIsAuthenticatedWithROLE_USER() {
-        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.username");
-        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.password");
-        plantAction.authenticateAsUser(username, password);
+public void theUserIsAuthenticatedWithROLE_USER() {
+    aRegularUserIsAuthenticated(); 
     }
 
     @When("I POST to {string} with following data:")
@@ -91,6 +87,10 @@ public class PlantApiStepDefinitions {
         plantAction.deletePlant(id);
     }
 
+@When("I GET to {string} with query params {string}")
+public void iGETToWithQueryParams(String endpoint, String queryParams) {
+    plantAction.getPlantsWithPagination(endpoint, queryParams);
+}
     @Then("the response status should be {int}")
     public void theResponseStatusShouldBe(int statusCode) {
         plantAction.verifyStatusCode(statusCode);
@@ -123,5 +123,19 @@ public void iGETTo(String endpoint) {
 @Then("the response should contain inventory statistics")
 public void theResponseShouldContainInventoryStatistics() {
     plantAction.verifyInventoryStatistics();
+}
+@Then("the response should contain a content array")
+public void theResponseShouldContainAContentArray() {
+    plantAction.verifyResponseHasContentArray();
+}
+
+@Then("the response page number should be {int}")
+public void theResponsePageNumberShouldBe(int expectedPage) {
+    plantAction.verifyPageNumber(expectedPage);
+}
+
+@Then("the response page size should be {int}")
+public void theResponsePageSizeShouldBe(int expectedSize) {
+    plantAction.verifyPageSize(expectedSize);
 }
 }

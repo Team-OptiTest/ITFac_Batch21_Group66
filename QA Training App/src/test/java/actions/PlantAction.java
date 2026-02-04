@@ -179,12 +179,32 @@ public class PlantAction {
                 .body("content", org.hamcrest.Matchers.notNullValue());
     }
 
-    @Step("Verify pagination metadata")
-    public void verifyPaginationMetadata() {
-        SerenityRest.then()
-                .body("page", org.hamcrest.Matchers.notNullValue())
-                .body("size", org.hamcrest.Matchers.notNullValue())
-                .body("totalPages", org.hamcrest.Matchers.notNullValue())
-                .body("totalElements", org.hamcrest.Matchers.notNullValue());
-    }
+    @Step("Verify response has content array")
+public void verifyResponseHasContentArray() {
+    SerenityRest.then()
+            .body("content", org.hamcrest.Matchers.notNullValue());
+}
+
+@Step("Verify pagination info for page {int} size {int}")
+public void verifyPaginationInfoForPageSize(int expectedPage, int expectedSize) {
+    SerenityRest.then()
+            .body("number", org.hamcrest.Matchers.equalTo(expectedPage))
+            .body("size", org.hamcrest.Matchers.equalTo(expectedSize));
+}
+
+@Step("Verify response is not empty")
+public void verifyResponseIsNotEmpty() {
+    SerenityRest.then()
+            .body("empty", org.hamcrest.Matchers.equalTo(false));
+}
+@Step("Verify page number is {0}")
+public void verifyPageNumber(int expectedPage) {
+    SerenityRest.then().body("number", org.hamcrest.Matchers.equalTo(expectedPage));
+}
+
+@Step("Verify page size is {0}")
+public void verifyPageSize(int expectedSize) {
+    SerenityRest.then().body("size", org.hamcrest.Matchers.equalTo(expectedSize));
+}
+
 }
