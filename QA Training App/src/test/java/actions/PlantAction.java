@@ -220,16 +220,18 @@ public class PlantAction {
                 if (statusCode == 200 || statusCode == 201) {
                         try {
                                 this.createdPlantId = response.jsonPath().getInt("id");
+                                this.createdPlantData = new java.util.HashMap<>(plantData);
                         } catch (Exception e) {
                                 System.out.println("Could not extract plant ID: " + e.getMessage());
                                 this.createdPlantId = null;
+                                this.createdPlantData = null;
                         }
                 } else {
                         System.out.println("Plant creation failed with status: " + statusCode);
                         System.out.println("Response: " + response.getBody().asString());
                         this.createdPlantId = null;
+                        this.createdPlantData = null;
                 }
-                this.createdPlantData = new java.util.HashMap<>(plantData);
         }
 
         @Step("Delete plant: {0}")
