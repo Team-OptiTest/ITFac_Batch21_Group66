@@ -72,6 +72,10 @@ public class CategoryActions {
 
     @Step("Get last created category ID")
     public Integer getLastCreatedCategoryId() {
+        Integer sessionId = Serenity.sessionVariableCalled("lastCreatedCategoryId");
+        if (sessionId != null) {
+            return sessionId;
+        }
         return lastCreatedCategoryId;
     }
     
@@ -102,8 +106,10 @@ public class CategoryActions {
         if (lastResponse.getStatusCode() == 201 || lastResponse.getStatusCode() == 200) {
             try {
                 lastCreatedCategoryId = lastResponse.jsonPath().getInt("id");
+                Serenity.setSessionVariable("lastCreatedCategoryId").to(lastCreatedCategoryId);
             } catch (Exception e) {
                 System.out.println("Could not extract category ID: " + e.getMessage());
+                lastCreatedCategoryId = null;
             }
         } else {
             // Request failed - don't try to extract ID
@@ -121,6 +127,13 @@ public class CategoryActions {
 
     @Step("Delete category with ID: {0}")
     public void deleteCategoryById(Integer categoryId) {
+        if (categoryId == null) {
+            System.out.println("=== DELETE CATEGORY DEBUG ===");
+            System.out.println("Category ID is NULL - cannot delete");
+            System.out.println("=============================");
+            // Create a mock failed response by attempting to delete with invalid ID
+            categoryId = -1;
+        }
 
         String token = getAuthToken();
         String deleteUrl = getBaseUrl() + "/api/categories/" + categoryId;
@@ -206,6 +219,38 @@ public void getCategoriesSummary() {
             .header("Authorization", "Bearer " + token)
             .when()
             .get(getBaseUrl() + "/api/categories");
+
+        System.out.println("Status Code: " + lastResponse.getStatusCode());
+        System.out.println("Response: " + lastResponse.getBody().asString());
+    }
+
+    @Step("Update category with ID: {0} and name: {1}")
+    public void updateCategory(Integer categoryId, String updatedName) {
+        if (categoryId == null) {
+            System.out.println("=== UPDATE CATEGORY DEBUG ===");
+            System.out.println("Category ID is NULL - cannot update");
+            System.out.println("=============================");
+            // Use invalid ID to trigger expected failure
+            categoryId = -1;
+        }
+
+        String token = getAuthToken();
+        String updateUrl = getBaseUrl() + "/api/categories/" + categoryId;
+        String requestBody = String.format("{\"name\":\"%s\"}", updatedName);
+        
+        System.out.println("=== UPDATE CATEGORY DEBUG ===");
+        System.out.println("Category ID: " + categoryId);
+        System.out.println("Updated Name: " + updatedName);
+        System.out.println("Update URL: " + updateUrl);
+        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
+        System.out.println("=============================");
+
+        lastResponse = SerenityRest.given()
+            .header("Authorization", "Bearer " + token)
+            .header("Content-Type", "application/json")
+            .body(requestBody)
+            .when()
+            .put(updateUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());

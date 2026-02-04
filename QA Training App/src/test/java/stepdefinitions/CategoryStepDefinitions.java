@@ -33,6 +33,14 @@ public class CategoryStepDefinitions {
     // If creation fails (maybe duplicate), that's OK for our test setup
     System.out.println("Setup: Category '" + categoryName + "' should exist now");
 }
+
+    @Given("a category exists with name {string}")
+    public void aCategoryExistsWithName(String categoryName) {
+        categoryActions.createCategory(categoryName);
+        
+        // If creation fails (maybe duplicate), that's OK for our test setup
+        System.out.println("Setup: Category '" + categoryName + "' should exist now");
+    }
 @When("the admin attempts to create another category with name {string}")
 public void theAdminAttemptsToCreateAnotherCategoryWithName(String categoryName) {
     // Try to create the same category again
