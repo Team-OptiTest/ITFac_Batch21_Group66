@@ -314,4 +314,29 @@ public class CategoryActions {
         System.out.println("Response: " + lastResponse.getBody().asString());
     }
 
+    @Step("Get main categories (categories without parent)")
+    public void getMainCategories() {
+        String token = getAuthToken();
+        String mainCategoriesUrl = getBaseUrl() + "/api/categories/main";
+
+        lastResponse = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(mainCategoriesUrl);
+
+    }
+
+    @Step("Verify response contains a list of main categories")
+    public boolean responseContainsMainCategoriesList() {
+        if (lastResponse == null) {
+            return false;
+        }
+        try {
+            List<?> categories = lastResponse.jsonPath().getList("$");
+            return categories != null && !categories.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
