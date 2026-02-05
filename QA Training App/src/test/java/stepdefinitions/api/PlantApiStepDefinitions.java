@@ -29,6 +29,13 @@ public class PlantApiStepDefinitions {
         authenticationActions.authenticateUser();
     }
 
+    @Given("a valid category with ID {int} exists")
+    public void aValidCategoryWithIDExists(Integer categoryId) {
+        // This is a precondition step - we assume the category exists in the test
+        // environment
+        // No action needed as this is just documenting the test precondition
+    }
+
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> data = dataTable.asMaps().get(0);
