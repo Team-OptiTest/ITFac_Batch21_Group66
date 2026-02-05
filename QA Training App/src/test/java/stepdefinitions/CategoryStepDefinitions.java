@@ -263,4 +263,16 @@ public class CategoryStepDefinitions {
                 .as("API should return " + expectedStatusCode + " status code")
                 .isEqualTo(expectedStatusCode);
     }
+
+    @When("the user requests the main categories")
+    public void theUserRequestsTheMainCategories() {
+        categoryActions.getMainCategories();
+    }
+
+    @Then("the response should contain a list of main categories")
+    public void theResponseShouldContainAListOfMainCategories() {
+        assertThat(categoryActions.responseContainsMainCategoriesList())
+                .as("Response should contain a list of main categories")
+                .isTrue();
+    }
 }
