@@ -270,6 +270,24 @@ public class CategoryActions {
         System.out.println("Response: " + lastResponse.getBody().asString());
     }
 
+    @Step("Create category with non-existent parent ID")
+    public void createCategoryWithNonExistentParentId() {
+        fetchExistingCategoryIds();
+        long nonExistentParentId = generateNonExistentId();
+
+        String token = getAuthToken();
+        String createUrl = getBaseUrl() + "/api/categories";
+        String requestBody = String.format("{\"name\":\"TestCategory\",\"parentId\":%d}", nonExistentParentId);
+
+        lastResponse = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(requestBody)
+                .when()
+                .post(createUrl);
+
+    }
+
     @Step("Search categories with name: {0} and parentId: {1}")
     public void searchCategories(String categoryName, String parentId) {
         String token = getAuthToken();
