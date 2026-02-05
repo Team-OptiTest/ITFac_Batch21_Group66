@@ -15,12 +15,12 @@ public class CategoryActions {
     private Response lastResponse;
     private Integer lastCreatedCategoryId;
     private List<Integer> existingCategoryIds;
-    
+
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
-    
+
     private String getBaseUrl() {
         return EnvironmentSpecificConfiguration.from(environmentVariables)
-            .getProperty("api.base.url");
+                .getProperty("api.base.url");
     }
 
     /**
@@ -33,10 +33,10 @@ public class CategoryActions {
     @Step("Retrieve existing category IDs from the system")
     public void fetchExistingCategoryIds() {
         Response response = SerenityRest.given()
-            .header("Authorization", "Bearer " + getAuthToken())
-            .when()
-            .get(getBaseUrl() + "/api/categories");
-        
+                .header("Authorization", "Bearer " + getAuthToken())
+                .when()
+                .get(getBaseUrl() + "/api/categories");
+
         if (response.getStatusCode() == 200) {
             existingCategoryIds = response.jsonPath().getList("id", Integer.class);
         }
@@ -44,20 +44,24 @@ public class CategoryActions {
 
     @Step("Send GET request for category with non-existent ID")
     public void getCategoryWithNonExistentId() {
+        fetchExistingCategoryIds();
         long nonExistentId = generateNonExistentId();
-        
+        String token = getAuthToken();
+        String viewUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
+
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + getAuthToken())
-            .when()
-            .get(getBaseUrl() + "/api/categories/" + nonExistentId);
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(viewUrl);
+
     }
 
     @Step("Send GET request for category with ID: {0}")
     public void getCategoryById(long categoryId) {
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + getAuthToken())
-            .when()
-            .get(getBaseUrl() + "/api/categories/" + categoryId);
+                .header("Authorization", "Bearer " + getAuthToken())
+                .when()
+                .get(getBaseUrl() + "/api/categories/" + categoryId);
     }
 
     @Step("Get response status code")
@@ -78,7 +82,7 @@ public class CategoryActions {
         }
         return lastCreatedCategoryId;
     }
-    
+
     private long generateNonExistentId() {
         long nonExistentId = 999999L;
         if (existingCategoryIds != null && !existingCategoryIds.isEmpty()) {
@@ -94,14 +98,14 @@ public class CategoryActions {
     public void createCategory(String categoryName) {
         String requestBody = String.format("{\"name\":\"%s\"}", categoryName);
         String token = getAuthToken();
-        
+
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .header("Content-Type", "application/json")
-            .body(requestBody)
-            .when()
-            .post(getBaseUrl() + "/api/categories");
-        
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(requestBody)
+                .when()
+                .post(getBaseUrl() + "/api/categories");
+
         // Only try to extract ID if the request was successful
         if (lastResponse.getStatusCode() == 201 || lastResponse.getStatusCode() == 200) {
             try {
@@ -116,7 +120,7 @@ public class CategoryActions {
             lastCreatedCategoryId = null;
             System.out.println("Category creation failed with status: " + lastResponse.getStatusCode());
         }
-        
+
         System.out.println("=== CREATE CATEGORY RESULT ===");
         System.out.println("Input: " + categoryName);
         System.out.println("Used: " + categoryName);
@@ -137,7 +141,7 @@ public class CategoryActions {
 
         String token = getAuthToken();
         String deleteUrl = getBaseUrl() + "/api/categories/" + categoryId;
-        
+
         System.out.println("=== DELETE CATEGORY DEBUG ===");
         System.out.println("Category ID: " + categoryId);
         System.out.println("Delete URL: " + deleteUrl);
@@ -145,27 +149,28 @@ public class CategoryActions {
         System.out.println("=============================");
 
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .when()
-            .delete(deleteUrl);
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete(deleteUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
     }
+
     @Step("Get categories summary")
-public void getCategoriesSummary() {
-    lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + getAuthToken())
-            .get(getBaseUrl() + "/api/categories/summary");
-}
+    public void getCategoriesSummary() {
+        lastResponse = SerenityRest.given()
+                .header("Authorization", "Bearer " + getAuthToken())
+                .get(getBaseUrl() + "/api/categories/summary");
+    }
 
     @Step("Delete category with non-existent ID")
     public void deleteCategoryWithNonExistentId() {
         fetchExistingCategoryIds();
         long nonExistentId = generateNonExistentId();
-        
+
         String token = getAuthToken();
         String deleteUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
-        
+
         System.out.println("=== DELETE NON-EXISTENT CATEGORY DEBUG ===");
         System.out.println("Non-existent Category ID: " + nonExistentId);
         System.out.println("Delete URL: " + deleteUrl);
@@ -173,9 +178,9 @@ public void getCategoriesSummary() {
         System.out.println("=========================================");
 
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .when()
-            .delete(deleteUrl);
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete(deleteUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
@@ -185,11 +190,11 @@ public void getCategoriesSummary() {
     public void updateCategoryWithNonExistentId() {
         fetchExistingCategoryIds();
         long nonExistentId = generateNonExistentId();
-        
+
         String token = getAuthToken();
         String updateUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
         String requestBody = String.format("{\"name\":\"%s\"}", "UpdatedName");
-        
+
         System.out.println("=== UPDATE NON-EXISTENT CATEGORY DEBUG ===");
         System.out.println("Non-existent Category ID: " + nonExistentId);
         System.out.println("Update URL: " + updateUrl);
@@ -197,11 +202,11 @@ public void getCategoriesSummary() {
         System.out.println("=========================================");
 
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .header("Content-Type", "application/json")
-            .body(requestBody)
-            .when()
-            .put(updateUrl);
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(requestBody)
+                .when()
+                .put(updateUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
@@ -210,15 +215,15 @@ public void getCategoriesSummary() {
     @Step("Get category list")
     public void getCategoryList() {
         String token = getAuthToken();
-        
+
         System.out.println("=== GET CATEGORY LIST DEBUG ===");
         System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
         System.out.println("================================");
 
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .when()
-            .get(getBaseUrl() + "/api/categories");
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(getBaseUrl() + "/api/categories");
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
@@ -237,7 +242,7 @@ public void getCategoriesSummary() {
         String token = getAuthToken();
         String updateUrl = getBaseUrl() + "/api/categories/" + categoryId;
         String requestBody = String.format("{\"name\":\"%s\"}", updatedName);
-        
+
         System.out.println("=== UPDATE CATEGORY DEBUG ===");
         System.out.println("Category ID: " + categoryId);
         System.out.println("Updated Name: " + updatedName);
@@ -246,11 +251,11 @@ public void getCategoriesSummary() {
         System.out.println("=============================");
 
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .header("Content-Type", "application/json")
-            .body(requestBody)
-            .when()
-            .put(updateUrl);
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(requestBody)
+                .when()
+                .put(updateUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
@@ -259,7 +264,7 @@ public void getCategoriesSummary() {
     @Step("Search categories with name: {0} and parentId: {1}")
     public void searchCategories(String categoryName, String parentId) {
         String token = getAuthToken();
-        
+
         String searchUrl = getBaseUrl() + "/api/categories";
         if (categoryName != null || parentId != null) {
             searchUrl += "?";
@@ -272,7 +277,7 @@ public void getCategoriesSummary() {
                 searchUrl += "parentId=" + parentId;
             }
         }
-        
+
         System.out.println("=== SEARCH CATEGORIES DEBUG ===");
         System.out.println("Search URL: " + searchUrl);
         System.out.println("Category Name: " + categoryName);
@@ -281,11 +286,12 @@ public void getCategoriesSummary() {
         System.out.println("===============================");
 
         lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .when()
-            .get(searchUrl);
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(searchUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
     }
+
 }
