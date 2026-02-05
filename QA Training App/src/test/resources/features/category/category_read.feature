@@ -47,7 +47,7 @@ Feature: Category Read Operations
     When the admin filters categories by parent ID "1"
     Then the filtered categories should be retrieved successfully
 
-  @API @Category @API_Category_Read_007 @negative
+  @API @Category @API_Category_Read_007 @negative @215098G
   Scenario: Verify user receives 404 error when viewing non-existent category
     Given the user is authenticated as user
     When the user attempts to view a category with a non-existent ID
