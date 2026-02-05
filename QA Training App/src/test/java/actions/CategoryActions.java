@@ -69,6 +69,9 @@ public class CategoryActions {
 
     @Step("Get response status code")
     public int getLastResponseStatusCode() {
+        if (lastResponse == null) {
+            throw new IllegalStateException("No response available - request may not have been executed");
+        }
         return lastResponse.getStatusCode();
     }
 
