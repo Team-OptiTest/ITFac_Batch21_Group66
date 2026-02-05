@@ -71,6 +71,9 @@ public class CategoryActions {
 
     @Step("Get response body")
     public String getLastResponseBody() {
+        if (lastResponse == null) {
+            return null;
+        }
         return lastResponse.getBody().asString();
     }
 
