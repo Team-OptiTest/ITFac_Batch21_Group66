@@ -277,7 +277,7 @@ public class CategoryActions {
 
         String token = getAuthToken();
         String createUrl = getBaseUrl() + "/api/categories";
-        String requestBody = String.format("{\"name\":\"TestCategory\",\"parentId\":%d}", nonExistentParentId);
+        String requestBody = String.format("{\"name\":\"TestCateg\",\"parent\":%d}", nonExistentParentId);
 
         lastResponse = SerenityRest.given()
                 .header("Authorization", "Bearer " + token)
