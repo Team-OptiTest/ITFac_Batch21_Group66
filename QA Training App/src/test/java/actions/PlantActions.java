@@ -4,60 +4,17 @@ import java.util.Map;
 
 import io.restassured.http.ContentType;
 import net.serenitybdd.annotations.Step;
+import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
+import net.thucydides.model.environment.SystemEnvironmentVariables;
+import net.thucydides.model.util.EnvironmentVariables;
 
-public class PlantAction {
+public class PlantActions {
 
-        private net.thucydides.model.util.EnvironmentVariables environmentVariables;
         private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
         private Integer createdPlantId;
         private Map<String, Object> createdPlantData;
-
-        @Step("Authenticate as admin")
-        public void authenticateAsAdmin(String username, String password) {
-                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getProperty("api.base.url");
-                String loginEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getProperty("api.endpoints.auth.login");
-
-                Map<String, String> credentials = new java.util.HashMap<>();
-                credentials.put("username", username);
-                credentials.put("password", password);
-
-                String token = SerenityRest.given()
-                                .contentType(ContentType.JSON)
-                                .body(credentials)
-                                .post(baseUrl + loginEndpoint)
-                                .jsonPath()
-                                .getString("token");
-
-                this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
-        }
-
-        @Step("Authenticate as normal user")
-        public void authenticateAsUser(String username, String password) {
-                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getProperty("api.base.url");
-                String loginEndpoint = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getProperty("api.endpoints.auth.login");
-
-                Map<String, String> credentials = new java.util.HashMap<>();
-                credentials.put("username", username);
-                credentials.put("password", password);
-
-                String token = SerenityRest.given()
-                                .contentType(ContentType.JSON)
-                                .body(credentials)
-                                .post(baseUrl + loginEndpoint)
-                                .jsonPath()
-                                .getString("token");
-
-                this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
-        }
+        private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
 
         @Step("Create a new plant in category {0} with data {1}")
         public void createPlant(int categoryId, Map<String, Object> plantData) {
@@ -311,6 +268,40 @@ public class PlantAction {
                                 "Price should match expected value",
                                 actualPrice,
                                 org.hamcrest.Matchers.closeTo(expectedPrice, 0.001));
+        }
+
+        public void setToken(String token) {
+            this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+        }
+
+        public int getLastCreatedPlantId() {
+            return this.createdPlantId != null ? this.createdPlantId : 0;
+        }
+
+        public int getLastResponseStatusCode() {
+            return SerenityRest.lastResponse().getStatusCode();
+        }
+
+        @Step("Get plant by ID: {0}")
+        public void getPlant(int plantId) {
+            String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                    .getProperty("api.base.url");
+
+            requestSpec
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .get(baseUrl + "/api/plants/" + plantId);
+        }
+
+        @Step("Delete plant by ID: {0}")
+        public void deletePlant(int plantId) {
+            String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                    .getProperty("api.base.url");
+
+            requestSpec
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .delete(baseUrl + "/api/plants/" + plantId);
         }
 
         @Step("Update plant quantity: {0}")
