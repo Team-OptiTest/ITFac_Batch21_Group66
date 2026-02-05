@@ -4,7 +4,7 @@ Feature: Plant Management - UI Create Operations
   So that I can manage the plant inventory
 
   Background:
-    Given the admin is authenticated
+    Given the admin user is authenticated
     And the user is on the Plants page
 
   @UI @Plant

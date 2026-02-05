@@ -38,8 +38,8 @@ public class PlantUIStepDefinitions {
                 user.can(BrowseTheWeb.with(driver));
         }
 
-        @Given("the admin is authenticated")
-        public void theAdminIsAuthenticated() {
+        @Given("the admin user is authenticated")
+        public void theAdminUserIsAuthenticated() {
                 String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
                                 .from(environmentVariables)
                                 .getOptionalProperty("test.admin.username")
