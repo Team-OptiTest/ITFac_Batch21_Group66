@@ -39,6 +39,9 @@ public class CategoryActions {
 
         if (response.getStatusCode() == 200) {
             existingCategoryIds = response.jsonPath().getList("id", Integer.class);
+        } else {
+            System.out.println("Warning: Failed to fetch existing category IDs. Status: " + response.getStatusCode());
+            existingCategoryIds = null;
         }
     }
 
