@@ -90,7 +90,7 @@ public class CategoryActions {
         long nonExistentId = 999999L;
         if (existingCategoryIds != null && !existingCategoryIds.isEmpty()) {
             nonExistentId = existingCategoryIds.stream()
-                    .mapToInt(Integer::intValue)
+                    .mapToLong(Integer::longValue)
                     .max()
                     .orElse(0) + 99999;
         }
