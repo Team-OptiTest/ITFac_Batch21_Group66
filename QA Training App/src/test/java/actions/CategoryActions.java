@@ -96,7 +96,7 @@ public class CategoryActions {
         long nonExistentId = 999999L;
         if (existingCategoryIds != null && !existingCategoryIds.isEmpty()) {
             nonExistentId = existingCategoryIds.stream()
-                    .mapToLong(Integer::longValue)
+                    .mapToInt(Integer::intValue)
                     .max()
                     .orElse(0) + 99999;
         }
@@ -268,6 +268,24 @@ public class CategoryActions {
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
         System.out.println("Response: " + lastResponse.getBody().asString());
+    }
+
+    @Step("Create category with non-existent parent ID")
+    public void createCategoryWithNonExistentParentId() {
+        fetchExistingCategoryIds();
+        long nonExistentParentId = generateNonExistentId();
+
+        String token = getAuthToken();
+        String createUrl = getBaseUrl() + "/api/categories";
+        String requestBody = String.format("{\"name\":\"TestCateg\",\"parent\":%d}", nonExistentParentId);
+
+        lastResponse = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(requestBody)
+                .when()
+                .post(createUrl);
+
     }
 
     @Step("Search categories with name: {0} and parentId: {1}")
