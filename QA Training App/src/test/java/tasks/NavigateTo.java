@@ -5,6 +5,9 @@ import net.serenitybdd.screenplay.Task;
 import net.serenitybdd.screenplay.actions.Open;
 import net.thucydides.model.util.EnvironmentVariables;
 
+import java.net.URI;
+import java.util.Optional;
+
 import static net.serenitybdd.screenplay.Tasks.instrumented;
 
 public class NavigateTo implements Task {
@@ -27,11 +30,13 @@ public class NavigateTo implements Task {
 
     @Override
     public <T extends Actor> void performAs(T actor) {
-        String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                .from(environmentVariables)
-                .getProperty("webdriver.base.url");
-
-        actor.attemptsTo(
-                Open.url(baseUrl + path));
+        String baseUrl = Optional.ofNullable(
+                net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                        .from(environmentVariables)
+                        .getProperty("webdriver.base.url"))
+                .orElseThrow(() -> new IllegalStateException("webdriver.base.url is not set"));
+        String targetUrl = URI.create(baseUrl)
+                .resolve(path).toString();
+        actor.attemptsTo(Open.url(targetUrl));
     }
 }

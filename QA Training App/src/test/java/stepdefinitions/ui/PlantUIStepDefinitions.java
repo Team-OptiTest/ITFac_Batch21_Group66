@@ -16,6 +16,7 @@ import pages.PlantsPage;
 import questions.PlantQuestions;
 import tasks.Login;
 import tasks.NavigateTo;
+import net.thucydides.model.environment.SystemEnvironmentVariables;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static org.hamcrest.Matchers.containsString;
@@ -32,6 +33,7 @@ public class PlantUIStepDefinitions {
 
     @Before
     public void setUp() {
+        environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
         user = Actor.named("Admin User");
         user.can(BrowseTheWeb.with(driver));
     }
@@ -50,8 +52,10 @@ public class PlantUIStepDefinitions {
 
     @When("the user clicks on the {string} button")
     public void theUserClicksOnTheButton(String buttonText) {
-        user.attemptsTo(
-                Click.on(PlantsPage.ADD_PLANT_BUTTON));
+        if (!"Add a Plant".equalsIgnoreCase(buttonText)) {
+            throw new IllegalArgumentException("Unsupported button: " + buttonText);
+        }
+        user.attemptsTo(Click.on(PlantsPage.ADD_PLANT_BUTTON));
     }
 
     @When("the user enters {string} as the Plant Name")
@@ -94,7 +98,7 @@ public class PlantUIStepDefinitions {
         // Optionally verify the message text contains expected text
         user.should(
                 seeThat("Success message text",
-                        PlantQuestions.successMessageText(), containsString("success")));
+                        PlantQuestions.successMessageText(), containsString(expectedMessage)));
     }
 
     @Then("the user is redirected to the Plants list")

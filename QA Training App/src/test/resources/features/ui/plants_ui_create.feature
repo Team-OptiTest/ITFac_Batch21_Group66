@@ -4,7 +4,7 @@ Feature: Plant Management - UI Create Operations
   So that I can manage the plant inventory
 
   Background:
-    Given the user is logged in as Admin with username "admin" and password "admin123"
+    Given the user is logged in as Admin
     And the user is on the Plants page
 
   @UI_Plant_Create_001

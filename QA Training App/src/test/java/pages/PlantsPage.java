@@ -2,6 +2,7 @@ package pages;
 
 import net.serenitybdd.screenplay.targets.Target;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.Quotes;
 
 public class PlantsPage {
 
@@ -32,7 +33,7 @@ public class PlantsPage {
 
         public static Target plantInTable(String plantName) {
                 return Target.the("Plant '" + plantName + "' in table")
-                                .located(By.xpath("//table//td[contains(text(), '" + plantName + "')]"));
+                        .located(By.xpath("//table//td[contains(text(), " + Quotes.escape(plantName) + ")]"));
         }
 
         public static final Target PAGE_TITLE = Target.the("Page title")
