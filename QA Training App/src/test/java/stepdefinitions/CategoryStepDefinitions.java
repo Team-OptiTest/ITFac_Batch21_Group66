@@ -252,6 +252,11 @@ public class CategoryStepDefinitions {
         categoryActions.getCategoryWithNonExistentId();
     }
 
+    @When("the admin creates a category with a non-existent parent category ID")
+    public void theAdminCreatesACategoryWithNonExistentParentCategoryId() {
+        categoryActions.createCategoryWithNonExistentParentId();
+    }
+
     @Then("the API should return {int} Not Found")
     public void theApiShouldReturnNotFound(int expectedStatusCode) {
         assertThat(categoryActions.getLastResponseStatusCode())
