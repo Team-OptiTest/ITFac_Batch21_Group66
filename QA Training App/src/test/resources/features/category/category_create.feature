@@ -42,3 +42,10 @@ Feature: Category Creation
     When the admin attempts to create another category with name "Roses"
     Then the API should return 400 Bad Request
     And the error message should contain "already exists"
+
+  @API @Category @API_Category_Create_007 @negative @215098G
+  Scenario: Verify admin cannot create category with non-existent parent ID
+    Given the user is authenticated as admin
+    When the admin creates a category with a non-existent parent category ID
+    Then the API should return 404 Not Found
+    And the error message should contain "Category not found"
