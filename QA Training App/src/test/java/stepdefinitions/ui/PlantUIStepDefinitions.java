@@ -31,6 +31,9 @@ public class PlantUIStepDefinitions {
         @Steps
         LoginPage loginPage;
 
+        @Steps
+        PlantsPage plantsPage;
+
         private EnvironmentVariables environmentVariables;
 
         private Actor user;
@@ -49,7 +52,7 @@ public class PlantUIStepDefinitions {
 
         @Given("the user is on the Plants page")
         public void theUserIsOnThePlantsPage() {
-
+                plantsPage.theUserIsOnThePlantsPage();
         }
 
         @When("the user clicks on the {string} button")

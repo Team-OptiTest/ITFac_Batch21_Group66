@@ -53,7 +53,7 @@ public class PlantsPage extends PageObject {
                         .located(By.xpath("//h1 | //h2"));
 
         public static final Target PLANT_NAME_ERROR = Target.the("Plant Name error")
-                        .located(By.xpath("//*[contains(text(), 'Plant Name is required')]"));
+                        .located(By.xpath("//*[contains(text(), 'Plant name is required')]"));
 
         public static final Target PRICE_ERROR = Target.the("Price error")
                         .located(By.xpath("//*[contains(text(), 'Price is required')]"));
@@ -67,7 +67,7 @@ public class PlantsPage extends PageObject {
 
         public void theUserIsOnThePlantsPage() {
                 getDriver().get("http://localhost:8080/ui/plants");
-                waitForCondition().until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+                waitForCondition().until(ExpectedConditions.presenceOfElementLocated(By.tagName("table")));
         }
 
         public static Target deleteButtonForPlant(String plantName) {
