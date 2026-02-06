@@ -1,10 +1,11 @@
 package pages;
 
+import org.openqa.selenium.By;
+
+import net.serenitybdd.annotations.Step;
 import net.serenitybdd.core.pages.PageObject;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
 import net.thucydides.model.util.EnvironmentVariables;
-import net.serenitybdd.annotations.Step;
-import org.openqa.selenium.By;
 
 public class LoginPage extends PageObject {
 
@@ -60,3 +61,4 @@ public class LoginPage extends PageObject {
         clickLogin();
     }
 }
+
