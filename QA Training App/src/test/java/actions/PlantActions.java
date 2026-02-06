@@ -318,7 +318,7 @@ public class PlantActions {
         }
 
         public void setToken(String token) {
-                this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                this.authToken = token;
         }
 
         public int getLastCreatedPlantId() {
