@@ -17,7 +17,6 @@ import net.serenitybdd.screenplay.targets.Target;
 import org.openqa.selenium.Keys;
 import pages.LoginPage;
 import pages.PlantsPage;
-import questions.PlantQuestions;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
@@ -100,19 +99,19 @@ public class PlantUIStepDefinitions {
         public void theMessageIsDisplayed(String expectedMessage) {
                 user.should(
                                 seeThat("Success message is visible",
-                                                PlantQuestions.successMessageIsDisplayed(), is(true)));
+                                                PlantsPage.successMessageIsDisplayed(), is(true)));
 
                 // Optionally verify the message text contains expected text
                 user.should(
                                 seeThat("Success message text",
-                                                PlantQuestions.successMessageText(), containsString(expectedMessage)));
+                                                PlantsPage.successMessageText(), containsString(expectedMessage)));
         }
 
         @Then("the user is redirected to the Plants list")
         public void theUserIsRedirectedToThePlantsList() {
                 user.should(
                                 seeThat("User is on plants list page",
-                                                PlantQuestions.isOnPlantsListPage(), is(true)));
+                                                PlantsPage.isOnPlantsListPage(), is(true)));
         }
 
         @Then("the new plant {string} appears in the table")
@@ -121,7 +120,7 @@ public class PlantUIStepDefinitions {
                 String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
                 user.should(
                                 seeThat("Plant appears in table",
-                                                PlantQuestions.plantAppearsInTable(uniquePlantName), is(true)));
+                                                PlantsPage.plantAppearsInTable(uniquePlantName), is(true)));
         }
 
         @When("the user leaves the {string} empty")
@@ -155,7 +154,7 @@ public class PlantUIStepDefinitions {
                 } else {
                         throw new IllegalArgumentException("Unknown validation error: " + errorMessage);
                 }
-                
+
                 user.should(seeThat("Validation error is displayed",
                                 net.serenitybdd.screenplay.questions.Visibility.of(errorTarget), is(true)));
         }
@@ -166,9 +165,9 @@ public class PlantUIStepDefinitions {
                                 .from(environmentVariables)
                                 .getOptionalProperty("webdriver.base.url")
                                 .orElse("http://localhost:8080");
-                
+
                 String addPlantUrl = baseUrl + "/ui/plants/add";
-                
+
                 // Directly open the URL
                 BrowseTheWeb.as(user).getDriver().get(addPlantUrl);
         }
@@ -177,19 +176,22 @@ public class PlantUIStepDefinitions {
         public void theUserIsRedirectedToDashboardOrSeesAccessDenied() {
                 // Check if current URL is NOT /ui/plants/add (redirected)
                 // OR if a 403 / Access Denied message is visible
-                
+
                 user.should(seeThat("User is denied access",
                                 actor -> {
                                         String currentUrl = BrowseTheWeb.as(actor).getDriver().getCurrentUrl();
                                         // Condition 1: Redirected to dashboard or login or root
                                         boolean relocated = !currentUrl.contains("/ui/plants/add");
-                                        
+
                                         // Condition 2: Access Denied Page/Message
                                         // Assuming standard Spring Boot white label error or app specific 403
-                                        boolean forbiddenMessage = BrowseTheWeb.as(actor).getDriver().getPageSource().contains("Forbidden") ||
-                                                                   BrowseTheWeb.as(actor).getDriver().getPageSource().contains("Access Denied") ||
-                                                                   BrowseTheWeb.as(actor).getDriver().getTitle().contains("403");
-                                                                   
+                                        boolean forbiddenMessage = BrowseTheWeb.as(actor).getDriver().getPageSource()
+                                                        .contains("Forbidden") ||
+                                                        BrowseTheWeb.as(actor).getDriver().getPageSource()
+                                                                        .contains("Access Denied")
+                                                        ||
+                                                        BrowseTheWeb.as(actor).getDriver().getTitle().contains("403");
+
                                         return relocated || forbiddenMessage;
                                 }, is(true)));
         }
@@ -197,11 +199,14 @@ public class PlantUIStepDefinitions {
         @Then("validation error messages are displayed below specific fields")
         public void validationErrorMessagesAreDisplayedBelowSpecificFields() {
                 user.should(
-                        seeThat("Plant Name validation error is visible",
-                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PLANT_NAME_ERROR), is(true)),
-                        seeThat("Price validation error is visible",
-                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PRICE_ERROR), is(true))
-                );
+                                seeThat("Plant Name validation error is visible",
+                                                net.serenitybdd.screenplay.questions.Visibility
+                                                                .of(PlantsPage.PLANT_NAME_ERROR),
+                                                is(true)),
+                                seeThat("Price validation error is visible",
+                                                net.serenitybdd.screenplay.questions.Visibility
+                                                                .of(PlantsPage.PRICE_ERROR),
+                                                is(true)));
         }
 
         // Delete Plant Step Definitions
@@ -209,14 +214,16 @@ public class PlantUIStepDefinitions {
         public void thePlantExistsInTheList(String plantName) {
                 // Verify that the plants table is visible
                 user.should(
-                        seeThat("Plants table is visible",
-                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PLANTS_TABLE), is(true)));
-                
+                                seeThat("Plants table is visible",
+                                                net.serenitybdd.screenplay.questions.Visibility
+                                                                .of(PlantsPage.PLANTS_TABLE),
+                                                is(true)));
+
                 // Verify the specific plant exists in the table
                 user.should(
-                        seeThat("Plant '" + plantName + "' exists in table",
-                                PlantQuestions.plantAppearsInTable(plantName), is(true)));
-                
+                                seeThat("Plant '" + plantName + "' exists in table",
+                                                PlantsPage.plantAppearsInTable(plantName), is(true)));
+
                 // Store the plant name for later steps
                 net.serenitybdd.core.Serenity.setSessionVariable("plantToDelete").to(plantName);
         }
@@ -225,9 +232,8 @@ public class PlantUIStepDefinitions {
         public void theUserSearchesForThePlant(String plantName) {
                 // Enter the plant name in the search field and press Enter
                 user.attemptsTo(
-                        Enter.theValue(plantName).into(PlantsPage.SEARCH_FIELD).thenHit(Keys.ENTER)
-                );
-                
+                                Enter.theValue(plantName).into(PlantsPage.SEARCH_FIELD).thenHit(Keys.ENTER));
+
                 // Wait for search to filter results
                 try {
                         Thread.sleep(1000);
@@ -240,14 +246,13 @@ public class PlantUIStepDefinitions {
         public void theUserClicksTheDeleteButtonForThePlant(String plantName) {
                 // Click the delete button for the specific plant
                 user.attemptsTo(
-                        Click.on(PlantsPage.deleteButtonForPlant(plantName))
-                );
+                                Click.on(PlantsPage.deleteButtonForPlant(plantName)));
         }
 
         @When("the user confirms the deletion in the browser dialog")
         public void theUserConfirmsTheDeletionInTheBrowserDialog() {
                 org.openqa.selenium.WebDriver driver = BrowseTheWeb.as(user).getDriver();
-                
+
                 // Wait a moment for the dialog to appear
                 try {
                         Thread.sleep(500);
@@ -255,7 +260,7 @@ public class PlantUIStepDefinitions {
                         e.printStackTrace();
                 }
                 System.out.println("\n\n\n Alert Appeared\n\n\n");
-                
+
                 // Accept the browser confirmation dialog (alert) IMMEDIATELY
                 // We must do this before any other driver operations
                 try {
@@ -264,19 +269,18 @@ public class PlantUIStepDefinitions {
                 } catch (Exception e) {
                         System.out.println("\n\n\n Failed to accept alert: " + e.getMessage() + "\n\n\n");
                 }
-                
+
                 // Wait for the page to be fully loaded (document ready)
                 try {
-                        org.openqa.selenium.support.ui.WebDriverWait wait =
-                                new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10));
-                        wait.until(webDriver -> 
-                                ((org.openqa.selenium.JavascriptExecutor) webDriver)
+                        org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(
+                                        driver, java.time.Duration.ofSeconds(10));
+                        wait.until(webDriver -> ((org.openqa.selenium.JavascriptExecutor) webDriver)
                                         .executeScript("return document.readyState").equals("complete"));
                         System.out.println("\n\n\n Page Fully Loaded\n\n\n");
                 } catch (Exception e) {
                         System.out.println("\n\n\n Page load check failed: " + e.getMessage() + "\n\n\n");
                 }
-                
+
                 // Additional wait for the page refresh and success message to appear
                 try {
                         Thread.sleep(2000);
@@ -284,7 +288,7 @@ public class PlantUIStepDefinitions {
                         e.printStackTrace();
                 }
                 System.out.println("\n\n\n Plant Deleted - Ready to verify\n\n\n");
-                
+
                 // DEBUG: Print page source to see what's actually there
                 try {
                         String pageSource = driver.getPageSource();
@@ -292,7 +296,7 @@ public class PlantUIStepDefinitions {
                         // Print first 2000 characters to see the content
                         System.out.println(pageSource.substring(0, Math.min(2000, pageSource.length())));
                         System.out.println("\n\n\n=== END PAGE SOURCE ===\n");
-                        
+
                         // Check if success message text exists anywhere
                         if (pageSource.contains("deleted successfully") || pageSource.contains("Plant deleted")) {
                                 System.out.println("\n\n\n SUCCESS MESSAGE FOUND IN PAGE SOURCE! \n\n\n");
@@ -307,27 +311,26 @@ public class PlantUIStepDefinitions {
         @Then("the plant {string} is removed from the table")
         public void thePlantIsRemovedFromTheTable(String plantName) {
                 user.should(
-                        seeThat("Plant is removed from table",
-                                PlantQuestions.plantIsRemovedFromTable(plantName), is(true)));
+                                seeThat("Plant is removed from table",
+                                                PlantsPage.plantIsRemovedFromTable(plantName), is(true)));
         }
 
         @Then("the plant {string} no longer appears in search results")
         public void thePlantNoLongerAppearsInSearchResults(String plantName) {
                 // Search for the deleted plant
                 user.attemptsTo(
-                        Enter.theValue(plantName).into(PlantsPage.SEARCH_FIELD).thenHit(Keys.ENTER)
-                );
-                
+                                Enter.theValue(plantName).into(PlantsPage.SEARCH_FIELD).thenHit(Keys.ENTER));
+
                 // Wait for search to complete
                 try {
                         Thread.sleep(1000);
                 } catch (InterruptedException e) {
                         e.printStackTrace();
                 }
-                
+
                 // Verify it doesn't appear
                 user.should(
-                        seeThat("Plant does not appear in search results",
-                                PlantQuestions.plantDoesNotAppearInSearch(plantName), is(true)));
+                                seeThat("Plant does not appear in search results",
+                                                PlantsPage.plantDoesNotAppearInSearch(plantName), is(true)));
         }
 }
