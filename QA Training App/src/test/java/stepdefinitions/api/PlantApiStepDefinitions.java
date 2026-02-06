@@ -163,6 +163,7 @@ public class PlantApiStepDefinitions {
         plantActions.createDuplicatePlant();
     }
 
+<<<<<<< API_Plant_Read_009
     @Then("the response should contain inventory statistics")
     public void theResponseShouldContainInventoryStatistics() {
         plantActions.verifyInventoryStatistics();
@@ -172,17 +173,33 @@ public class PlantApiStepDefinitions {
     public void theResponseShouldContainAContentArray() {
         plantActions.verifyResponseHasContentArray();
     }
-
-    @Then("the response page number should be {int}")
-    public void theResponsePageNumberShouldBe(int expectedPage) {
-        plantActions.verifyPageNumber(expectedPage);
+=======
+    @Then("the error message should contain {string}")
+    public void theErrorMessageShouldContain(String expectedMessage) {
+        plantActions.verifyErrorMessage(expectedMessage);
     }
 
-    @Then("the response page size should be {int}")
-    public void theResponsePageSizeShouldBe(int expectedSize) {
-        plantActions.verifyPageSize(expectedSize);
-    }
+@Then("the response should contain inventory statistics")
+public void theResponseShouldContainInventoryStatistics() {
+    plantActions.verifyInventoryStatistics();
+}
+@Then("the response should contain a content array")
+public void theResponseShouldContainAContentArray() {
+    plantActions.verifyResponseHasContentArray();
+}
+>>>>>>> qa
 
+@Then("the response page number should be {int}")
+public void theResponsePageNumberShouldBe(int expectedPage) {
+    plantActions.verifyPageNumber(expectedPage);
+}
+
+@Then("the response page size should be {int}")
+public void theResponsePageSizeShouldBe(int expectedSize) {
+    plantActions.verifyPageSize(expectedSize);
+}
+
+<<<<<<< API_Plant_Read_009
     @Then("the response status should be {int} Unauthorized")
     public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
         plantActions.verifyStatusCode(expectedStatusCode);
@@ -197,4 +214,10 @@ public class PlantApiStepDefinitions {
     public void theAdminCreatesPlantWithNonExistentCategoryId() {
         plantActions.createPlantWithNonExistentCategory();
     }
+=======
+@Then("the response status should be {int} Unauthorized")
+public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
+    plantActions.verifyStatusCode(expectedStatusCode);
+>>>>>>> qa
+}
 }

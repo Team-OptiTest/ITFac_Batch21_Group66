@@ -12,11 +12,12 @@ import utils.TestUtils;
 
 public class PlantActions {
 
-        private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
-        private Integer createdPlantId;
-        private Map<String, Object> createdPlantData;
-        private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables
-                        .createEnvironmentVariables();
+    private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
+    private Integer createdPlantId;
+    private Map<String, Object> createdPlantData;
+    private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
+    private Response lastResponse;
+
 
         private String getAuthToken() {
                 return net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
@@ -39,12 +40,21 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                getAuthenticatedRequest()
-                                .contentType(ContentType.JSON)
-                                .body(plantData)
-                                .when()
-                                .post(fullUrl);
+        getAuthenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(plantData)
+                .when()
+                .post(fullUrl);
+        Response response = request.body(plantData)
+                .when()
+                .post(baseUrl + "/api/plants/category/" + categoryId);
+
+        lastResponse = response;
+
+        if (response.getStatusCode() == 201) {
+            lastCreatedPlantId = response.jsonPath().getInt("id");
         }
+    }
 
         @Step("Verify response status code is {0}")
         public void verifyStatusCode(int expectedStatus) {
@@ -434,25 +444,24 @@ public class PlantActions {
                 Object price = existingPlant.get("price");
                 Object quantity = existingPlant.get("quantity");
 
-                int categoryId = 5;
-                if (existingPlant.get("category") != null) {
-                        Object categoryObj = existingPlant.get("category");
-                        if (categoryObj instanceof java.util.Map) {
-                                java.util.Map<String, Object> category = (java.util.Map<String, Object>) categoryObj;
-                                if (category.get("id") != null) {
-                                        categoryId = ((Number) category.get("id")).intValue();
-                                }
-                        } else if (categoryObj instanceof Number) {
-                                categoryId = ((Number) categoryObj).intValue();
-                        } else if (categoryObj instanceof String) {
-                                try {
-                                        categoryId = Integer.parseInt((String) categoryObj);
-                                } catch (NumberFormatException e) {
-                                        System.out.println(
-                                                        "Warning: Could not parse category as integer: " + categoryObj);
-                                }
-                        }
+        int categoryId = 5;
+        if (existingPlant.get("category") != null) {
+            Object categoryObj = existingPlant.get("category");
+            if (categoryObj instanceof java.util.Map) {
+                java.util.Map<String, Object> category = (java.util.Map<String, Object>) categoryObj;
+                if (category.get("id") != null) {
+                    categoryId = ((Number) category.get("id")).intValue();
                 }
+            } else if (categoryObj instanceof Number) {
+                categoryId = ((Number) categoryObj).intValue();
+            } else if (categoryObj instanceof String) {
+                try {
+                    categoryId = Integer.parseInt((String) categoryObj);
+                } catch (NumberFormatException e) {
+                    System.out.println("Warning: Could not parse category as integer: " + categoryObj);
+                }
+            }
+        }
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
@@ -514,14 +523,13 @@ public class PlantActions {
                                 .when()
                                 .get(baseUrl + "/api/categories");
 
-                if (response.getStatusCode() == 200) {
-                        return response.jsonPath().getList("id", Integer.class);
-                } else {
-                        System.out.println("Warning: Failed to fetch existing category IDs. Status: "
-                                        + response.getStatusCode());
-                        return null;
-                }
+        if (response.getStatusCode() == 200) {
+            return response.jsonPath().getList("id", Integer.class);
+        } else {
+            System.out.println("Warning: Failed to fetch existing category IDs. Status: " + response.getStatusCode());
+            return null;
         }
+    }
 
         @Step("Create a plant with a non-existent category ID")
         public void createPlantWithNonExistentCategory() {
