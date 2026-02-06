@@ -535,5 +535,24 @@ public class PlantActions {
                 .when()
                 .post(fullUrl);
     }
+    @Step("Verify inventory statistics")
+    public void verifyInventoryStatistics() {
+        SerenityRest.then()
+                .body("totalPlants", org.hamcrest.Matchers.notNullValue())
+                .body("lowStockPlants", org.hamcrest.Matchers.notNullValue());
+    }
+    @Step("Verify page number is {0}")
+public void verifyPageNumber(int expectedPage) {
+    SerenityRest.then().body("number", org.hamcrest.Matchers.equalTo(expectedPage));
+}
+@Step("Verify response has content array")
+public void verifyResponseHasContentArray() {
+    SerenityRest.then()
+            .body("content", org.hamcrest.Matchers.notNullValue());
+}
+@Step("Verify page size is {0}")
+public void verifyPageSize(int expectedSize) {
+    SerenityRest.then().body("size", org.hamcrest.Matchers.equalTo(expectedSize));
+}
 }
 
