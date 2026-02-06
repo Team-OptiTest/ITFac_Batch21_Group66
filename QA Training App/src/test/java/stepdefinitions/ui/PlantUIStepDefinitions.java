@@ -5,6 +5,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Managed;
+import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
 import net.serenitybdd.screenplay.actions.Click;
@@ -31,6 +32,7 @@ public class PlantUIStepDefinitions {
 
     private Actor user;
 
+    @Steps
     private LoginPage loginPage;
 
     @Before
@@ -40,8 +42,8 @@ public class PlantUIStepDefinitions {
         user.can(BrowseTheWeb.with(driver));
     }
 
-    @Given("the user is logged in as Admin with username {string} and password {string}")
-    public void theUserIsLoggedInAsAdmin(String username, String password) {
+    @Given("the user is logged in as Admin")
+    public void theUserIsLoggedInAsAdmin() {
         loginPage.loginAsAdmin();
     }
 
