@@ -12,6 +12,5 @@ import static io.cucumber.junit.platform.engine.Constants.*;
 @SelectClasspathResource("/features/category")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "stepdefinitions")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "io.cucumber.core.plugin.SerenityReporterParallel,pretty")
-@ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "@simple")
-public class CategoryCreateSimpleRunner {
+public class CategoryCreateRunner {
 }
