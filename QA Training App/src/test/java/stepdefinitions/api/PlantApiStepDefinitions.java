@@ -167,4 +167,9 @@ public class PlantApiStepDefinitions {
     public void theErrorMessageShouldContain(String expectedMessage) {
         plantActions.verifyErrorMessage(expectedMessage);
     }
+
+    @When("the admin creates a plant with a non-existent category ID")
+    public void theAdminCreatesAPlantWithANonExistentCategoryID() {
+        plantActions.createPlantWithNonExistentCategory();
+    }
 }
