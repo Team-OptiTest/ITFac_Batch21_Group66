@@ -133,7 +133,11 @@ public class PlantActions {
             throw new AssertionError("No plants found in response");
         }
 
-        for (String name : plantNames) {
+        for (int i = 0; i < plantNames.size(); i++) {
+            String name = plantNames.get(i);
+            if (name == null) {
+                throw new AssertionError("Plant name is null for searchTerm '" + searchTerm + "' at index " + i);
+            }
             if (!name.toLowerCase().contains(searchTerm.toLowerCase())) {
                 throw new AssertionError(
                         "Plant name '" + name + "' does not contain '" + searchTerm + "'");
@@ -346,6 +350,9 @@ public class PlantActions {
         if (response.getStatusCode() == 200) {
             try {
                 java.util.List<java.util.Map<String, Object>> plants = response.jsonPath().getList("content");
+                if (plants == null || plants.isEmpty()) {
+                    plants = response.jsonPath().getList("$");
+                }
                 if (plants != null && !plants.isEmpty()) {
                     // Store the first plant's data for duplicate creation
                     java.util.Map<String, Object> existingPlant = plants.get(0);
@@ -361,6 +368,14 @@ public class PlantActions {
                             java.util.Map<String, Object> category = (java.util.Map<String, Object>) categoryObj;
                             if (category.get("id") != null) {
                                 existingCategoryId = ((Number) category.get("id")).intValue();
+                            }
+                        } else if (categoryObj instanceof Number) {
+                            existingCategoryId = ((Number) categoryObj).intValue();
+                        } else if (categoryObj instanceof String) {
+                            try {
+                                existingCategoryId = Integer.parseInt((String) categoryObj);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Warning: Could not parse category as integer: " + categoryObj);
                             }
                         }
                     }
@@ -393,12 +408,8 @@ public class PlantActions {
         String categoryEndpoint = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.endpoints.plants.category");
 
-        // Get auth token from Serenity session
-        String token = getAuthToken();
-
         // Fetch existing plants from the API
-        io.restassured.response.Response response = SerenityRest.given()
-                .header("Authorization", "Bearer " + token)
+        io.restassured.response.Response response = getAuthenticatedRequest()
                 .contentType(ContentType.JSON)
                 .when()
                 .get(baseUrl + "/api/plants");
@@ -408,14 +419,9 @@ public class PlantActions {
         }
 
         // Parse response - it could be either an array or paginated with "content" field
-        java.util.List<java.util.Map<String, Object>> plants = null;
-
-        try {
-            // Try to get as direct array first
+        java.util.List<java.util.Map<String, Object>> plants = response.jsonPath().getList("content");
+        if (plants == null || plants.isEmpty()) {
             plants = response.jsonPath().getList("$");
-        } catch (Exception e) {
-            // Try to get from "content" field (paginated response)
-            plants = response.jsonPath().getList("content");
         }
 
         if (plants == null || plants.isEmpty()) {
@@ -437,6 +443,14 @@ public class PlantActions {
                 if (category.get("id") != null) {
                     categoryId = ((Number) category.get("id")).intValue();
                 }
+            } else if (categoryObj instanceof Number) {
+                categoryId = ((Number) categoryObj).intValue();
+            } else if (categoryObj instanceof String) {
+                try {
+                    categoryId = Integer.parseInt((String) categoryObj);
+                } catch (NumberFormatException e) {
+                    System.out.println("Warning: Could not parse category as integer: " + categoryObj);
+                }
             }
         }
 
@@ -448,8 +462,7 @@ public class PlantActions {
         duplicateData.put("price", price != null ? price : 25.00);
         duplicateData.put("quantity", quantity != null ? quantity : 100);
 
-        SerenityRest.given()
-                .header("Authorization", "Bearer " + token)
+        getAuthenticatedRequest()
                 .contentType(ContentType.JSON)
                 .body(duplicateData)
                 .when()
