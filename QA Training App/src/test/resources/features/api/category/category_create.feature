@@ -14,14 +14,14 @@ Feature: Category Creation
     Given the user is authenticated as admin
     When the admin creates a category with less than 3 characters "Ab"
     Then the category creation should fail with validation error
-    And the error message should contain "Category name must be between 3 and 10 characters"
+    And the error message should be contained "Category name must be between 3 and 10 characters"
 
   @API @Category
   Scenario: Create category with more than 10 characters
     Given the user is authenticated as admin
     When the admin creates a category with more than 10 characters "ThisNameIsTooLongForCategory"
     Then the category creation should fail with validation error
-    And the error message should contain "Category name must be between 3 and 10 characters"
+    And the error message should be contained "Category name must be between 3 and 10 characters"
 
   @API @Category
   Scenario: Create category without name
@@ -41,11 +41,11 @@ Feature: Category Creation
     And a category named "Roses" exists
     When the admin attempts to create another category with name "Roses"
     Then the API should return 400 Bad Request
-    And the error message should contain "already exists"
+    And the error message should be contained "already exists"
 
   @API @Category @API_Category_Create_007 @negative @215098G
   Scenario: Verify admin cannot create category with non-existent parent ID
     Given the user is authenticated as admin
     When the admin creates a category with a non-existent parent category ID
     Then the API should return 404 Not Found
-    And the error message should contain "Category not found"
+    And the error message should be contained "Category not found"

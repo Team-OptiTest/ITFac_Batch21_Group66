@@ -18,8 +18,8 @@ Feature: Category Read Operations
     eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNTc3ODM2MDAwLCJleHAiOjE1Nzc4MzYwMDB9.expired_signature_123
     """
     When the user requests categories summary
-    Then the API should return 401 Unauthorized
+    Then the API should be returned 401 Unauthorized
   @simple @API_Category_Read_006 @security @authentication
   Scenario: API rejects requests without JWT token
     When a request is made to get categories without JWT token
-    Then the API should return 401 Unauthorized
+    Then the API should be returned 401 Unauthorized
