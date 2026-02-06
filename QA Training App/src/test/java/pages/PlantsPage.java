@@ -44,4 +44,10 @@ public class PlantsPage {
 
         public static final Target PRICE_ERROR = Target.the("Price error")
                         .located(By.xpath("//*[contains(text(), 'Price is required')]"));
+
+        public static final Target SEARCH_INPUT = Target.the("Search plant input box")
+                        .located(By.xpath("//input[@placeholder='Search plant' or @id='searchName' or @name='searchName']"));
+
+        public static final Target SEARCH_BUTTON = Target.the("Search button")
+                        .located(By.xpath("//button[contains(text(), 'Search')]"));
 }
