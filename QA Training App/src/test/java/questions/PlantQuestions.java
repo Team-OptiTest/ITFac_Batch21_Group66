@@ -54,6 +54,34 @@ public class PlantQuestions {
         };
     }
 
+    public static Question<Boolean> plantIsRemovedFromTable(String plantName) {
+        return actor -> {
+            try {
+                // Wait up to 10 seconds for the plant to appear in the table
+                actor.attemptsTo(
+                        WaitUntil.the(PlantsPage.plantInTable(plantName), isVisible())
+                                .forNoMoreThan(10).seconds());
+                return Visibility.of(PlantsPage.plantInTable(plantName)).answeredBy(actor);
+            } catch (Exception e) {
+                return false;
+            }
+        };
+    }
+
+    public static Question<Boolean> plantDoesNotAppearInSearch(String plantName) {
+        return actor -> {
+            try {
+                // Wait up to 10 seconds for the plant to appear in the table
+                actor.attemptsTo(
+                        WaitUntil.the(PlantsPage.plantInTable(plantName), isVisible())
+                                .forNoMoreThan(10).seconds());
+                return Visibility.of(PlantsPage.plantInTable(plantName)).answeredBy(actor);
+            } catch (Exception e) {
+                return false;
+            }
+        };
+    }
+
     public static Question<Boolean> isOnPlantsListPage() {
         return actor -> {
             try {

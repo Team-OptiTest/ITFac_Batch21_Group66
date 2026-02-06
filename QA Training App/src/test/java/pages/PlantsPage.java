@@ -1,10 +1,12 @@
 package pages;
 
+import net.serenitybdd.core.pages.PageObject;
 import net.serenitybdd.screenplay.targets.Target;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Quotes;
 
-public class PlantsPage {
+public class PlantsPage extends PageObject {
 
         public static final Target ADD_PLANT_BUTTON = Target.the("Add a Plant button")
                         .located(By.xpath("//a[contains(text(), 'Add a Plant')]"));
@@ -45,9 +47,19 @@ public class PlantsPage {
         public static final Target PRICE_ERROR = Target.the("Price error")
                         .located(By.xpath("//*[contains(text(), 'Price is required')]"));
 
-        public static final Target SEARCH_INPUT = Target.the("Search plant input box")
+        public static final Target SEARCH_FIELD = Target.the("Search plant input box")
                         .located(By.xpath("//input[@placeholder='Search plant' or @id='searchName' or @name='searchName']"));
 
         public static final Target SEARCH_BUTTON = Target.the("Search button")
                         .located(By.xpath("//button[contains(text(), 'Search')]"));
+
+        public void theUserIsOnThePlantsPage() {
+                getDriver().get("http://localhost:8080/ui/plants");
+                waitForCondition().until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+        }
+
+        public static Target deleteButtonForPlant(String plantName) {
+                return Target.the("Delete button for plant '" + plantName + "'")
+                        .located(By.xpath("//table//tr[td[contains(text(), " + Quotes.escape(plantName) + ")]]//button[contains(@title, 'Delete')]"));
+        }
 }

@@ -1,19 +1,24 @@
 package stepdefinitions.ui;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import net.serenitybdd.annotations.Managed;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.screenplay.Actor;
+import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
 import net.serenitybdd.screenplay.actions.Click;
 import net.serenitybdd.screenplay.actions.Enter;
 import net.serenitybdd.screenplay.actions.SelectFromOptions;
 import net.thucydides.model.util.EnvironmentVariables;
 import org.openqa.selenium.WebDriver;
 import net.serenitybdd.screenplay.targets.Target;
+import org.openqa.selenium.Keys;
+import pages.LoginPage;
 import pages.PlantsPage;
 import questions.PlantQuestions;
-import pages.LoginPage;
+import net.thucydides.model.environment.SystemEnvironmentVariables;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static org.hamcrest.Matchers.containsString;
@@ -24,6 +29,9 @@ public class PlantUIStepDefinitions {
         @Managed(driver = "chrome")
         private WebDriver driver;
 
+        @Steps
+        LoginPage loginPage;
+
         private EnvironmentVariables environmentVariables;
 
         private Actor user;
@@ -33,50 +41,16 @@ public class PlantUIStepDefinitions {
                 environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
                 user = Actor.named("Admin User");
                 user.can(BrowseTheWeb.with(driver));
-    private LoginPage loginPage;
-
-    @Given("the user is logged in as Admin")
-    public void theUserIsLoggedInAsAdmin() {
-        loginPage.loginAsAdmin();
-    }
-
-    @Given("the user is on the Plants page")
-    public void theUserIsOnThePlantsPage() {
-        user.attemptsTo(Click.on(PlantsPage.PAGE_TITLE));
-    }
-
-    @When("the user clicks on the {string} button")
-    public void theUserClicksOnTheButton(String buttonText) {
-        if (!"Add a Plant".equalsIgnoreCase(buttonText)) {
-            throw new IllegalArgumentException("Unsupported button: " + buttonText);
-
-        }
-
-        @Given("the admin user is authenticated")
-        public void theAdminUserIsAuthenticated() {
-                String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getOptionalProperty("test.admin.username")
-                                .orElse("admin");
-                String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getOptionalProperty("test.admin.password")
-                                .orElse("admin123");
-
-                user.attemptsTo(
-                                Login.asUser(username, password, environmentVariables));
         }
 
         @Given("the user is logged in as Admin with username {string} and password {string}")
         public void theUserIsLoggedInAsAdmin(String username, String password) {
-                user.attemptsTo(
-                                Login.asUser(username, password, environmentVariables));
+                loginPage.loginAsUser();
         }
 
         @Given("the user is on the Plants page")
         public void theUserIsOnThePlantsPage() {
-                user.attemptsTo(
-                                NavigateTo.plantsPage(environmentVariables));
+
         }
 
         @When("the user clicks on the {string} button")
@@ -186,21 +160,6 @@ public class PlantUIStepDefinitions {
                                 net.serenitybdd.screenplay.questions.Visibility.of(errorTarget), is(true)));
         }
 
-        @Given("the normal user is authenticated")
-        public void theNormalUserIsAuthenticated() {
-                String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getOptionalProperty("test.user.username")
-                                .orElse("testuser");
-                String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getOptionalProperty("test.user.password")
-                                .orElse("test123");
-
-                user.attemptsTo(
-                                Login.asUser(username, password, environmentVariables));
-        }
-
         @When("the user navigates directly to the add plant page")
         public void theUserNavigatesDirectlyToTheAddPlantPage() {
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -245,101 +204,130 @@ public class PlantUIStepDefinitions {
                 );
         }
 
-        @Given("multiple plants with different names exist")
-        public void multiplePlantsWithDifferentNamesExist() {
-            // Assume database setup or background data
+        // Delete Plant Step Definitions
+        @Given("the plant {string} exists in the list")
+        public void thePlantExistsInTheList(String plantName) {
+                // Verify that the plants table is visible
+                user.should(
+                        seeThat("Plants table is visible",
+                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PLANTS_TABLE), is(true)));
+                
+                // Verify the specific plant exists in the table
+                user.should(
+                        seeThat("Plant '" + plantName + "' exists in table",
+                                PlantQuestions.plantAppearsInTable(plantName), is(true)));
+                
+                // Store the plant name for later steps
+                net.serenitybdd.core.Serenity.setSessionVariable("plantToDelete").to(plantName);
         }
 
-        @When("the user enters {string} in the {string} input box")
-        public void theUserEntersInTheInputBox(String value, String inputBox) {
-            if ("Search plant".equalsIgnoreCase(inputBox)) {
-                user.attemptsTo(Enter.theValue(value).into(PlantsPage.SEARCH_INPUT));
-            } else {
-                throw new IllegalArgumentException("Unsupported input box: " + inputBox);
-            }
+        @When("the user searches for the plant {string}")
+        public void theUserSearchesForThePlant(String plantName) {
+                // Enter the plant name in the search field and press Enter
+                user.attemptsTo(
+                        Enter.theValue(plantName).into(PlantsPage.SEARCH_FIELD).thenHit(Keys.ENTER)
+                );
+                
+                // Wait for search to filter results
+                try {
+                        Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                        e.printStackTrace();
+                }
         }
 
-        @When("the user clicks the {string} button")
-        public void theUserClicksTheSearchButtonGeneric(String buttonName) {
-            if ("Search".equalsIgnoreCase(buttonName)) {
-                user.attemptsTo(Click.on(PlantsPage.SEARCH_BUTTON));
-            } else if ("Save".equalsIgnoreCase(buttonName)) {
-                user.attemptsTo(Click.on(PlantsPage.SAVE_BUTTON));
-            } else {
-                 throw new IllegalArgumentException("Unsupported button: " + buttonName);
-            }
+        @When("the user clicks the Delete button for the plant {string}")
+        public void theUserClicksTheDeleteButtonForThePlant(String plantName) {
+                // Click the delete button for the specific plant
+                user.attemptsTo(
+                        Click.on(PlantsPage.deleteButtonForPlant(plantName))
+                );
         }
 
-        @Then("the list updates to show only plants matching {string}")
-        public void theListUpdatesToShowOnlyMatching(String searchTerm) {
-            user.should(seeThat("Matching plant is visible",
-                    PlantQuestions.plantAppearsInTable(searchTerm), is(true)));
+        @When("the user confirms the deletion in the browser dialog")
+        public void theUserConfirmsTheDeletionInTheBrowserDialog() {
+                org.openqa.selenium.WebDriver driver = BrowseTheWeb.as(user).getDriver();
+                
+                // Wait a moment for the dialog to appear
+                try {
+                        Thread.sleep(500);
+                } catch (InterruptedException e) {
+                        e.printStackTrace();
+                }
+                System.out.println("\n\n\n Alert Appeared\n\n\n");
+                
+                // Accept the browser confirmation dialog (alert) IMMEDIATELY
+                // We must do this before any other driver operations
+                try {
+                        driver.switchTo().alert().accept();
+                        System.out.println("\n\n\n Alert Accepted - Waiting for page refresh\n\n\n");
+                } catch (Exception e) {
+                        System.out.println("\n\n\n Failed to accept alert: " + e.getMessage() + "\n\n\n");
+                }
+                
+                // Wait for the page to be fully loaded (document ready)
+                try {
+                        org.openqa.selenium.support.ui.WebDriverWait wait =
+                                new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10));
+                        wait.until(webDriver -> 
+                                ((org.openqa.selenium.JavascriptExecutor) webDriver)
+                                        .executeScript("return document.readyState").equals("complete"));
+                        System.out.println("\n\n\n Page Fully Loaded\n\n\n");
+                } catch (Exception e) {
+                        System.out.println("\n\n\n Page load check failed: " + e.getMessage() + "\n\n\n");
+                }
+                
+                // Additional wait for the page refresh and success message to appear
+                try {
+                        Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                        e.printStackTrace();
+                }
+                System.out.println("\n\n\n Plant Deleted - Ready to verify\n\n\n");
+                
+                // DEBUG: Print page source to see what's actually there
+                try {
+                        String pageSource = driver.getPageSource();
+                        System.out.println("\n\n\n=== PAGE SOURCE AFTER DELETE ===\n");
+                        // Print first 2000 characters to see the content
+                        System.out.println(pageSource.substring(0, Math.min(2000, pageSource.length())));
+                        System.out.println("\n\n\n=== END PAGE SOURCE ===\n");
+                        
+                        // Check if success message text exists anywhere
+                        if (pageSource.contains("deleted successfully") || pageSource.contains("Plant deleted")) {
+                                System.out.println("\n\n\n SUCCESS MESSAGE FOUND IN PAGE SOURCE! \n\n\n");
+                        } else {
+                                System.out.println("\n\n\n SUCCESS MESSAGE NOT FOUND IN PAGE SOURCE! \n\n\n");
+                        }
+                } catch (Exception e) {
+                        System.out.println("\n\n\n Failed to get page source: " + e.getMessage() + "\n\n\n");
+                }
         }
 
-        @Then("non-matching plants are hidden")
-        public void nonMatchingPlantsAreHidden() {
-            // Verification logic: ensure only results containing search term are present
-            // For now, checking visibility of the matched item is the primary assertion
+        @Then("the plant {string} is removed from the table")
+        public void thePlantIsRemovedFromTheTable(String plantName) {
+                user.should(
+                        seeThat("Plant is removed from table",
+                                PlantQuestions.plantIsRemovedFromTable(plantName), is(true)));
         }
 
+        @Then("the plant {string} no longer appears in search results")
+        public void thePlantNoLongerAppearsInSearchResults(String plantName) {
+                // Search for the deleted plant
+                user.attemptsTo(
+                        Enter.theValue(plantName).into(PlantsPage.SEARCH_FIELD).thenHit(Keys.ENTER)
+                );
+                
+                // Wait for search to complete
+                try {
+                        Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                        e.printStackTrace();
+                }
+                
+                // Verify it doesn't appear
+                user.should(
+                        seeThat("Plant does not appear in search results",
+                                PlantQuestions.plantDoesNotAppearInSearch(plantName), is(true)));
         }
-        user.attemptsTo(Click.on(PlantsPage.ADD_PLANT_BUTTON));
-    }
-
-    @When("the user enters {string} as the Plant Name")
-    public void theUserEntersAsThePlantName(String plantName) {
-        user.attemptsTo(
-                Enter.theValue(plantName).into(PlantsPage.PLANT_NAME_FIELD));
-    }
-
-    @When("the user selects a Category from the dropdown")
-    public void theUserSelectsACategoryFromTheDropdown() {
-        // Select the first available category (index 1, as 0 is usually a placeholder)
-        user.attemptsTo(
-                SelectFromOptions.byIndex(1).from(PlantsPage.CATEGORY_DROPDOWN));
-    }
-
-    @When("the user enters {string} as the Price")
-    public void theUserEntersAsThePrice(String price) {
-        user.attemptsTo(
-                Enter.theValue(price).into(PlantsPage.PRICE_FIELD));
-    }
-
-    @When("the user enters {string} as the Quantity")
-    public void theUserEntersAsTheQuantity(String quantity) {
-        user.attemptsTo(
-                Enter.theValue(quantity).into(PlantsPage.QUANTITY_FIELD));
-    }
-
-    @When("the user clicks the Save button")
-    public void theUserClicksTheSaveButton() {
-        user.attemptsTo(
-                Click.on(PlantsPage.SAVE_BUTTON));
-    }
-
-    @Then("the {string} message is displayed")
-    public void theMessageIsDisplayed(String expectedMessage) {
-        user.should(
-                seeThat("Success message is visible",
-                        PlantQuestions.successMessageIsDisplayed(), is(true)));
-
-        // Optionally verify the message text contains expected text
-        user.should(
-                seeThat("Success message text",
-                        PlantQuestions.successMessageText(), containsString(expectedMessage)));
-    }
-
-    @Then("the user is redirected to the Plants list")
-    public void theUserIsRedirectedToThePlantsList() {
-        user.should(
-                seeThat("User is on plants list page",
-                        PlantQuestions.isOnPlantsListPage(), is(true)));
-    }
-
-    @Then("the new plant {string} appears in the table")
-    public void theNewPlantAppearsInTheTable(String plantName) {
-        user.should(
-                seeThat("Plant appears in table",
-                        PlantQuestions.plantAppearsInTable(plantName), is(true)));
-    }
 }

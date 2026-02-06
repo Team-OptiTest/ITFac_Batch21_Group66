@@ -4,7 +4,7 @@ Feature: Plant Management - UI Create Operations
   So that I can manage the plant inventory
 
   Background:
-    Given the admin user is authenticated
+    Given the user is logged in as an admin user
     And the user is on the Plants page
 
   @UI @Plant
@@ -35,6 +35,6 @@ Feature: Plant Management - UI Create Operations
 
   @UI @Plant @AccessControl
   Scenario: Access Control - Normal User cannot add plant (Direct URL)
-    Given the normal user is authenticated
+    Given the user is logged in as a user
     When the user navigates directly to the add plant page
     Then the user is redirected to the dashboard or sees access denied
