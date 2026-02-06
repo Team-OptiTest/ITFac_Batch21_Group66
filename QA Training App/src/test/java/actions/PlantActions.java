@@ -535,5 +535,37 @@ public class PlantActions {
                 .when()
                 .post(fullUrl);
     }
+
+    @Step("Fetch existing plant IDs from the system")
+    private java.util.List<Integer> fetchExistingPlantIds() {
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+
+        io.restassured.response.Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + getAuthToken())
+                .when()
+                .get(baseUrl + "/api/plants");
+
+        if (response.getStatusCode() == 200) {
+            return response.jsonPath().getList("id", Integer.class);
+        } else {
+            return null;
+        }
+    }
+
+    @Step("Send GET request for plant with non-existent ID")
+    public void getPlantWithNonExistentId() {
+        java.util.List<Integer> existingPlantIds = fetchExistingPlantIds();
+        long nonExistentId = TestUtils.generateNonExistentId(existingPlantIds);
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+        String viewUrl = baseUrl + "/api/plants/" + nonExistentId;
+
+        SerenityRest.given()
+                .header("Authorization", "Bearer " + getAuthToken())
+                .when()
+                .get(viewUrl);
+
+    }
 }
 
