@@ -40,4 +40,4 @@ Feature: Plant Management API
     And at least one plant exists in the system
     When the admin creates a plant with the same name and category as an existing plant
     Then the response status should be 400
-    And the error message should contain "Duplicate plant"
+    And the response error message should contain "Duplicate plant"
