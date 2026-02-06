@@ -163,6 +163,11 @@ public class PlantApiStepDefinitions {
         plantActions.createDuplicatePlant();
     }
 
+    @Then("the error message should contain {string}")
+    public void theErrorMessageShouldContain(String expectedMessage) {
+        plantActions.verifyErrorMessage(expectedMessage);
+    }
+
     @Then("the response should contain inventory statistics")
     public void theResponseShouldContainInventoryStatistics() {
         plantActions.verifyInventoryStatistics();
