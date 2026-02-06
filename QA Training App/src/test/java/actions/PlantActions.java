@@ -3,6 +3,7 @@ package actions;
 import java.util.Map;
 
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
@@ -45,15 +46,6 @@ public class PlantActions {
                 .body(plantData)
                 .when()
                 .post(fullUrl);
-        Response response = request.body(plantData)
-                .when()
-                .post(baseUrl + "/api/plants/category/" + categoryId);
-
-        lastResponse = response;
-
-        if (response.getStatusCode() == 201) {
-            lastCreatedPlantId = response.jsonPath().getInt("id");
-        }
     }
 
         @Step("Verify response status code is {0}")
@@ -360,7 +352,11 @@ public class PlantActions {
                         try {
                                 java.util.List<java.util.Map<String, Object>> plants = response.jsonPath()
                                                 .getList("content");
-                                if (plants == null || plants.isEmpty()) {
+                                
+                                // Check if list contains only nulls (which happens when projecting "content" on a root list)
+                                boolean isListOfNulls = plants != null && !plants.isEmpty() && plants.get(0) == null;
+                                
+                                if (plants == null || plants.isEmpty() || isListOfNulls) {
                                         plants = response.jsonPath().getList("$");
                                 }
                                 if (plants != null && !plants.isEmpty()) {
@@ -431,7 +427,11 @@ public class PlantActions {
                 }
 
                 java.util.List<java.util.Map<String, Object>> plants = response.jsonPath().getList("content");
-                if (plants == null || plants.isEmpty()) {
+                
+                // Check if list contains only nulls (which happens when projecting "content" on a root list)
+                boolean isListOfNulls = plants != null && !plants.isEmpty() && plants.get(0) == null;
+                
+                if (plants == null || plants.isEmpty() || isListOfNulls) {
                         plants = response.jsonPath().getList("$");
                 }
 
