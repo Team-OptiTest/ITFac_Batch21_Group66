@@ -30,3 +30,10 @@ Feature: Sales API - Read Sales
     And a valid sale exists in the system
     When an unauthenticated user attempts to retrieve the sale
     Then the API should return 401 Unauthorized
+  
+  Scenario: API_Sales_Read_007 - Retrieve Sales with Pagination and Sorting - User
+    Given user is authenticated
+    And multiple sales exist in the system
+    When user retrieves sales page with params "page=0&size=5&sort=soldAt,desc"
+    Then the response should contain pagination metadata for page 0 and size 5
+    And the response content should be sorted by "soldAt" "desc"

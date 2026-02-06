@@ -5,6 +5,8 @@ import net.serenitybdd.rest.SerenityRest;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
 import net.thucydides.model.util.EnvironmentVariables;
+import net.serenitybdd.core.Serenity;
+import io.restassured.http.ContentType;
 import static org.hamcrest.Matchers.*;
 import java.util.List;
 
@@ -147,5 +149,29 @@ public class SalesAction {
     public void verifyUnauthorizedError() {
         SerenityRest.then()
                 .statusCode(401);
+    }
+
+    @Step("Get sales page with pagination: {0}?{1}")
+    public void getSalesWithPagination(String endpoint, String queryParams) {
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+
+        String fullUrl = baseUrl + endpoint + "?" + queryParams;
+
+        String tokenFromSession = Serenity.sessionVariableCalled("authToken");
+
+        if (tokenFromSession != null) {
+            SerenityRest.given()
+                    .header("Authorization", "Bearer " + tokenFromSession)
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .get(fullUrl);
+        } else {
+            // No auth header
+            SerenityRest.given()
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .get(fullUrl);
+        }
     }
 }
