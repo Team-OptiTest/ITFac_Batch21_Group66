@@ -421,6 +421,7 @@ public class PlantActions {
                 return null;
         }
 
+        @Step("Get plant quantity for plant ID: {0}")
         public int getPlantQuantity(int plantId) {
                 initRequest();
                 io.restassured.response.Response response = requestSpec
