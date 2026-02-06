@@ -206,5 +206,13 @@ public void verifyPageNumber(int expectedPage) {
 public void verifyPageSize(int expectedSize) {
     SerenityRest.then().body("size", org.hamcrest.Matchers.equalTo(expectedSize));
 }
-
+@Step("Verify pagination metadata")
+public void verifyPaginationMetadata() {
+    SerenityRest.then()
+            .body("pageable", org.hamcrest.Matchers.notNullValue())
+            .body("totalElements", org.hamcrest.Matchers.notNullValue())
+            .body("totalPages", org.hamcrest.Matchers.notNullValue())
+            .body("size", org.hamcrest.Matchers.notNullValue())
+            .body("number", org.hamcrest.Matchers.notNullValue());
+}
 }
