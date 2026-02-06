@@ -11,10 +11,18 @@ import net.thucydides.model.util.EnvironmentVariables;
 
 public class PlantActions {
 
-        private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
+        private String authToken;
         private Integer createdPlantId;
         private Map<String, Object> createdPlantData;
         private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
+
+        private io.restassured.specification.RequestSpecification given() {
+                var spec = SerenityRest.given();
+                if (authToken != null) {
+                        spec = spec.header("Authorization", "Bearer " + authToken);
+                }
+                return spec;
+        }
 
         @Step("Create a new plant in category {0} with data {1}")
         public void createPlant(int categoryId, Map<String, Object> plantData) {
@@ -27,7 +35,7 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                requestSpec
+                given()
                                 .contentType(ContentType.JSON)
                                 .body(plantData)
                                 .when()
@@ -77,7 +85,7 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                requestSpec
+                given()
                                 .contentType(ContentType.JSON)
                                 .body(plantData)
                                 .when()
@@ -92,7 +100,7 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + endpoint + "?" + queryParams;
 
-                requestSpec
+                given()
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .get(fullUrl);
@@ -143,7 +151,7 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + endpoint;
 
-                requestSpec
+                given()
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .get(fullUrl);
@@ -167,7 +175,7 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                io.restassured.response.Response response = requestSpec
+                io.restassured.response.Response response = given()
                                 .contentType(ContentType.JSON)
                                 .body(plantData)
                                 .when()
@@ -176,10 +184,17 @@ public class PlantActions {
                 int statusCode = response.getStatusCode();
                 if (statusCode == 200 || statusCode == 201) {
                         try {
-                                this.createdPlantId = response.jsonPath().getInt("id");
-                                this.createdPlantData = new java.util.HashMap<>(plantData);
+                                String idStr = response.jsonPath().getString("id");
+                                if (idStr != null) {
+                                    this.createdPlantId = Integer.parseInt(idStr);
+                                    this.createdPlantData = new java.util.HashMap<>(plantData);
+                                } else {
+                                    System.out.println("ID field is missing in response: " + response.getBody().asString());
+                                    this.createdPlantId = null;
+                                }
                         } catch (Exception e) {
-                                System.out.println("Could not extract plant ID: " + e.getMessage());
+                                System.out.println("Could not extract plant ID. Status: " + statusCode + ", Body: " + response.getBody().asString());
+                                System.out.println("Error: " + e.getMessage());
                                 this.createdPlantId = null;
                                 this.createdPlantData = null;
                         }
@@ -204,7 +219,7 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
-                requestSpec
+                given()
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .delete(fullUrl);
@@ -223,7 +238,7 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + "/api/plants/" + this.createdPlantId;
 
-                io.restassured.response.Response response = requestSpec
+                io.restassured.response.Response response = given() // Replaced authenticatedGiven() with given()
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .get(fullUrl);
@@ -254,7 +269,7 @@ public class PlantActions {
                                 : new java.util.HashMap<>();
                 completeBody.put("price", updateData.get("price"));
 
-                requestSpec
+                given()
                                 .contentType(ContentType.JSON)
                                 .body(completeBody)
                                 .when()
@@ -271,7 +286,7 @@ public class PlantActions {
         }
 
         public void setToken(String token) {
-            this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+            this.authToken = token;
         }
 
         public int getLastCreatedPlantId() {
@@ -287,7 +302,7 @@ public class PlantActions {
             String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                     .getProperty("api.base.url");
 
-            requestSpec
+            given()
                     .contentType(ContentType.JSON)
                     .when()
                     .get(baseUrl + "/api/plants/" + plantId);
@@ -298,7 +313,7 @@ public class PlantActions {
             String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                     .getProperty("api.base.url");
 
-            requestSpec
+            given()
                     .contentType(ContentType.JSON)
                     .when()
                     .delete(baseUrl + "/api/plants/" + plantId);
@@ -323,7 +338,7 @@ public class PlantActions {
                                 : new java.util.HashMap<>();
                 completeBody.put("quantity", updateData.get("quantity"));
 
-                requestSpec
+                given()
                                 .contentType(ContentType.JSON)
                                 .body(completeBody)
                                 .when()
