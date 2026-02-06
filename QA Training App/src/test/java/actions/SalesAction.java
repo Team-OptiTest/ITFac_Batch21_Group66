@@ -135,4 +135,17 @@ public class SalesAction {
                 .statusCode(404)
                 .body("message", containsString("Sale not found"));
     }
+
+    @Step("Get sale by ID without authentication")
+    public void getSaleByIdWithoutAuth(int saleId) {
+        SerenityRest.given()
+                .when()
+                .get(getBaseUrl() + "/api/sales/" + saleId);
+    }
+
+    @Step("Verify unauthorized error response")
+    public void verifyUnauthorizedError() {
+        SerenityRest.then()
+                .statusCode(401);
+    }
 }

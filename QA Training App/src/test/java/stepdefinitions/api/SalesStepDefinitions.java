@@ -248,4 +248,35 @@ public class SalesStepDefinitions {
         salesAction.verifyStatusCode(expectedStatusCode);
         salesAction.verifyErrorMessage(expectedMessage);
     }
+
+    @Given("a valid sale exists in the system")
+    public void a_valid_sale_exists_in_the_system() {
+        plant_exists_with_sufficient_stock();
+        admin_creates_sale();
+        sale_created_successfully();
+        saleId = salesAction.getLastCreatedSaleId();
+    }
+
+    @When("an unauthenticated user attempts to retrieve the sale")
+    public void an_unauthenticated_user_attempts_to_retrieve_the_sale() {
+        // Clear any existing token to simulate unauthenticated request
+        salesAction.setToken(null);
+        salesAction.getSaleByIdWithoutAuth(saleId);
+    }
+
+    @Then("the API should return {int} Unauthorized")
+    public void the_api_should_return_unauthorized(int expectedStatusCode) {
+        salesAction.verifyStatusCode(expectedStatusCode);
+        salesAction.verifyUnauthorizedError();
+
+        // Cleanup plant
+        if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0;
+            }
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
+        }
+    }
 }

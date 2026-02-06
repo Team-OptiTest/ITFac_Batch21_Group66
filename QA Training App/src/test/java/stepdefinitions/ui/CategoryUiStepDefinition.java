@@ -1,5 +1,6 @@
 package stepdefinitions.ui;
 
+import pages.AddCategoryPage;
 import pages.CategoryPage;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
@@ -16,6 +17,9 @@ public class CategoryUiStepDefinition {
     
     @Steps
     CategoryPage categoryPage;
+
+    @Steps
+    AddCategoryPage addCategoryPage;
     
     @Given("the user is logged in as an admin user")
     public void theUserIsLoggedInAsAnAdminUser() {
@@ -41,12 +45,17 @@ public class CategoryUiStepDefinition {
 
     @When("the user fills in the category name with {string}")
     public void theUserFillsInTheCategoryNameWith(String categoryName) {
-        categoryPage.fillCategoryName(categoryName);
+        addCategoryPage.fillCategoryName(categoryName);
+    }
+
+    @When("the user leaves the category name field empty")
+    public void theUserLeavesTheCategoryNameFieldEmpty() {
+        addCategoryPage.fillCategoryName("");
     }
 
     @When("the user clicks on the Save button")
     public void theUserClicksTheSaveButton() {
-        categoryPage.clickSaveButton();
+        addCategoryPage.clickSaveButton();
     }
 
     @Then("the user should see a success message confirming the category was created")
@@ -60,6 +69,13 @@ public class CategoryUiStepDefinition {
     public void theNewCategoryShouldBeListedOnTheCategoriesPage(String categoryName) {
         assertThat(categoryPage.isCategoryVisibleInList(categoryName))
             .as("Newly created category should be visible in the categories list")
+            .isTrue();
+    }
+
+    @Then("the user should see a validation error message indicating that the category name is required")
+    public void theUserShouldSeeTheCategoryNameIsRequiredMessage() {
+        assertThat(addCategoryPage.isValidationErrorMessageDisplayed())
+            .as("Validation error message should be displayed when category name is empty")
             .isTrue();
     }
 
