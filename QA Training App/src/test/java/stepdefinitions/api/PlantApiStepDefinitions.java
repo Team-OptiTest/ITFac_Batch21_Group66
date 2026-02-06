@@ -175,13 +175,19 @@ public class PlantApiStepDefinitions {
     public void theErrorMessageShouldContain(String expectedMessage) {
         plantActions.verifyErrorMessage(expectedMessage);
     }
-    @When("I GET to {string}")
-public void iGETTo(String endpoint) {
-    plantAction.getRequest(endpoint);
-}
 
-@Then("the response should contain inventory statistics")
-public void theResponseShouldContainInventoryStatistics() {
-    plantAction.verifyInventoryStatistics();
-}
+    @When("the admin creates a plant with a non-existent category ID")
+    public void theAdminCreatesAPlantWithANonExistentCategoryID() {
+        plantActions.createPlantWithNonExistentCategory();
+    }
+  
+    @When("I GET to {string}")
+    public void iGETTo(String endpoint) {
+        plantAction.getRequest(endpoint);
+    }
+
+    @Then("the response should contain inventory statistics")
+    public void theResponseShouldContainInventoryStatistics() {
+        plantAction.verifyInventoryStatistics();
+    }
 }
