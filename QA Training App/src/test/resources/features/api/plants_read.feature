@@ -27,6 +27,13 @@ Feature: Plant Retrieval API
     Then the response status should be 200
     And the response should contain an array of plants
 
+  @API @Plant @API_Plant_Read_009 @negative @215098G
+  Scenario: Verify user receives 404 error when viewing non-existent plant
+    Given the user is authenticated as user
+    When the user attempts to view a plant with a non-existent ID
+    Then the API should return 404 Not Found
+    And the error message should contain "Plant not found"
+    
   @API @Plant_Read_003_1 @negative
   Scenario: Negative page returns 400
     Given the user is authenticated with ROLE_USER

@@ -163,32 +163,43 @@ public class PlantApiStepDefinitions {
         plantActions.createDuplicatePlant();
     }
 
+    @Then("the response should contain inventory statistics")
+    public void theResponseShouldContainInventoryStatistics() {
+        plantActions.verifyInventoryStatistics();
+    }
+
+    @Then("the response should contain a content array")
+    public void theResponseShouldContainAContentArray() {
+        plantActions.verifyResponseHasContentArray();
+    }
+
     @Then("the error message should contain {string}")
     public void theErrorMessageShouldContain(String expectedMessage) {
         plantActions.verifyErrorMessage(expectedMessage);
     }
 
-@Then("the response should contain inventory statistics")
-public void theResponseShouldContainInventoryStatistics() {
-    plantActions.verifyInventoryStatistics();
-}
-@Then("the response should contain a content array")
-public void theResponseShouldContainAContentArray() {
-    plantActions.verifyResponseHasContentArray();
-}
+    @Then("the response page number should be {int}")
+    public void theResponsePageNumberShouldBe(int expectedPage) {
+        plantActions.verifyPageNumber(expectedPage);
+    }
 
-@Then("the response page number should be {int}")
-public void theResponsePageNumberShouldBe(int expectedPage) {
-    plantActions.verifyPageNumber(expectedPage);
-}
+    @Then("the response page size should be {int}")
+    public void theResponsePageSizeShouldBe(int expectedSize) {
+        plantActions.verifyPageSize(expectedSize);
+    }
 
-@Then("the response page size should be {int}")
-public void theResponsePageSizeShouldBe(int expectedSize) {
-    plantActions.verifyPageSize(expectedSize);
-}
+    @Then("the response status should be {int} Unauthorized")
+    public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
+        plantActions.verifyStatusCode(expectedStatusCode);
+    }
 
-@Then("the response status should be {int} Unauthorized")
-public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
-    plantActions.verifyStatusCode(expectedStatusCode);
-}
+    @When("the user attempts to view a plant with a non-existent ID")
+    public void theUserAttemptsToViewPlantWithNonExistentId() {
+        plantActions.getPlantWithNonExistentId();
+    }
+
+    @When("the admin creates a plant with a non-existent category ID")
+    public void theAdminCreatesPlantWithNonExistentCategoryId() {
+        plantActions.createPlantWithNonExistentCategory();
+    }
 }
