@@ -8,6 +8,7 @@ import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
 import net.thucydides.model.util.EnvironmentVariables;
+import utils.TestUtils;
 
 public class PlantActions {
 
@@ -504,10 +505,68 @@ public class PlantActions {
                 return SerenityRest.lastResponse().getBody().asString();
         }
 
+        @Step("Fetch existing category IDs from the system")
+        private java.util.List<Integer> fetchExistingCategoryIds() {
+                String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                                .getProperty("api.base.url");
+
+                io.restassured.response.Response response = getAuthenticatedRequest()
+                                .when()
+                                .get(baseUrl + "/api/categories");
+
+                if (response.getStatusCode() == 200) {
+                        return response.jsonPath().getList("id", Integer.class);
+                } else {
+                        System.out.println("Warning: Failed to fetch existing category IDs. Status: "
+                                        + response.getStatusCode());
+                        return null;
+                }
+        }
+
+        @Step("Create a plant with a non-existent category ID")
+        public void createPlantWithNonExistentCategory() {
+                String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                                .getProperty("api.base.url");
+                String categoryEndpoint = EnvironmentSpecificConfiguration.from(environmentVariables)
+                                .getProperty("api.endpoints.plants.category");
+
+                // Fetch existing category IDs and generate a non-existent one
+                java.util.List<Integer> existingCategoryIds = fetchExistingCategoryIds();
+                long nonExistentCategoryId = TestUtils.generateNonExistentId(existingCategoryIds);
+                String fullUrl = baseUrl + categoryEndpoint + nonExistentCategoryId;
+
+                Map<String, Object> plantData = new java.util.HashMap<>();
+                plantData.put("name", "TestPlant_" + System.currentTimeMillis());
+                plantData.put("price", 25.00);
+                plantData.put("quantity", 100);
+
+                getAuthenticatedRequest()
+                                .contentType(ContentType.JSON)
+                                .body(plantData)
+                                .when()
+                                .post(fullUrl);
+        }
+
         @Step("Verify inventory statistics")
         public void verifyInventoryStatistics() {
                 SerenityRest.then()
                                 .body("totalPlants", org.hamcrest.Matchers.notNullValue())
                                 .body("lowStockPlants", org.hamcrest.Matchers.notNullValue());
+        }
+
+        @Step("Verify page number is {0}")
+        public void verifyPageNumber(int expectedPage) {
+                SerenityRest.then().body("number", org.hamcrest.Matchers.equalTo(expectedPage));
+        }
+
+        @Step("Verify response has content array")
+        public void verifyResponseHasContentArray() {
+                SerenityRest.then()
+                                .body("content", org.hamcrest.Matchers.notNullValue());
+        }
+
+        @Step("Verify page size is {0}")
+        public void verifyPageSize(int expectedSize) {
+                SerenityRest.then().body("size", org.hamcrest.Matchers.equalTo(expectedSize));
         }
 }

@@ -41,3 +41,10 @@ Feature: Plant Management API
     When the admin creates a plant with the same name and category as an existing plant
     Then the response status should be 400
     And the response error message should contain "Duplicate plant"
+
+  @API @Plant @API_Plant_Create_005 @negative
+  Scenario: Verify admin cannot create plant with non-existent category ID
+    Given the admin is authenticated
+    When the admin creates a plant with a non-existent category ID
+    Then the response status should be 404
+    And the error message should contain "Category not found"

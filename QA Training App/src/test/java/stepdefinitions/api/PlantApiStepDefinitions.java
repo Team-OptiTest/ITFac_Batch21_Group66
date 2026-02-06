@@ -168,8 +168,27 @@ public class PlantApiStepDefinitions {
         plantActions.verifyErrorMessage(expectedMessage);
     }
 
-    @Then("the response should contain inventory statistics")
-    public void theResponseShouldContainInventoryStatistics() {
-        plantActions.verifyInventoryStatistics();
-    }
+@Then("the response should contain inventory statistics")
+public void theResponseShouldContainInventoryStatistics() {
+    plantActions.verifyInventoryStatistics();
+}
+@Then("the response should contain a content array")
+public void theResponseShouldContainAContentArray() {
+    plantActions.verifyResponseHasContentArray();
+}
+
+@Then("the response page number should be {int}")
+public void theResponsePageNumberShouldBe(int expectedPage) {
+    plantActions.verifyPageNumber(expectedPage);
+}
+
+@Then("the response page size should be {int}")
+public void theResponsePageSizeShouldBe(int expectedSize) {
+    plantActions.verifyPageSize(expectedSize);
+}
+
+@Then("the response status should be {int} Unauthorized")
+public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
+    plantActions.verifyStatusCode(expectedStatusCode);
+}
 }
