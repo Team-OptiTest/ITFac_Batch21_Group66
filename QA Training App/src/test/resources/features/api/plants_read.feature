@@ -66,3 +66,9 @@ Feature: Plant Retrieval API
     And the response page number should be 0
     And the response page size should be 10
     And the response should contain pagination metadata
+  
+  @simple @API_Plant_Read_005 @security @authentication
+  Scenario: API rejects invalid JWT token for plant retrieval
+    Given the user has an invalid JWT token
+    When I GET to "/api/plants/paged" with query params "page=0&size=10&sort=name"
+    Then the response status should be 401 Unauthorized
