@@ -52,17 +52,31 @@ public class PlantActions {
 
                 int statusCode = response.getStatusCode();
                 if (statusCode == 200 || statusCode == 201) {
-                        this.plantWasCreated = true;
                         try {
                                 String idStr = response.jsonPath().getString("id");
                                 if (idStr != null) {
                                         this.createdPlantId = Integer.parseInt(idStr);
                                         this.createdPlantData = new java.util.HashMap<>(plantData);
+                                        this.plantWasCreated = true;
+                                } else {
+                                        this.createdPlantId = null;
+                                        this.createdPlantData = null;
+                                        this.plantWasCreated = false;
+                                        System.out.println("ID field is missing in response: "
+                                                        + response.getBody().asString());
                                 }
                         } catch (Exception e) {
+                                this.createdPlantId = null;
+                                this.createdPlantData = null;
+                                this.plantWasCreated = false;
                                 System.out.println("Could not extract plant ID in createPlant: " + e.getMessage());
                         }
+                } else {
+                        this.createdPlantId = null;
+                        this.createdPlantData = null;
+                        this.plantWasCreated = false;
                 }
+
         }
 
         @Step("Verify response status code is {0}")
