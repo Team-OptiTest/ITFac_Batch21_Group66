@@ -152,23 +152,4 @@ public class PlantApiStepDefinitions {
         body.put("quantity", Integer.parseInt(newQuantity));
         plantActions.updatePlantQuantity(endpoint, body);
     }
-  @Then("the response should contain inventory statistics")
-public void theResponseShouldContainInventoryStatistics() {
-    plantActions.verifyInventoryStatistics();
-}
-
-@Then("the response should contain a content array")
-public void theResponseShouldContainAContentArray() {
-    plantActions.verifyResponseHasContentArray();
-}
-
-@Then("the response page number should be {int}")
-public void theResponsePageNumberShouldBe(int expectedPage) {
-    plantActions.verifyPageNumber(expectedPage);
-}
-
-@Then("the response page size should be {int}")
-public void theResponsePageSizeShouldBe(int expectedSize) {
-    plantActions.verifyPageSize(expectedSize);
-}
 }
