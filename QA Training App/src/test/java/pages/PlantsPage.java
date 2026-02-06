@@ -26,16 +26,22 @@ public class PlantsPage {
 
         public static final Target SUCCESS_MESSAGE = Target.the("Success message")
                         .located(By.xpath(
-                                        "//*[contains(text(), 'Plant added successfully') or contains(@class, 'success')]"));
+                                        "//*[contains(text(), 'added successfully') or contains(text(), 'Plant added successfully')]"));
 
         public static final Target PLANTS_TABLE = Target.the("Plants table")
                         .located(By.cssSelector("table, .plants-table, [class*='table']"));
 
         public static Target plantInTable(String plantName) {
                 return Target.the("Plant '" + plantName + "' in table")
-                        .located(By.xpath("//table//td[contains(text(), " + Quotes.escape(plantName) + ")]"));
+                                .located(By.xpath("//table//td[contains(text(), " + Quotes.escape(plantName) + ")]"));
         }
 
         public static final Target PAGE_TITLE = Target.the("Page title")
                         .located(By.xpath("//h1 | //h2"));
+
+        public static final Target PLANT_NAME_ERROR = Target.the("Plant Name error")
+                        .located(By.xpath("//*[contains(text(), 'Plant Name is required')]"));
+
+        public static final Target PRICE_ERROR = Target.the("Price error")
+                        .located(By.xpath("//*[contains(text(), 'Price is required')]"));
 }
