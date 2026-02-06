@@ -42,7 +42,7 @@ Feature: Plant Management API
     Then the response status should be 400
     And the response error message should contain "Duplicate plant"
 
-  @API @Plant @API_Plant_Create_005 @negative
+  @API @Plant @API_Plant_Create_005 @negative @215098G
   Scenario: Verify admin cannot create plant with non-existent category ID
     Given the admin is authenticated
     When the admin creates a plant with a non-existent category ID

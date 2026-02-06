@@ -1,6 +1,8 @@
 @sales
 Feature: Sales API - Create Sale
 
+  @API @Sales_Business_001
+  Scenario: Sale reduces plant inventory
   Scenario: Create Sale with Valid Quantity - Admin
     Given admin is authenticated
     And plant exists with sufficient stock
@@ -10,6 +12,10 @@ Feature: Sales API - Create Sale
 
   Scenario: Create Sale with Invalid Quantity (0) - Admin
     Given admin is authenticated
+    And a plant exists with sufficient stock
+    When admin creates a sale with quantity 2
+    Then the sale should be created with status 201
+    And the plant quantity should be reduced by 2
     And plant exists with sufficient stock
     When admin creates a sale with quantity 0
     Then sale creation should fail with status 400

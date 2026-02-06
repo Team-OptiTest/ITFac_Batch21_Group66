@@ -3,6 +3,7 @@ package actions;
 import java.util.Map;
 
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
@@ -12,11 +13,12 @@ import utils.TestUtils;
 
 public class PlantActions {
 
-        private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
-        private Integer createdPlantId;
-        private Map<String, Object> createdPlantData;
-        private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables
-                        .createEnvironmentVariables();
+    private io.restassured.specification.RequestSpecification requestSpec = SerenityRest.given();
+    private Integer createdPlantId;
+    private Map<String, Object> createdPlantData;
+    private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
+    private Response lastResponse;
+
 
         private String getAuthToken() {
                 return net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
@@ -39,12 +41,12 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                getAuthenticatedRequest()
-                                .contentType(ContentType.JSON)
-                                .body(plantData)
-                                .when()
-                                .post(fullUrl);
-        }
+        getAuthenticatedRequest()
+                .contentType(ContentType.JSON)
+                .body(plantData)
+                .when()
+                .post(fullUrl);
+    }
 
         @Step("Verify response status code is {0}")
         public void verifyStatusCode(int expectedStatus) {
@@ -350,7 +352,11 @@ public class PlantActions {
                         try {
                                 java.util.List<java.util.Map<String, Object>> plants = response.jsonPath()
                                                 .getList("content");
-                                if (plants == null || plants.isEmpty()) {
+                                
+                                // Check if list contains only nulls (which happens when projecting "content" on a root list)
+                                boolean isListOfNulls = plants != null && !plants.isEmpty() && plants.get(0) == null;
+                                
+                                if (plants == null || plants.isEmpty() || isListOfNulls) {
                                         plants = response.jsonPath().getList("$");
                                 }
                                 if (plants != null && !plants.isEmpty()) {
@@ -421,7 +427,11 @@ public class PlantActions {
                 }
 
                 java.util.List<java.util.Map<String, Object>> plants = response.jsonPath().getList("content");
-                if (plants == null || plants.isEmpty()) {
+                
+                // Check if list contains only nulls (which happens when projecting "content" on a root list)
+                boolean isListOfNulls = plants != null && !plants.isEmpty() && plants.get(0) == null;
+                
+                if (plants == null || plants.isEmpty() || isListOfNulls) {
                         plants = response.jsonPath().getList("$");
                 }
 
@@ -434,25 +444,24 @@ public class PlantActions {
                 Object price = existingPlant.get("price");
                 Object quantity = existingPlant.get("quantity");
 
-                int categoryId = 5;
-                if (existingPlant.get("category") != null) {
-                        Object categoryObj = existingPlant.get("category");
-                        if (categoryObj instanceof java.util.Map) {
-                                java.util.Map<String, Object> category = (java.util.Map<String, Object>) categoryObj;
-                                if (category.get("id") != null) {
-                                        categoryId = ((Number) category.get("id")).intValue();
-                                }
-                        } else if (categoryObj instanceof Number) {
-                                categoryId = ((Number) categoryObj).intValue();
-                        } else if (categoryObj instanceof String) {
-                                try {
-                                        categoryId = Integer.parseInt((String) categoryObj);
-                                } catch (NumberFormatException e) {
-                                        System.out.println(
-                                                        "Warning: Could not parse category as integer: " + categoryObj);
-                                }
-                        }
+        int categoryId = 5;
+        if (existingPlant.get("category") != null) {
+            Object categoryObj = existingPlant.get("category");
+            if (categoryObj instanceof java.util.Map) {
+                java.util.Map<String, Object> category = (java.util.Map<String, Object>) categoryObj;
+                if (category.get("id") != null) {
+                    categoryId = ((Number) category.get("id")).intValue();
                 }
+            } else if (categoryObj instanceof Number) {
+                categoryId = ((Number) categoryObj).intValue();
+            } else if (categoryObj instanceof String) {
+                try {
+                    categoryId = Integer.parseInt((String) categoryObj);
+                } catch (NumberFormatException e) {
+                    System.out.println("Warning: Could not parse category as integer: " + categoryObj);
+                }
+            }
+        }
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
@@ -514,14 +523,13 @@ public class PlantActions {
                                 .when()
                                 .get(baseUrl + "/api/categories");
 
-                if (response.getStatusCode() == 200) {
-                        return response.jsonPath().getList("id", Integer.class);
-                } else {
-                        System.out.println("Warning: Failed to fetch existing category IDs. Status: "
-                                        + response.getStatusCode());
-                        return null;
-                }
+        if (response.getStatusCode() == 200) {
+            return response.jsonPath().getList("id", Integer.class);
+        } else {
+            System.out.println("Warning: Failed to fetch existing category IDs. Status: " + response.getStatusCode());
+            return null;
         }
+    }
 
         @Step("Create a plant with a non-existent category ID")
         public void createPlantWithNonExistentCategory() {
@@ -569,4 +577,36 @@ public class PlantActions {
         public void verifyPageSize(int expectedSize) {
                 SerenityRest.then().body("size", org.hamcrest.Matchers.equalTo(expectedSize));
         }
+
+    @Step("Fetch existing plant IDs from the system")
+    private java.util.List<Integer> fetchExistingPlantIds() {
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+
+        io.restassured.response.Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + getAuthToken())
+                .when()
+                .get(baseUrl + "/api/plants");
+
+        if (response.getStatusCode() == 200) {
+            return response.jsonPath().getList("id", Integer.class);
+        } else {
+            return null;
+        }
+    }
+
+    @Step("Send GET request for plant with non-existent ID")
+    public void getPlantWithNonExistentId() {
+        java.util.List<Integer> existingPlantIds = fetchExistingPlantIds();
+        long nonExistentId = TestUtils.generateNonExistentId(existingPlantIds);
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+        String viewUrl = baseUrl + "/api/plants/" + nonExistentId;
+
+        SerenityRest.given()
+                .header("Authorization", "Bearer " + getAuthToken())
+                .when()
+                .get(viewUrl);
+
+    }
 }

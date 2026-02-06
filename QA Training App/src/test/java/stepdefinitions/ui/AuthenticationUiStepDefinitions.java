@@ -8,7 +8,7 @@ import pages.LoginPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AuthenticationSteps {
+public class AuthenticationUiStepDefinitions {
     
     @Steps
     LoginPage loginPage;

@@ -163,11 +163,6 @@ public class PlantApiStepDefinitions {
         plantActions.createDuplicatePlant();
     }
 
-    @Then("the error message should contain {string}")
-    public void theErrorMessageShouldContain(String expectedMessage) {
-        plantActions.verifyErrorMessage(expectedMessage);
-    }
-
     @Then("the response should contain inventory statistics")
     public void theResponseShouldContainInventoryStatistics() {
         plantActions.verifyInventoryStatistics();
@@ -176,6 +171,11 @@ public class PlantApiStepDefinitions {
     @Then("the response should contain a content array")
     public void theResponseShouldContainAContentArray() {
         plantActions.verifyResponseHasContentArray();
+    }
+
+    @Then("the error message should contain {string}")
+    public void theErrorMessageShouldContain(String expectedMessage) {
+        plantActions.verifyErrorMessage(expectedMessage);
     }
 
     @Then("the response page number should be {int}")
@@ -191,5 +191,15 @@ public class PlantApiStepDefinitions {
     @Then("the response status should be {int} Unauthorized")
     public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
         plantActions.verifyStatusCode(expectedStatusCode);
+    }
+
+    @When("the user attempts to view a plant with a non-existent ID")
+    public void theUserAttemptsToViewPlantWithNonExistentId() {
+        plantActions.getPlantWithNonExistentId();
+    }
+
+    @When("the admin creates a plant with a non-existent category ID")
+    public void theAdminCreatesPlantWithNonExistentCategoryId() {
+        plantActions.createPlantWithNonExistentCategory();
     }
 }

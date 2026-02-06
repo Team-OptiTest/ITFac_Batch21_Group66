@@ -18,7 +18,7 @@ Feature: Category Read Operations
     eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNTc3ODM2MDAwLCJleHAiOjE1Nzc4MzYwMDB9.expired_signature_123
     """
     When the user requests categories summary
-    Then the API should return 401 Unauthorized
+    Then the API should be returned 401 Unauthorized
 
 
   @API @Category
@@ -62,7 +62,7 @@ Feature: Category Read Operations
     Given the user is authenticated as user
     When the user attempts to view a category with a non-existent ID
     Then the API should return 404 Not Found
-    And the error message should contain "Category not found"
+    And the error message should be contained "Category not found"
   
   @API @Category @API_Category_Read_008 @215098G
   Scenario: Verify user can view main categories
@@ -70,3 +70,8 @@ Feature: Category Read Operations
     When the user requests the main categories
     Then the API should return 200 OK
     And the response should contain a list of main categories
+
+  @simple @API_Category_Read_006 @security @authentication
+  Scenario: API rejects requests without JWT token
+    When a request is made to get categories without JWT token
+    Then the API should be returned 401 Unauthorized
