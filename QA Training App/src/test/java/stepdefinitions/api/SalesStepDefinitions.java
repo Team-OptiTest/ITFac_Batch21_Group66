@@ -24,7 +24,7 @@ public class SalesStepDefinitions {
 
     @Steps
     CategoryActions categoryActions;
-    
+
     @Steps
     AuthenticationActions authenticationActions;
 
@@ -39,34 +39,45 @@ public class SalesStepDefinitions {
     public void admin_is_authenticated() {
         // Use central authentication action
         authenticationActions.authenticateAsAdmin();
-        
-        // Retrieve token from session (AuthenticationActions puts it there)
+
+        // Token is automatically available via Serenity session
         String token = Serenity.sessionVariableCalled("authToken");
-        
-        // Propagate token to other actions
-        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
     @Given("plant exists with sufficient stock")
     public void plant_exists_with_sufficient_stock() {
-        // Use existing sub-category "Flowering" (ID: 5)
-        categoryId = 5;
+        // First, look for an existing plant with at least 10 units
+        Integer existingPlantId = plantActions.findExistingPlantWithStock();
 
-        initialStock = 50;
-        Map<String, Object> body = new HashMap<>();
-        // Plant name must be 3-25 chars.
-        body.put("name", "Plant " + (System.currentTimeMillis() % 10000));
-        body.put("price", 20.0);
-        body.put("quantity", initialStock);
-        
-        plantActions.createPlant(categoryId, body);
-        
-        plantId = plantActions.getLastCreatedPlantId();
-        
-        if (plantId == 0) {
-             throw new RuntimeException("Failed to create plant in category " + categoryId 
-                 + ". Status: " + plantActions.getLastResponseStatusCode());
+        if (existingPlantId != null && existingPlantId > 0) {
+            plantId = existingPlantId;
+            initialStock = plantActions.getPlantQuantity(plantId);
+            System.out.println("Reusing existing plant ID: " + plantId + " with stock: " + initialStock);
+        } else {
+            // Fallback: Create a category first since no suitable plant was found
+            categoryActions.createCategory("Cat_" + (System.currentTimeMillis() % 10000));
+            Integer lastId = categoryActions.getLastCreatedCategoryId();
+            categoryId = (lastId != null) ? lastId : 0;
+
+            if (categoryId == 0) {
+                throw new RuntimeException("Fallback failed: Could not create category. Status: "
+                        + categoryActions.getLastResponseStatusCode());
+            }
+
+            initialStock = 50;
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", "Fallback_" + (System.currentTimeMillis() % 10000));
+            body.put("price", 20.0);
+            body.put("quantity", initialStock);
+
+            plantActions.createPlantAndStoreId(categoryId, body);
+            plantId = plantActions.getLastCreatedPlantId();
+
+            if (plantId == 0) {
+                throw new RuntimeException("Fallback failed: Could not create plant in category " + categoryId
+                        + ". Status: " + plantActions.getLastResponseStatusCode());
+            }
         }
     }
 
@@ -86,13 +97,16 @@ public class SalesStepDefinitions {
     public void plant_stock_reduced() {
         plantActions.getPlant(plantId);
         plantActions.verifyStatusCode(200);
-        
+
         int expectedStock = initialStock - quantitySold;
         net.serenitybdd.rest.SerenityRest.then().body("quantity", equalTo(expectedStock));
-        
-        // Cleanup
-        plantActions.deletePlant(plantId);
-        // categoryActions.deleteCategoryById(categoryId); // Do not delete the shared category
+
+        // Cleanup - only delete if we created the plant (categoryId != 0)
+        if (categoryId != 0) {
+            plantActions.deletePlant(plantId);
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
+        }
     }
 
     @When("admin creates a sale with quantity {int}")
@@ -109,18 +123,25 @@ public class SalesStepDefinitions {
     @Then("error message should be {string}")
     public void error_message_should_be(String message) {
         salesAction.verifyErrorMessage(message);
-        
+
         // Cleanup plant ensures we don't leave data behind even on negative tests
-        if (plantId != 0) {
-            plantActions.deletePlant(plantId);
+        if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0;
+            }
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
         }
     }
+
     @When("admin creates a sale for plant {int} with quantity {int}")
     public void admin_creates_sale_for_plant_with_quantity(int plantId, int quantity) {
-        // Set local fields just in case they are used elsewhere, though not strictly needed for this specific test
+        // Set local fields just in case they are used elsewhere, though not strictly
+        // needed for this specific test
         this.plantId = plantId;
         this.quantitySold = quantity;
-        
+
         salesAction.createSale(plantId, quantity);
     }
 
@@ -139,11 +160,15 @@ public class SalesStepDefinitions {
     @Then("all sales should be returned successfully")
     public void all_sales_should_be_returned_successfully() {
         salesAction.verifySalesListReturned();
-        
+
         // Cleanup the plant created in at_least_one_sale_exists_in_the_system
-        if (plantId != 0) {
-            plantActions.deletePlant(plantId);
-            plantId = 0; // Reset to avoid double deletion
+        if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0; // Reset to avoid double deletion
+            }
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
         }
     }
 
@@ -169,11 +194,15 @@ public class SalesStepDefinitions {
     public void the_deleted_sale_should_not_be_retrievable() {
         salesAction.getSaleById(saleId);
         salesAction.verifyStatusCode(404);
-        
+
         // Cleanup plant
-        if (plantId != 0) {
-            plantActions.deletePlant(plantId);
-            plantId = 0;
+        if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0;
+            }
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
         }
     }
 
@@ -181,7 +210,6 @@ public class SalesStepDefinitions {
     public void user_is_authenticated() {
         authenticationActions.authenticateUser();
         String token = Serenity.sessionVariableCalled("authToken");
-        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
@@ -198,11 +226,15 @@ public class SalesStepDefinitions {
     @Then("the sale details should be returned successfully")
     public void the_sale_details_should_be_returned_successfully() {
         salesAction.verifySaleReturned(saleId);
-        
+
         // Cleanup plant
-        if (plantId != 0) {
-            plantActions.deletePlant(plantId);
-            plantId = 0;
+        if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0;
+            }
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
         }
     }
 }

@@ -62,7 +62,6 @@ public class PlantActions {
 
     @Step("Verify error message contains {0}")
     public void verifyErrorMessage(String expectedMessage) {
-        // Check if error message exists in either 'message' or 'error' field
         String messageField = SerenityRest.lastResponse().jsonPath().getString("message");
         String errorField = SerenityRest.lastResponse().jsonPath().getString("error");
 
@@ -252,7 +251,6 @@ public class PlantActions {
 
         String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
-        // Create complete plant object with updated price
         Map<String, Object> completeBody = this.createdPlantData != null
                 ? new java.util.HashMap<>(this.createdPlantData)
                 : new java.util.HashMap<>();
@@ -320,7 +318,6 @@ public class PlantActions {
 
         String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
-        // Create complete plant object with updated quantity
         Map<String, Object> completeBody = this.createdPlantData != null
                 ? new java.util.HashMap<>(this.createdPlantData)
                 : new java.util.HashMap<>();
@@ -338,14 +335,13 @@ public class PlantActions {
         String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.base.url");
 
-        // Try to get existing plants
         io.restassured.response.Response response = getAuthenticatedRequest()
                 .contentType(ContentType.JSON)
                 .when()
                 .get(baseUrl + "/api/plants");
 
         boolean plantsExist = false;
-        int existingCategoryId = 5; // Default category ID
+        int existingCategoryId = 5;
 
         if (response.getStatusCode() == 200) {
             try {
@@ -354,14 +350,12 @@ public class PlantActions {
                     plants = response.jsonPath().getList("$");
                 }
                 if (plants != null && !plants.isEmpty()) {
-                    // Store the first plant's data for duplicate creation
                     java.util.Map<String, Object> existingPlant = plants.get(0);
                     this.createdPlantData = new java.util.HashMap<>();
                     this.createdPlantData.put("name", existingPlant.get("name"));
                     this.createdPlantData.put("price", existingPlant.get("price"));
                     this.createdPlantData.put("quantity", existingPlant.get("quantity"));
 
-                    // Get the category ID from the existing plant
                     if (existingPlant.get("category") != null) {
                         Object categoryObj = existingPlant.get("category");
                         if (categoryObj instanceof java.util.Map) {
@@ -389,7 +383,6 @@ public class PlantActions {
             }
         }
 
-        // If no plants exist, create one
         if (!plantsExist) {
             Map<String, Object> newPlantData = new java.util.HashMap<>();
             newPlantData.put("name", "TestPlant_" + System.currentTimeMillis());
@@ -408,7 +401,6 @@ public class PlantActions {
         String categoryEndpoint = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.endpoints.plants.category");
 
-        // Fetch existing plants from the API
         io.restassured.response.Response response = getAuthenticatedRequest()
                 .contentType(ContentType.JSON)
                 .when()
@@ -418,7 +410,6 @@ public class PlantActions {
             throw new IllegalStateException("Failed to fetch plants. Status: " + response.getStatusCode());
         }
 
-        // Parse response - it could be either an array or paginated with "content" field
         java.util.List<java.util.Map<String, Object>> plants = response.jsonPath().getList("content");
         if (plants == null || plants.isEmpty()) {
             plants = response.jsonPath().getList("$");
@@ -428,14 +419,12 @@ public class PlantActions {
             throw new IllegalStateException("No plants found in the system to duplicate");
         }
 
-        // Get the first plant's data
         java.util.Map<String, Object> existingPlant = plants.get(0);
         String plantName = (String) existingPlant.get("name");
         Object price = existingPlant.get("price");
         Object quantity = existingPlant.get("quantity");
 
-        // Get the category ID from the existing plant
-        int categoryId = 5; // Default
+        int categoryId = 5;
         if (existingPlant.get("category") != null) {
             Object categoryObj = existingPlant.get("category");
             if (categoryObj instanceof java.util.Map) {
@@ -456,7 +445,6 @@ public class PlantActions {
 
         String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-        // Create duplicate with the same name
         Map<String, Object> duplicateData = new java.util.HashMap<>();
         duplicateData.put("name", plantName);
         duplicateData.put("price", price != null ? price : 25.00);
@@ -469,7 +457,41 @@ public class PlantActions {
                 .post(fullUrl);
     }
 
+    @Step("Find an existing plant with stock")
+    public Integer findExistingPlantWithStock() {
+        io.restassured.response.Response response = getAuthenticatedRequest()
+                .get(EnvironmentSpecificConfiguration.from(environmentVariables)
+                        .getProperty("api.base.url") + "/api/plants");
+
+        if (response.getStatusCode() == 200) {
+            java.util.List<Map<String, Object>> plants = response.jsonPath().getList("$");
+            if (plants != null) {
+                for (Map<String, Object> plant : plants) {
+                    Number quantity = (Number) plant.get("quantity");
+                    if (quantity != null && quantity.intValue() >= 10) {
+                        this.createdPlantId = ((Number) plant.get("id")).intValue();
+                        this.createdPlantData = plant;
+                        return this.createdPlantId;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Step("Get plant quantity for plant ID: {0}")
+    public int getPlantQuantity(int plantId) {
+        io.restassured.response.Response response = getAuthenticatedRequest()
+                .get(EnvironmentSpecificConfiguration.from(environmentVariables)
+                        .getProperty("api.base.url") + "/api/plants/" + plantId);
+        if (response.getStatusCode() == 200) {
+            return response.jsonPath().getInt("quantity");
+        }
+        return 0;
+    }
+
     public String getLastResponseBody() {
         return SerenityRest.lastResponse().getBody().asString();
     }
 }
+
