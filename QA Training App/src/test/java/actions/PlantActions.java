@@ -371,6 +371,7 @@ public class PlantActions {
                     plantsExist = true;
                 }
             } catch (Exception e) {
+                System.out.println("Warning: Could not parse existing plants: " + e.getMessage());
             }
         }
 
