@@ -23,7 +23,7 @@ import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
-public class PlantUIStepDefinitions {
+public class PlantUiStepDefinitions {
 
         @Managed(driver = "chrome")
         private WebDriver driver;
@@ -49,7 +49,7 @@ public class PlantUIStepDefinitions {
 
         @Given("the user is on the Plants page")
         public void theUserIsOnThePlantsPage() {
-
+                user.attemptsTo(Click.on(PlantsPage.PAGE_TITLE));
         }
 
         @When("the user clicks on the {string} button")
