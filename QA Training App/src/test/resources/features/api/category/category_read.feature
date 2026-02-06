@@ -7,10 +7,20 @@ Feature: Category Read Operations
 
   @simple @API_Category_Read_004 @dashboard @summary
   Scenario: Categories summary API returns aggregated data
-  Given the user is authenticated as admin
-  When the admin requests categories summary
-  Then the API should return 200 OK
-  
+    Given the user has a valid JWT token
+    When the user requests categories summary
+    Then the API should return 200 OK
+
+  @simple @API_Category_Read_005 @security @authentication
+  Scenario: Categories summary API rejects invalid JWT token
+    Given the user has an expired JWT token:
+    """
+    eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNTc3ODM2MDAwLCJleHAiOjE1Nzc4MzYwMDB9.expired_signature_123
+    """
+    When the user requests categories summary
+    Then the API should return 401 Unauthorized
+
+
   @API @Category
   Scenario: Verify admin can fetch category list
     Given the user is authenticated as admin
@@ -53,3 +63,10 @@ Feature: Category Read Operations
     When the user attempts to view a category with a non-existent ID
     Then the API should return 404 Not Found
     And the error message should contain "Category not found"
+  
+  @API @Category @API_Category_Read_008 @215098G
+  Scenario: Verify user can view main categories
+    Given the user is authenticated as user
+    When the user requests the main categories
+    Then the API should return 200 OK
+    And the response should contain a list of main categories

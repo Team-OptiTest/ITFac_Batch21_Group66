@@ -6,14 +6,14 @@ Feature: Category Update
   @API @Category
   Scenario: Update category with valid data
     Given the user is authenticated as admin
-    And a category exists with name "new"
+    And a category named "new" exists
     When the admin updates that category with name "Updatednew"
     Then the category should be updated successfully
 
   @API @Category
   Scenario: Update category as a user
     Given the user is authenticated as admin
-    And a category exists with name "abc"
+    And a category named "abc" exists
     And the user is authenticated as user
     When the user updates that category with name "updatedAbc"
     Then the category update should fail

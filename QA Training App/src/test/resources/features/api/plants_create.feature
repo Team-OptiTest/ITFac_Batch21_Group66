@@ -33,3 +33,11 @@ Feature: Plant Management API
       | Ab   | 10.00 | 50       |
     Then the response status should be 400
     And the response error message should contain "Plant name must be between 3 and 25 characters"
+
+  @API @Plant @API_Plant_Create_004 @negative @215098G
+  Scenario: Verify admin cannot create duplicate plant
+    Given the admin is authenticated
+    And at least one plant exists in the system
+    When the admin creates a plant with the same name and category as an existing plant
+    Then the response status should be 400
+    And the response error message should contain "Duplicate plant"

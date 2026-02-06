@@ -1,13 +1,13 @@
 package stepdefinitions.api;
 
+import java.util.Map;
+
 import actions.AuthenticationActions;
 import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-
-import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
@@ -21,25 +21,19 @@ public class PlantApiStepDefinitions {
 
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
-        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.admin.username");
-        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.admin.password");
-
         authenticationActions.authenticateAsAdmin();
-    }
-
-    @Given("a valid category with ID {int} exists")
-    public void aValidCategoryWithIDExists(int id) {
     }
 
     @Given("the user is authenticated with ROLE_USER")
     public void theUserIsAuthenticatedWithROLE_USER() {
-        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.username");
-        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.password");
         authenticationActions.authenticateUser();
+    }
+
+    @Given("a valid category with ID {int} exists")
+    public void aValidCategoryWithIDExists(Integer categoryId) {
+        // This is a precondition step - we assume the category exists in the test
+        // environment
+        // No action needed as this is just documenting the test precondition
     }
 
     @When("I POST to {string} with following data:")
@@ -157,5 +151,20 @@ public class PlantApiStepDefinitions {
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("quantity", Integer.parseInt(newQuantity));
         plantActions.updatePlantQuantity(endpoint, body);
+    }
+
+    @Given("at least one plant exists in the system")
+    public void atLeastOnePlantExistsInTheSystem() {
+        plantActions.ensureAtLeastOnePlantExists();
+    }
+
+    @When("the admin creates a plant with the same name and category as an existing plant")
+    public void theAdminCreatesAPlantWithTheSameNameAndCategoryAsAnExistingPlant() {
+        plantActions.createDuplicatePlant();
+    }
+
+    @Then("the error message should contain {string}")
+    public void theErrorMessageShouldContain(String expectedMessage) {
+        plantActions.verifyErrorMessage(expectedMessage);
     }
 }
