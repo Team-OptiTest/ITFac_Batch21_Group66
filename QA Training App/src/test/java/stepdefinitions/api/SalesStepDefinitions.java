@@ -40,11 +40,8 @@ public class SalesStepDefinitions {
         // Use central authentication action
         authenticationActions.authenticateAsAdmin();
 
-        // Retrieve token from session (AuthenticationActions puts it there)
+        // Token is automatically available via Serenity session
         String token = Serenity.sessionVariableCalled("authToken");
-
-        // Propagate token to other actions
-        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
@@ -104,11 +101,9 @@ public class SalesStepDefinitions {
         int expectedStock = initialStock - quantitySold;
         net.serenitybdd.rest.SerenityRest.then().body("quantity", equalTo(expectedStock));
 
-        // Cleanup
-        if (plantActions.wasPlantCreated()) {
-            plantActions.deletePlant(plantId);
-        }
+        // Cleanup - only delete if we created the plant (categoryId != 0)
         if (categoryId != 0) {
+            plantActions.deletePlant(plantId);
             categoryActions.deleteCategoryById(categoryId);
             categoryId = 0;
         }
@@ -130,13 +125,11 @@ public class SalesStepDefinitions {
         salesAction.verifyErrorMessage(message);
 
         // Cleanup plant ensures we don't leave data behind even on negative tests
-        if (plantId != 0) {
-            if (plantActions.wasPlantCreated()) {
-                plantActions.deletePlant(plantId);
-            }
-            plantId = 0;
-        }
         if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0;
+            }
             categoryActions.deleteCategoryById(categoryId);
             categoryId = 0;
         }
@@ -169,13 +162,11 @@ public class SalesStepDefinitions {
         salesAction.verifySalesListReturned();
 
         // Cleanup the plant created in at_least_one_sale_exists_in_the_system
-        if (plantId != 0) {
-            if (plantActions.wasPlantCreated()) {
-                plantActions.deletePlant(plantId);
-            }
-            plantId = 0; // Reset to avoid double deletion
-        }
         if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0; // Reset to avoid double deletion
+            }
             categoryActions.deleteCategoryById(categoryId);
             categoryId = 0;
         }
@@ -205,13 +196,11 @@ public class SalesStepDefinitions {
         salesAction.verifyStatusCode(404);
 
         // Cleanup plant
-        if (plantId != 0) {
-            if (plantActions.wasPlantCreated()) {
-                plantActions.deletePlant(plantId);
-            }
-            plantId = 0;
-        }
         if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0;
+            }
             categoryActions.deleteCategoryById(categoryId);
             categoryId = 0;
         }
@@ -221,7 +210,6 @@ public class SalesStepDefinitions {
     public void user_is_authenticated() {
         authenticationActions.authenticateUser();
         String token = Serenity.sessionVariableCalled("authToken");
-        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
@@ -240,13 +228,11 @@ public class SalesStepDefinitions {
         salesAction.verifySaleReturned(saleId);
 
         // Cleanup plant
-        if (plantId != 0) {
-            if (plantActions.wasPlantCreated()) {
-                plantActions.deletePlant(plantId);
-            }
-            plantId = 0;
-        }
         if (categoryId != 0) {
+            if (plantId != 0) {
+                plantActions.deletePlant(plantId);
+                plantId = 0;
+            }
             categoryActions.deleteCategoryById(categoryId);
             categoryId = 0;
         }
