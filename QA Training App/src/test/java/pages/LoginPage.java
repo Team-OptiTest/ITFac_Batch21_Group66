@@ -1,12 +1,15 @@
 package pages;
 
 import net.serenitybdd.core.pages.PageObject;
+import net.thucydides.model.environment.SystemEnvironmentVariables;
+import net.thucydides.model.util.EnvironmentVariables;
 import net.serenitybdd.annotations.Step;
 import org.openqa.selenium.By;
 
 public class LoginPage extends PageObject {
-    
-    // Update these locators based on your actual HTML elements
+
+    private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
+
     private final By usernameInput = By.name("username");
     private final By passwordInput = By.name("password");
     private final By loginButton = By.xpath("//button[@type='submit']");
@@ -40,16 +43,20 @@ public class LoginPage extends PageObject {
     @Step("the user is logged in as an admin user")
     public void loginAsAdmin() {
         navigateToLoginPage();
-        enterUsername("admin");
-        enterPassword("admin123");
+        enterUsername(net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.admin.username"));
+        enterPassword(net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.admin.password"));
         clickLogin();
     }
 
     @Step("the user is logged in as a user")
     public void loginAsUser() {
         navigateToLoginPage();
-        enterUsername("testuser");
-        enterPassword("test123");
+        enterUsername(net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.username"));
+        enterPassword(net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.password"));
         clickLogin();
     }
 }

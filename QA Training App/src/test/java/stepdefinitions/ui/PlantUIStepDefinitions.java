@@ -14,9 +14,9 @@ import net.thucydides.model.util.EnvironmentVariables;
 import org.openqa.selenium.WebDriver;
 import pages.PlantsPage;
 import questions.PlantQuestions;
-import tasks.Login;
 import tasks.NavigateTo;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
+import pages.LoginPage;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static org.hamcrest.Matchers.containsString;
@@ -31,6 +31,8 @@ public class PlantUIStepDefinitions {
 
     private Actor user;
 
+    private LoginPage loginPage;
+
     @Before
     public void setUp() {
         environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
@@ -40,8 +42,7 @@ public class PlantUIStepDefinitions {
 
     @Given("the user is logged in as Admin with username {string} and password {string}")
     public void theUserIsLoggedInAsAdmin(String username, String password) {
-        user.attemptsTo(
-                Login.asUser(username, password, environmentVariables));
+        loginPage.loginAsAdmin();
     }
 
     @Given("the user is on the Plants page")
