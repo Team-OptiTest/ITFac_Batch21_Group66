@@ -14,15 +14,8 @@ public class PlantActions {
         private String authToken;
         private Integer createdPlantId;
         private Map<String, Object> createdPlantData;
-        private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
-
-        private io.restassured.specification.RequestSpecification given() {
-                var spec = SerenityRest.given();
-                if (authToken != null) {
-                        spec = spec.header("Authorization", "Bearer " + authToken);
-                }
-                return spec;
-        }
+        private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables
+                        .createEnvironmentVariables();
 
         @Step("Create a new plant in category {0} with data {1}")
         public void createPlant(int categoryId, Map<String, Object> plantData) {
@@ -35,7 +28,14 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
                                 .contentType(ContentType.JSON)
                                 .body(plantData)
                                 .when()
@@ -85,7 +85,14 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
                                 .contentType(ContentType.JSON)
                                 .body(plantData)
                                 .when()
@@ -100,10 +107,18 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + endpoint + "?" + queryParams;
 
-                given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                var response = requestSpec
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .get(fullUrl);
+                var statusCode = response.getStatusCode();
         }
 
         @Step("Verify response contains a list of plants")
@@ -151,7 +166,14 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + endpoint;
 
-                given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .get(fullUrl);
@@ -175,7 +197,14 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + categoryEndpoint + categoryId;
 
-                io.restassured.response.Response response = given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                io.restassured.response.Response response = requestSpec
                                 .contentType(ContentType.JSON)
                                 .body(plantData)
                                 .when()
@@ -219,7 +248,14 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
-                given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .delete(fullUrl);
@@ -238,7 +274,14 @@ public class PlantActions {
 
                 String fullUrl = baseUrl + "/api/plants/" + this.createdPlantId;
 
-                io.restassured.response.Response response = given() // Replaced authenticatedGiven() with given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                io.restassured.response.Response response = requestSpec
                                 .contentType(ContentType.JSON)
                                 .when()
                                 .get(fullUrl);
@@ -264,12 +307,19 @@ public class PlantActions {
                 String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
                 // Create complete plant object with updated price
-                Map<String, Object> completeBody = this.createdPlantData != null 
-                                ? new java.util.HashMap<>(this.createdPlantData) 
+                Map<String, Object> completeBody = this.createdPlantData != null
+                                ? new java.util.HashMap<>(this.createdPlantData)
                                 : new java.util.HashMap<>();
                 completeBody.put("price", updateData.get("price"));
 
-                given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
                                 .contentType(ContentType.JSON)
                                 .body(completeBody)
                                 .when()
@@ -286,37 +336,51 @@ public class PlantActions {
         }
 
         public void setToken(String token) {
-            this.authToken = token;
+                this.requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
         }
 
         public int getLastCreatedPlantId() {
-            return this.createdPlantId != null ? this.createdPlantId : 0;
+                return this.createdPlantId != null ? this.createdPlantId : 0;
         }
 
         public int getLastResponseStatusCode() {
-            return SerenityRest.lastResponse().getStatusCode();
+                return SerenityRest.lastResponse().getStatusCode();
         }
 
         @Step("Get plant by ID: {0}")
         public void getPlant(int plantId) {
-            String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
-                    .getProperty("api.base.url");
+                String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                                .getProperty("api.base.url");
 
-            given()
-                    .contentType(ContentType.JSON)
-                    .when()
-                    .get(baseUrl + "/api/plants/" + plantId);
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .get(baseUrl + "/api/plants/" + plantId);
         }
 
         @Step("Delete plant by ID: {0}")
         public void deletePlant(int plantId) {
-            String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
-                    .getProperty("api.base.url");
+                String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                                .getProperty("api.base.url");
 
-            given()
-                    .contentType(ContentType.JSON)
-                    .when()
-                    .delete(baseUrl + "/api/plants/" + plantId);
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
+                                .contentType(ContentType.JSON)
+                                .when()
+                                .delete(baseUrl + "/api/plants/" + plantId);
         }
 
         @Step("Update plant quantity: {0}")
@@ -333,12 +397,19 @@ public class PlantActions {
                 String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
 
                 // Create complete plant object with updated quantity
-                Map<String, Object> completeBody = this.createdPlantData != null 
-                                ? new java.util.HashMap<>(this.createdPlantData) 
+                Map<String, Object> completeBody = this.createdPlantData != null
+                                ? new java.util.HashMap<>(this.createdPlantData)
                                 : new java.util.HashMap<>();
                 completeBody.put("quantity", updateData.get("quantity"));
 
-                given()
+                // Retrieve token from Serenity session
+                String token = net.serenitybdd.core.Serenity.sessionVariableCalled("authToken");
+
+                if (token != null) {
+                        requestSpec = SerenityRest.given().header("Authorization", "Bearer " + token);
+                }
+
+                requestSpec
                                 .contentType(ContentType.JSON)
                                 .body(completeBody)
                                 .when()
