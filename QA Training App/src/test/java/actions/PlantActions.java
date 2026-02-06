@@ -3,6 +3,7 @@ package actions;
 import java.util.Map;
 
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
@@ -45,15 +46,6 @@ public class PlantActions {
                 .body(plantData)
                 .when()
                 .post(fullUrl);
-        Response response = request.body(plantData)
-                .when()
-                .post(baseUrl + "/api/plants/category/" + categoryId);
-
-        lastResponse = response;
-
-        if (response.getStatusCode() == 201) {
-            lastCreatedPlantId = response.jsonPath().getInt("id");
-        }
     }
 
         @Step("Verify response status code is {0}")
