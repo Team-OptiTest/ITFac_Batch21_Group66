@@ -1,23 +1,21 @@
 package stepdefinitions.ui;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import net.serenitybdd.annotations.Managed;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.screenplay.Actor;
-import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
 import net.serenitybdd.screenplay.actions.Click;
 import net.serenitybdd.screenplay.actions.Enter;
 import net.serenitybdd.screenplay.actions.SelectFromOptions;
+<<<<<<< HEAD
 import net.thucydides.model.util.EnvironmentVariables;
 import org.openqa.selenium.WebDriver;
 import net.serenitybdd.screenplay.targets.Target;
+=======
+>>>>>>> cddf76b (Refactor PlantUIStepDefinitions to remove NavigateTo task and simplify navigation to Plants page)
 import pages.PlantsPage;
 import questions.PlantQuestions;
-import tasks.NavigateTo;
-import net.thucydides.model.environment.SystemEnvironmentVariables;
 import pages.LoginPage;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
@@ -26,12 +24,16 @@ import static org.hamcrest.Matchers.is;
 
 public class PlantUIStepDefinitions {
 
+<<<<<<< HEAD
         @Managed(driver = "chrome")
         private WebDriver driver;
 
         private EnvironmentVariables environmentVariables;
 
         private Actor user;
+=======
+    private Actor user;
+>>>>>>> cddf76b (Refactor PlantUIStepDefinitions to remove NavigateTo task and simplify navigation to Plants page)
 
 <<<<<<< HEAD
         @Before
@@ -42,13 +44,6 @@ public class PlantUIStepDefinitions {
 =======
     private LoginPage loginPage;
 
-    @Before
-    public void setUp() {
-        environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
-        user = Actor.named("Admin User");
-        user.can(BrowseTheWeb.with(driver));
-    }
-
     @Given("the user is logged in as Admin")
     public void theUserIsLoggedInAsAdmin() {
         loginPage.loginAsAdmin();
@@ -56,8 +51,7 @@ public class PlantUIStepDefinitions {
 
     @Given("the user is on the Plants page")
     public void theUserIsOnThePlantsPage() {
-        user.attemptsTo(
-                NavigateTo.plantsPage(environmentVariables));
+        user.attemptsTo(Click.on(PlantsPage.PAGE_TITLE));
     }
 
     @When("the user clicks on the {string} button")
