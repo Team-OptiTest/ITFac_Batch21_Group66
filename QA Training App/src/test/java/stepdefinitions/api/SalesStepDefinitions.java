@@ -1,5 +1,8 @@
 package stepdefinitions.api;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import actions.AuthenticationActions;
 import actions.CategoryActions;
 import actions.PlantActions;
@@ -32,8 +35,11 @@ public class SalesStepDefinitions {
     private int plantId;
     private int quantitySold;
     private int initialStock;
+    private int currentQuantityBeforeSale;
     private int categoryId;
     private int saleId;
+        private int initialQuantity;
+
 
     @Given("admin is authenticated")
     public void admin_is_authenticated() {
@@ -71,7 +77,8 @@ public class SalesStepDefinitions {
             body.put("price", 20.0);
             body.put("quantity", initialStock);
 
-            plantActions.createPlantAndStoreId(categoryId, body);
+
+plantActions.createPlantAndStoreId(categoryId, body);
             plantId = plantActions.getLastCreatedPlantId();
 
             if (plantId == 0) {
@@ -190,15 +197,49 @@ public class SalesStepDefinitions {
         salesAction.verifyStatusCode(statusCode);
     }
 
+    @Then("the plant quantity should be reduced by {int}")
+    public void the_plant_quantity_should_be_reduced_by(int reductionAmount) {
+        // Get current plant quantity after sale
+        int currentQuantity = plantActions.getPlantQuantity(plantId);
+        int expectedQuantity = initialQuantity - reductionAmount;
+
+        System.out.println("=== QUANTITY VERIFICATION ===");
+        System.out.println("Initial quantity: " + initialQuantity);
+        System.out.println("Reduction amount: " + reductionAmount);
+        System.out.println("Expected quantity: " + expectedQuantity);
+        System.out.println("Actual quantity: " + currentQuantity);
+        System.out.println("=============================");
+
+        if (currentQuantity != expectedQuantity) {
+            throw new AssertionError(
+                    "Expected plant quantity: " + expectedQuantity +
+                            ", but got: " + currentQuantity
+            );
+        }
+
+        // Cleanup - delete the test plant
+        cleanupTestData();
+    }
+
     @Then("the deleted sale should not be retrievable")
     public void the_deleted_sale_should_not_be_retrievable() {
         salesAction.getSaleById(saleId);
         salesAction.verifyStatusCode(404);
+        cleanupTestData();
+    }
 
-        // Cleanup plant
-        if (categoryId != 0) {
-            if (plantId != 0) {
-                plantActions.deletePlant(plantId);
+    private void cleanupTestData() {
+        if (plantId != 0) {
+            try {
+                // Cleanup plant
+                if (categoryId != 0) {
+                    if (plantId != 0) {
+                        plantActions.deletePlant(plantId);
+                        System.out.println("Cleaned up test plant ID: " + plantId);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Warning: Failed to cleanup plant " + plantId + ": " + e.getMessage());
                 plantId = 0;
             }
             categoryActions.deleteCategoryById(categoryId);
