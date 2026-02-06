@@ -38,4 +38,10 @@ public class PlantsPage {
 
         public static final Target PAGE_TITLE = Target.the("Page title")
                         .located(By.xpath("//h1 | //h2"));
+
+        public static final Target PLANT_NAME_ERROR = Target.the("Plant Name error")
+                        .located(By.xpath("//*[contains(text(), 'Plant Name is required')]"));
+
+        public static final Target PRICE_ERROR = Target.the("Price error")
+                        .located(By.xpath("//*[contains(text(), 'Price is required')]"));
 }

@@ -12,6 +12,7 @@ import net.serenitybdd.screenplay.actions.Enter;
 import net.serenitybdd.screenplay.actions.SelectFromOptions;
 import net.thucydides.model.util.EnvironmentVariables;
 import org.openqa.selenium.WebDriver;
+import net.serenitybdd.screenplay.targets.Target;
 import pages.PlantsPage;
 import questions.PlantQuestions;
 import tasks.Login;
@@ -134,5 +135,51 @@ public class PlantUIStepDefinitions {
                 user.should(
                                 seeThat("Plant appears in table",
                                                 PlantQuestions.plantAppearsInTable(uniquePlantName), is(true)));
+        }
+
+        @When("the user leaves the {string} empty")
+        public void theUserLeavesTheFieldEmpty(String fieldName) {
+                Target targetField;
+                if ("Plant Name".equalsIgnoreCase(fieldName)) {
+                        targetField = PlantsPage.PLANT_NAME_FIELD;
+                } else if ("Price".equalsIgnoreCase(fieldName)) {
+                        targetField = PlantsPage.PRICE_FIELD;
+                } else {
+                        throw new IllegalArgumentException("Unsupported field: " + fieldName);
+                }
+                user.attemptsTo(Enter.theValue("").into(targetField));
+        }
+
+        @Then("the form is not submitted")
+        public void theFormIsNotSubmitted() {
+                // Verify we are still on the add plant page (url contains /add)
+                user.should(seeThat("User is still on Add Plant page",
+                                actor -> BrowseTheWeb.as(actor).getDriver().getCurrentUrl().contains("/plants/add"),
+                                is(true)));
+        }
+
+        @Then("the validation error {string} is displayed")
+        public void theValidationErrorIsDisplayed(String errorMessage) {
+                Target errorTarget;
+                if (errorMessage.contains("Plant Name")) {
+                        errorTarget = PlantsPage.PLANT_NAME_ERROR;
+                } else if (errorMessage.contains("Price")) {
+                        errorTarget = PlantsPage.PRICE_ERROR;
+                } else {
+                        throw new IllegalArgumentException("Unknown validation error: " + errorMessage);
+                }
+                
+                user.should(seeThat("Validation error is displayed",
+                                net.serenitybdd.screenplay.questions.Visibility.of(errorTarget), is(true)));
+        }
+
+        @Then("validation error messages are displayed below specific fields")
+        public void validationErrorMessagesAreDisplayedBelowSpecificFields() {
+                user.should(
+                        seeThat("Plant Name validation error is visible",
+                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PLANT_NAME_ERROR), is(true)),
+                        seeThat("Price validation error is visible",
+                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PRICE_ERROR), is(true))
+                );
         }
 }
