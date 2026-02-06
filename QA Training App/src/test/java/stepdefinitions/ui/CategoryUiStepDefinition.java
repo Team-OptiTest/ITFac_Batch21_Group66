@@ -25,6 +25,11 @@ public class CategoryUiStepDefinition {
     public void theUserIsLoggedInAsAnAdminUser() {
         loginPage.loginAsAdmin();
     }
+
+    @Given("the user is logged in as a regular user")
+    public void theUserIsLoggedInAsARegularUser() {
+        loginPage.loginAsUser();
+    }
     
     @When("the user navigates to the categories page")
     public void theUserNavigatesToTheCategoriesPage() {
@@ -35,6 +40,13 @@ public class CategoryUiStepDefinition {
     public void theUserShouldSeeTheButton(String buttonText) {
         assertThat(categoryPage.isAddCategoryButtonVisible())
             .as("\"Add a category\" button should be visible to admin user")
+            .isTrue();
+    }
+
+    @Then("the user should not see the {string} button")
+    public void theUserShouldNotSeeTheAddCategoryButton(String buttonText) {
+        assertThat(categoryPage.isAddCategoryButtonNotVisible())
+            .as("\"Add a category\" button should not be visible to regular user")
             .isTrue();
     }
 
