@@ -2,13 +2,11 @@ package stepdefinitions.api;
 
 import actions.AuthenticationActions;
 import actions.CategoryActions;
-import actions.PlantAction;
+import actions.PlantActions;
 import actions.SalesAction;
 import io.cucumber.java.en.*;
-import io.restassured.path.json.JsonPath;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.HashMap;
@@ -19,7 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class SalesStepDefinitions {
 
     @Steps
-    PlantAction plantAction;
+    PlantActions plantActions;
 
     @Steps
     SalesAction salesAction;
@@ -46,7 +44,7 @@ public class SalesStepDefinitions {
         String token = Serenity.sessionVariableCalled("authToken");
         
         // Propagate token to other actions
-        plantAction.setToken(token);
+        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
@@ -62,13 +60,13 @@ public class SalesStepDefinitions {
         body.put("price", 20.0);
         body.put("quantity", initialStock);
         
-        plantAction.createPlant(categoryId, body);
+        plantActions.createPlant(categoryId, body);
         
-        plantId = plantAction.getLastCreatedPlantId();
+        plantId = plantActions.getLastCreatedPlantId();
         
         if (plantId == 0) {
              throw new RuntimeException("Failed to create plant in category " + categoryId 
-                 + ". Status: " + plantAction.getLastResponseStatusCode());
+                 + ". Status: " + plantActions.getLastResponseStatusCode());
         }
     }
 
@@ -86,14 +84,14 @@ public class SalesStepDefinitions {
 
     @Then("plant stock should be reduced accordingly")
     public void plant_stock_reduced() {
-        plantAction.getPlant(plantId);
-        plantAction.verifyStatusCode(200);
+        plantActions.getPlant(plantId);
+        plantActions.verifyStatusCode(200);
         
         int expectedStock = initialStock - quantitySold;
         net.serenitybdd.rest.SerenityRest.then().body("quantity", equalTo(expectedStock));
         
         // Cleanup
-        plantAction.deletePlant(plantId);
+        plantActions.deletePlant(plantId);
         // categoryActions.deleteCategoryById(categoryId); // Do not delete the shared category
     }
 
@@ -114,7 +112,7 @@ public class SalesStepDefinitions {
         
         // Cleanup plant ensures we don't leave data behind even on negative tests
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
+            plantActions.deletePlant(plantId);
         }
     }
     @When("admin creates a sale for plant {int} with quantity {int}")
@@ -144,7 +142,7 @@ public class SalesStepDefinitions {
         
         // Cleanup the plant created in at_least_one_sale_exists_in_the_system
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
+            plantActions.deletePlant(plantId);
             plantId = 0; // Reset to avoid double deletion
         }
     }
@@ -174,7 +172,7 @@ public class SalesStepDefinitions {
         
         // Cleanup plant
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
+            plantActions.deletePlant(plantId);
             plantId = 0;
         }
     }
@@ -183,7 +181,7 @@ public class SalesStepDefinitions {
     public void user_is_authenticated() {
         authenticationActions.authenticateUser();
         String token = Serenity.sessionVariableCalled("authToken");
-        plantAction.setToken(token);
+        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
@@ -203,7 +201,7 @@ public class SalesStepDefinitions {
         
         // Cleanup plant
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
+            plantActions.deletePlant(plantId);
             plantId = 0;
         }
     }

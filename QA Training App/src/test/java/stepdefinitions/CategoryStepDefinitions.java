@@ -168,15 +168,15 @@ public class CategoryStepDefinitions {
     @Then("the user should be denied permission to create a category")
     public void theUserShouldBeDeniedPermissionToCreateACategory() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Category creation should not succeed")
-            .isIn(403, 404);
+                .as("Category creation should not succeed")
+                .isIn(403, 404);
     }
 
     @Then("the category should be deleted successfully")
     public void theCategoryShouldBeDeletedSuccessfully() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Category deletion should succeed")
-            .isIn(204, 205);
+                .as("Category deletion should succeed")
+                .isIn(204, 205);
     }
 
     @Then("the API should return {int} Unauthorized")
@@ -199,8 +199,8 @@ public class CategoryStepDefinitions {
     @Then("the category deletion should fail")
     public void theCategoryDeletionShouldFail() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Category deletion should not succeed")
-            .isIn(403, 404);
+                .as("Category deletion should not succeed")
+                .isIn(403, 404);
     }
 
     @When("the admin fetches the category list")
@@ -216,8 +216,8 @@ public class CategoryStepDefinitions {
     @Then("the category list should be retrieved successfully")
     public void theCategoryListShouldBeRetrievedSuccessfully() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("the category list should be retrieved successfully")
-            .isEqualTo(200);
+                .as("the category list should be retrieved successfully")
+                .isEqualTo(200);
     }
 
     @When("the user searches for categories with name {string}")
@@ -233,8 +233,8 @@ public class CategoryStepDefinitions {
     @Then("the search results should be returned successfully")
     public void theSearchResultsShouldBeReturnedSuccessfully() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Search categories should return HTTP 200")
-            .isEqualTo(200);
+                .as("Search categories should return HTTP 200")
+                .isEqualTo(200);
     }
 
     @When("the user filters categories by parent ID {string}")
@@ -250,8 +250,8 @@ public class CategoryStepDefinitions {
     @Then("the filtered categories should be retrieved successfully")
     public void theFilteredCategoriesShouldBeRetrievedSuccessfully() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Filtered categories should be retrieved successfully with HTTP 200")
-            .isEqualTo(200);
+                .as("Filtered categories should be retrieved successfully with HTTP 200")
+                .isEqualTo(200);
     }
 
     @When("the admin updates that category with name {string}")
@@ -262,8 +262,8 @@ public class CategoryStepDefinitions {
     @Then("the category should be updated successfully")
     public void theCategoryShouldBeUpdatedSuccessfully() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Category update should succeed with HTTP 200")
-            .isEqualTo(200);
+                .as("Category update should succeed with HTTP 200")
+                .isEqualTo(200);
     }
 
     @When("the user updates that category with name {string}")
@@ -279,7 +279,36 @@ public class CategoryStepDefinitions {
     @Then("the category update should fail")
     public void theCategoryUpdateShouldFail() {
         assertThat(categoryActions.getLastResponseStatusCode())
-            .as("Category update should not succeed")
-            .isIn(403, 404);
+                .as("Category update should not succeed")
+                .isIn(403, 404);
+    }
+
+    @When("the user attempts to view a category with a non-existent ID")
+    public void theUserAttemptsToViewCategoryWithNonExistentId() {
+        categoryActions.getCategoryWithNonExistentId();
+    }
+
+    @When("the admin creates a category with a non-existent parent category ID")
+    public void theAdminCreatesACategoryWithNonExistentParentCategoryId() {
+        categoryActions.createCategoryWithNonExistentParentId();
+    }
+
+    @Then("the API should return {int} Not Found")
+    public void theApiShouldReturnNotFound(int expectedStatusCode) {
+        assertThat(categoryActions.getLastResponseStatusCode())
+                .as("API should return " + expectedStatusCode + " status code")
+                .isEqualTo(expectedStatusCode);
+    }
+
+    @When("the user requests the main categories")
+    public void theUserRequestsTheMainCategories() {
+        categoryActions.getMainCategories();
+    }
+
+    @Then("the response should contain a list of main categories")
+    public void theResponseShouldContainAListOfMainCategories() {
+        assertThat(categoryActions.responseContainsMainCategoriesList())
+                .as("Response should contain a list of main categories")
+                .isTrue();
     }
 }

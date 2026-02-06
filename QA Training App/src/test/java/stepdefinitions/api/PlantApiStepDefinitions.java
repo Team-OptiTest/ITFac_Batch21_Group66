@@ -1,41 +1,39 @@
 package stepdefinitions.api;
 
-import actions.PlantAction;
+import java.util.Map;
+
+import actions.AuthenticationActions;
+import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-
-import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
     private net.thucydides.model.util.EnvironmentVariables environmentVariables;
 
     @Steps
-    PlantAction plantAction;
+    PlantActions plantActions;
+
+    @Steps
+    AuthenticationActions authenticationActions;
 
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
-        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.admin.username");
-        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.admin.password");
-
-        plantAction.authenticateAsAdmin(username, password);
-    }
-
-    @Given("a valid category with ID {int} exists")
-    public void aValidCategoryWithIDExists(int id) {
+        authenticationActions.authenticateAsAdmin();
     }
 
     @Given("the user is authenticated with ROLE_USER")
     public void theUserIsAuthenticatedWithROLE_USER() {
-        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.username");
-        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.password");
-        plantAction.authenticateAsUser(username, password);
+        authenticationActions.authenticateUser();
+    }
+
+    @Given("a valid category with ID {int} exists")
+    public void aValidCategoryWithIDExists(Integer categoryId) {
+        // This is a precondition step - we assume the category exists in the test
+        // environment
+        // No action needed as this is just documenting the test precondition
     }
 
     @When("I POST to {string} with following data:")
@@ -50,27 +48,27 @@ public class PlantApiStepDefinitions {
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
 
-        plantAction.createPlant(categoryId, body);
+        plantActions.createPlant(categoryId, body);
     }
 
     @Then("the response status should be {int}")
     public void theResponseStatusShouldBe(int statusCode) {
-        plantAction.verifyStatusCode(statusCode);
+        plantActions.verifyStatusCode(statusCode);
     }
 
     @Then("the response should contain a plant object with an assigned ID")
     public void theResponseShouldContainAPlantObjectWithAnAssignedID() {
-        plantAction.verifyAssignedId();
+        plantActions.verifyAssignedId();
     }
 
     @Then("the plant name should be {string}")
     public void thePlantNameShouldBe(String name) {
-        plantAction.verifyPlantName(name);
+        plantActions.verifyPlantName(name);
     }
 
     @Then("the response error message should contain {string}")
     public void theResponseErrorMessageShouldContain(String expectedMessage) {
-        plantAction.verifyErrorMessage(expectedMessage);
+        plantActions.verifyErrorMessage(expectedMessage);
     }
 
     @When("I POST to {string} with invalid data:")
@@ -84,37 +82,37 @@ public class PlantApiStepDefinitions {
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
 
-        plantAction.createPlantWithInvalidData(categoryId, body);
+        plantActions.createPlantWithInvalidData(categoryId, body);
     }
 
     @When("I GET to {string} with query params {string}")
     public void iGETToWithQueryParams(String endpoint, String queryParams) {
-        plantAction.getPlantsWithPagination(endpoint, queryParams);
+        plantActions.getPlantsWithPagination(endpoint, queryParams);
     }
 
     @Then("the response should contain a list of plants")
     public void theResponseShouldContainAListOfPlants() {
-        plantAction.verifyPlantListExists();
+        plantActions.verifyPlantListExists();
     }
 
     @Then("the response should contain pagination metadata")
     public void theResponseShouldContainPaginationMetadata() {
-        plantAction.verifyPaginationMetadata();
+        plantActions.verifyPaginationMetadata();
     }
 
     @Then("the response should contain plants with name containing {string}")
     public void theResponseShouldContainPlantsWithNameContaining(String searchTerm) {
-        plantAction.verifyPlantsContainName(searchTerm);
+        plantActions.verifyPlantsContainName(searchTerm);
     }
 
     @When("I GET to {string}")
     public void iGETTo(String endpoint) {
-        plantAction.getPlantsByCategory(endpoint);
+        plantActions.getPlantsByCategory(endpoint);
     }
 
     @Then("the response should contain an array of plants")
     public void theResponseShouldContainAnArrayOfPlants() {
-        plantAction.verifyPlantsArrayExists();
+        plantActions.verifyPlantsArrayExists();
     }
 
     @Given("a plant with ID exists in the system")
@@ -123,35 +121,50 @@ public class PlantApiStepDefinitions {
         body.put("name", "TestPlant_" + System.currentTimeMillis());
         body.put("price", 25.00);
         body.put("quantity", 100);
-        plantAction.createPlantAndStoreId(5, body);
+        plantActions.createPlantAndStoreId(5, body);
     }
 
     @When("I DELETE to {string}")
     public void iDELETETo(String endpoint) {
-        plantAction.deletePlant(endpoint);
+        plantActions.deletePlant(endpoint);
     }
 
     @Then("the plant should no longer exist when retrieved")
     public void thePlantShouldNoLongerExistWhenRetrieved() {
-        plantAction.verifyPlantNoLongerExists();
+        plantActions.verifyPlantNoLongerExists();
     }
 
     @When("I PUT to {string} with new price {string}")
     public void iPUTToWithNewPrice(String endpoint, String newPrice) {
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("price", Double.parseDouble(newPrice));
-        plantAction.updatePlantPrice(endpoint, body);
+        plantActions.updatePlantPrice(endpoint, body);
     }
 
     @Then("the response should show updated price {string}")
     public void theResponseShouldShowUpdatedPrice(String expectedPrice) {
-        plantAction.verifyUpdatedPrice(Double.parseDouble(expectedPrice));
+        plantActions.verifyUpdatedPrice(Double.parseDouble(expectedPrice));
     }
 
     @When("I PUT to {string} with new quantity {string}")
     public void iPUTToWithNewQuantity(String endpoint, String newQuantity) {
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("quantity", Integer.parseInt(newQuantity));
-        plantAction.updatePlantQuantity(endpoint, body);
+        plantActions.updatePlantQuantity(endpoint, body);
+    }
+
+    @Given("at least one plant exists in the system")
+    public void atLeastOnePlantExistsInTheSystem() {
+        plantActions.ensureAtLeastOnePlantExists();
+    }
+
+    @When("the admin creates a plant with the same name and category as an existing plant")
+    public void theAdminCreatesAPlantWithTheSameNameAndCategoryAsAnExistingPlant() {
+        plantActions.createDuplicatePlant();
+    }
+
+    @Then("the error message should contain {string}")
+    public void theErrorMessageShouldContain(String expectedMessage) {
+        plantActions.verifyErrorMessage(expectedMessage);
     }
 }
