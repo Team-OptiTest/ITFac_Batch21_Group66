@@ -171,9 +171,6 @@ public class PlantApiStepDefinitions {
 
     @Then("the error message should contain {string}")
     public void theErrorMessageShouldContain(String expectedMessage) {
-        String responseBody = plantActions.getLastResponseBody();
-        if (!responseBody.toLowerCase().contains(expectedMessage.toLowerCase())) {
-            throw new AssertionError("Error message should contain: " + expectedMessage + ", but got: " + responseBody);
-        }
+        plantActions.verifyErrorMessage(expectedMessage);
     }
 }
