@@ -152,4 +152,14 @@ public class PlantApiStepDefinitions {
         body.put("quantity", Integer.parseInt(newQuantity));
         plantActions.updatePlantQuantity(endpoint, body);
     }
+
+    @When("the user attempts to view a plant with a non-existent ID")
+    public void theUserAttemptsToViewPlantWithNonExistentId() {
+        plantActions.getPlantWithNonExistentId();
+    }
+
+    @When("the admin creates a plant with a non-existent category ID")
+    public void theAdminCreatesPlantWithNonExistentCategoryId() {
+        plantActions.createPlantWithNonExistentCategory();
+    }
 }
