@@ -2,7 +2,11 @@ package pages;
 
 import net.serenitybdd.core.pages.PageObject;
 import net.serenitybdd.screenplay.Question;
+import net.serenitybdd.screenplay.Task;
 import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
+import net.serenitybdd.screenplay.actions.Click;
+import net.serenitybdd.screenplay.actions.Enter;
+import net.serenitybdd.screenplay.actions.SelectFromOptions;
 import net.serenitybdd.screenplay.questions.Text;
 import net.serenitybdd.screenplay.questions.Visibility;
 import net.serenitybdd.screenplay.targets.Target;
@@ -147,5 +151,54 @@ public class PlantsPage extends PageObject {
                                 return false;
                         }
                 };
+        }
+
+        public static class AddAPlant implements Task {
+                private String plantName;
+                private String category;
+                private String price;
+                private String quantity;
+
+                public static AddAPlant withDetails() {
+                        return new AddAPlant();
+                }
+
+                public AddAPlant name(String plantName) {
+                        this.plantName = plantName;
+                        return this;
+                }
+
+                public AddAPlant category(String category) {
+                        this.category = category;
+                        return this;
+                }
+
+                public AddAPlant price(String price) {
+                        this.price = price;
+                        return this;
+                }
+
+                public AddAPlant quantity(String quantity) {
+                        this.quantity = quantity;
+                        return this;
+                }
+
+                @Override
+                public <T extends net.serenitybdd.screenplay.Actor> void performAs(T actor) {
+                        actor.attemptsTo(Click.on(ADD_PLANT_BUTTON));
+                        if (plantName != null) {
+                                actor.attemptsTo(Enter.theValue(plantName).into(PLANT_NAME_FIELD));
+                        }
+                        if (category != null) {
+                                actor.attemptsTo(SelectFromOptions.byVisibleText(category).from(CATEGORY_DROPDOWN));
+                        }
+                        if (price != null) {
+                                actor.attemptsTo(Enter.theValue(price).into(PRICE_FIELD));
+                        }
+                        if (quantity != null) {
+                                actor.attemptsTo(Enter.theValue(quantity).into(QUANTITY_FIELD));
+                        }
+                        actor.attemptsTo(Click.on(SAVE_BUTTON));
+                }
         }
 }
