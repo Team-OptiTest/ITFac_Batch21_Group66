@@ -45,13 +45,19 @@ public class SalesStepDefinitions {
         
         // Propagate token to other actions
         plantActions.setToken(token);
-        salesAction.setToken(token);
+        salesAction.setToken(token);  
     }
 
     @Given("plant exists with sufficient stock")
     public void plant_exists_with_sufficient_stock() {
-        // Use existing sub-category "Flowering" (ID: 5)
-        categoryId = 5;
+        // Create a category first since ID 5 is not reliable
+        categoryActions.createCategory("Cat_" + (System.currentTimeMillis() % 10000));
+        Integer lastId = categoryActions.getLastCreatedCategoryId();
+        categoryId = (lastId != null) ? lastId : 0;
+        
+        if (categoryId == 0) {
+            throw new RuntimeException("Failed to create category for plant. Status: " + categoryActions.getLastResponseStatusCode());
+        }
 
         initialStock = 50;
         Map<String, Object> body = new HashMap<>();
@@ -60,7 +66,7 @@ public class SalesStepDefinitions {
         body.put("price", 20.0);
         body.put("quantity", initialStock);
         
-        plantActions.createPlant(categoryId, body);
+        plantActions.createPlantAndStoreId(categoryId, body);
         
         plantId = plantActions.getLastCreatedPlantId();
         
@@ -92,7 +98,10 @@ public class SalesStepDefinitions {
         
         // Cleanup
         plantActions.deletePlant(plantId);
-        // categoryActions.deleteCategoryById(categoryId); // Do not delete the shared category
+        if (categoryId != 0) {
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0; 
+        }
     }
 
     @When("admin creates a sale with quantity {int}")
@@ -113,6 +122,11 @@ public class SalesStepDefinitions {
         // Cleanup plant ensures we don't leave data behind even on negative tests
         if (plantId != 0) {
             plantActions.deletePlant(plantId);
+            plantId = 0;
+        }
+        if (categoryId != 0) {
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
         }
     }
     @When("admin creates a sale for plant {int} with quantity {int}")
@@ -126,7 +140,7 @@ public class SalesStepDefinitions {
 
     @Given("at least one sale exists in the system")
     public void at_least_one_sale_exists_in_the_system() {
-        plant_exists_with_sufficient_stock();
+      plant_exists_with_sufficient_stock();
         admin_creates_sale();
         sale_created_successfully();
     }
@@ -144,6 +158,10 @@ public class SalesStepDefinitions {
         if (plantId != 0) {
             plantActions.deletePlant(plantId);
             plantId = 0; // Reset to avoid double deletion
+        }
+        if (categoryId != 0) {
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
         }
     }
 
@@ -175,6 +193,10 @@ public class SalesStepDefinitions {
             plantActions.deletePlant(plantId);
             plantId = 0;
         }
+        if (categoryId != 0) {
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
+        }
     }
 
     @Given("user is authenticated")
@@ -203,6 +225,10 @@ public class SalesStepDefinitions {
         if (plantId != 0) {
             plantActions.deletePlant(plantId);
             plantId = 0;
+        }
+        if (categoryId != 0) {
+            categoryActions.deleteCategoryById(categoryId);
+            categoryId = 0;
         }
     }
 }
