@@ -1,13 +1,13 @@
 package stepdefinitions.api;
 
+import java.util.Map;
+
 import actions.AuthenticationActions;
 import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-
-import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
@@ -157,5 +157,23 @@ public class PlantApiStepDefinitions {
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("quantity", Integer.parseInt(newQuantity));
         plantActions.updatePlantQuantity(endpoint, body);
+    }
+
+    @Given("at least one plant exists in the system")
+    public void atLeastOnePlantExistsInTheSystem() {
+        plantActions.ensureAtLeastOnePlantExists();
+    }
+
+    @When("the admin creates a plant with the same name and category as an existing plant")
+    public void theAdminCreatesAPlantWithTheSameNameAndCategoryAsAnExistingPlant() {
+        plantActions.createDuplicatePlant();
+    }
+
+    @Then("the error message should contain {string}")
+    public void theErrorMessageShouldContain(String expectedMessage) {
+        String responseBody = plantActions.getLastResponseBody();
+        if (!responseBody.toLowerCase().contains(expectedMessage.toLowerCase())) {
+            throw new AssertionError("Error message should contain: " + expectedMessage + ", but got: " + responseBody);
+        }
     }
 }
