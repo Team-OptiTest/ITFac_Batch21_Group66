@@ -19,8 +19,6 @@ public class CategoryActions {
 
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
 
-    private Integer lastCreatedCategoryId;
-
     private String getBaseUrl() {
         return EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.base.url");
