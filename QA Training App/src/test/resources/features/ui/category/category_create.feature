@@ -30,6 +30,6 @@ Feature: Create Category
 
   @Ui @Category_Create_004
   Scenario: "Add a category" button not visible to regular user
-    Given the user is logged in as a regular user
+    Given the user is logged in as a user
     When the user navigates to the categories page
     Then the user should not see the "Add a category" button
