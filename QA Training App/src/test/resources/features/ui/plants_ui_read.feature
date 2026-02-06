@@ -4,7 +4,7 @@ Feature: Plant Management - UI Read Operations
   So that I can find specific plants easily
 
   Background:
-    Given the admin user is authenticated
+    Given the user is logged in as an admin user
     And the user is on the Plants page
 
   @UI @Plant @Reading
