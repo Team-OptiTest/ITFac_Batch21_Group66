@@ -44,15 +44,24 @@ public class PlantActions {
 
                 initRequest();
 
-                requestSpec
+                io.restassured.response.Response response = requestSpec
                                 .contentType(ContentType.JSON)
                                 .body(plantData)
                                 .when()
                                 .post(fullUrl);
 
-                if (SerenityRest.lastResponse().getStatusCode() == 201
-                                || SerenityRest.lastResponse().getStatusCode() == 200) {
+                int statusCode = response.getStatusCode();
+                if (statusCode == 200 || statusCode == 201) {
                         this.plantWasCreated = true;
+                        try {
+                                String idStr = response.jsonPath().getString("id");
+                                if (idStr != null) {
+                                        this.createdPlantId = Integer.parseInt(idStr);
+                                        this.createdPlantData = new java.util.HashMap<>(plantData);
+                                }
+                        } catch (Exception e) {
+                                System.out.println("Could not extract plant ID in createPlant: " + e.getMessage());
+                        }
                 }
         }
 
