@@ -70,3 +70,8 @@ Feature: Category Read Operations
     When the user requests the main categories
     Then the API should return 200 OK
     And the response should contain a list of main categories
+
+  @simple @API_Category_Read_006 @security @authentication
+  Scenario: API rejects requests without JWT token
+    When a request is made to get categories without JWT token
+    Then the API should be returned 401 Unauthorized

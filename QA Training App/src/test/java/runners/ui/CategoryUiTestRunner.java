@@ -3,12 +3,11 @@ package runners.ui;
 import org.junit.runner.RunWith;
 import io.cucumber.junit.CucumberOptions;
 import net.serenitybdd.cucumber.CucumberWithSerenity;
-
 @RunWith(CucumberWithSerenity.class)
 @CucumberOptions(
-    features = "src/test/resources/features/ui/authentication",
+    features = "src/test/resources/features/ui/category",
     glue = "stepdefinitions.ui",
     plugin = {"pretty"}
 )
-public class LoginUiRunner {
+public class CategoryUiTestRunner {
 }

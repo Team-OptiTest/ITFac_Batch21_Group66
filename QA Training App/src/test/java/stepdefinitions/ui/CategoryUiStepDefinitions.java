@@ -10,7 +10,7 @@ import pages.LoginPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CategoryUiStepDefinition {
+public class CategoryUiStepDefinitions {
     
     @Steps
     LoginPage loginPage;
