@@ -314,27 +314,5 @@ public class CategoryActions {
         System.out.println("Response: " + lastResponse.getBody().asString());
     }
 
-    @Step("Update category with ID: {0} and name: {1}")
-    public void updateCategory(Integer categoryId, String updatedName) {
-        String token = getAuthToken();
-        String updateUrl = getBaseUrl() + "/api/categories/" + categoryId;
-        String requestBody = String.format("{\"name\":\"%s\"}", updatedName);
-        
-        System.out.println("=== UPDATE CATEGORY DEBUG ===");
-        System.out.println("Category ID: " + categoryId);
-        System.out.println("Updated Name: " + updatedName);
-        System.out.println("Update URL: " + updateUrl);
-        System.out.println("Auth Token: " + (token != null ? "Present" : "NULL"));
-        System.out.println("==============================");
-
-        lastResponse = SerenityRest.given()
-            .header("Authorization", "Bearer " + token)
-            .header("Content-Type", "application/json")
-            .body(requestBody)
-            .when()
-            .put(updateUrl);
-
-        System.out.println("Status Code: " + lastResponse.getStatusCode());
-        System.out.println("Response: " + lastResponse.getBody().asString());
-    }
+    
 }
