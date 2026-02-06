@@ -34,3 +34,48 @@ Feature: Plant Retrieval API
     Then the API should return 404 Not Found
     And the error message should contain "Plant not found"
     
+  @API @Plant_Read_003_1 @negative
+  Scenario: Negative page returns 400
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "page=-1&size=10&sort=name"
+    Then the response status should be 400
+
+  @API @Plant_Read_003_2 @negative
+  Scenario: Negative size returns 400
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "page=0&size=-5&sort=name"
+    Then the response status should be 400
+
+  @API @Plant_Read_003_3 @negative
+  Scenario: Non-numeric values return 400
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "page=abc&size=xyz&sort=name"
+    Then the response status should be 400
+
+  @API @Plant_Read_003_4 @negative
+  Scenario: Zero size returns 400
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "page=0&size=0&sort=name"
+    Then the response status should be 400
+
+  @API @Plant_Read_003_5 @negative
+  Scenario: Large size returns 400
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "page=0&size=1001&sort=name"
+    Then the response status should be 400
+
+  @simple @API_Plant_Read_004 @pagination @default
+  Scenario: Get paginated plant list with default values
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/paged" with query params "page=0&size=10&sort=name"
+    Then the response status should be 200
+    And the response should contain a content array
+    And the response page number should be 0
+    And the response page size should be 10
+    And the response should contain pagination metadata
+  
+  @simple @API_Plant_Read_005 @security @authentication
+  Scenario: API rejects invalid JWT token for plant retrieval
+    Given the user has an invalid JWT token
+    When I GET to "/api/plants/paged" with query params "page=0&size=10&sort=name"
+    Then the response status should be 401 Unauthorized

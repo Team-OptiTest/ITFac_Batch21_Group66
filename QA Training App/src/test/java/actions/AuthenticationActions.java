@@ -3,10 +3,10 @@ package actions;
 import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.rest.SerenityRest;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
-import net.thucydides.model.util.EnvironmentVariables;
+import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
+import net.thucydides.model.util.EnvironmentVariables;
 
 public class AuthenticationActions {
 
@@ -73,4 +73,12 @@ public class AuthenticationActions {
     public String getAuthToken() {
         return authToken;
     }
+    @Step("Set invalid JWT token")
+public void setInvalidJWTToken() {
+    // Set an obviously invalid token
+    String invalidToken = "invalid.jwt.token.123";
+    authToken = invalidToken;
+    Serenity.setSessionVariable("authToken").to(invalidToken);
+    System.out.println("Set invalid JWT token for testing");
+}
 }

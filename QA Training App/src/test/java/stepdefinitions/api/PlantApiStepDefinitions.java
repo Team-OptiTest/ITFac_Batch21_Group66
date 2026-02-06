@@ -1,13 +1,13 @@
 package stepdefinitions.api;
 
+import java.util.Map;
+
 import actions.AuthenticationActions;
 import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-
-import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
@@ -151,6 +151,31 @@ public class PlantApiStepDefinitions {
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("quantity", Integer.parseInt(newQuantity));
         plantActions.updatePlantQuantity(endpoint, body);
+    }
+
+    @Then("the response should contain inventory statistics")
+    public void theResponseShouldContainInventoryStatistics() {
+        plantActions.verifyInventoryStatistics();
+    }
+
+    @Then("the response should contain a content array")
+    public void theResponseShouldContainAContentArray() {
+        plantActions.verifyResponseHasContentArray();
+    }
+
+    @Then("the response page number should be {int}")
+    public void theResponsePageNumberShouldBe(int expectedPage) {
+        plantActions.verifyPageNumber(expectedPage);
+    }
+
+    @Then("the response page size should be {int}")
+    public void theResponsePageSizeShouldBe(int expectedSize) {
+        plantActions.verifyPageSize(expectedSize);
+    }
+
+    @Then("the response status should be {int} Unauthorized")
+    public void theResponseStatusShouldBeUnauthorized(int expectedStatusCode) {
+        plantActions.verifyStatusCode(expectedStatusCode);
     }
 
     @When("the user attempts to view a plant with a non-existent ID")
