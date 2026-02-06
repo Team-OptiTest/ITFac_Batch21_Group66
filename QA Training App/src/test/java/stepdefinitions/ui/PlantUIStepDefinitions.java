@@ -15,9 +15,9 @@ import org.openqa.selenium.WebDriver;
 import net.serenitybdd.screenplay.targets.Target;
 import pages.PlantsPage;
 import questions.PlantQuestions;
-import tasks.Login;
 import tasks.NavigateTo;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
+import pages.LoginPage;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static org.hamcrest.Matchers.containsString;
@@ -32,11 +32,38 @@ public class PlantUIStepDefinitions {
 
         private Actor user;
 
+<<<<<<< HEAD
         @Before
         public void setUp() {
                 environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
                 user = Actor.named("Admin User");
                 user.can(BrowseTheWeb.with(driver));
+=======
+    private LoginPage loginPage;
+
+    @Before
+    public void setUp() {
+        environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
+        user = Actor.named("Admin User");
+        user.can(BrowseTheWeb.with(driver));
+    }
+
+    @Given("the user is logged in as Admin with username {string} and password {string}")
+    public void theUserIsLoggedInAsAdmin(String username, String password) {
+        loginPage.loginAsAdmin();
+    }
+
+    @Given("the user is on the Plants page")
+    public void theUserIsOnThePlantsPage() {
+        user.attemptsTo(
+                NavigateTo.plantsPage(environmentVariables));
+    }
+
+    @When("the user clicks on the {string} button")
+    public void theUserClicksOnTheButton(String buttonText) {
+        if (!"Add a Plant".equalsIgnoreCase(buttonText)) {
+            throw new IllegalArgumentException("Unsupported button: " + buttonText);
+>>>>>>> ac695b3 (Refactor Login functionality to use environment variables and remove Login task class)
         }
 
         @Given("the admin user is authenticated")
