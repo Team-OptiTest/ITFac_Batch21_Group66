@@ -153,6 +153,21 @@ public class PlantApiStepDefinitions {
         plantActions.updatePlantQuantity(endpoint, body);
     }
 
+    @Given("at least one plant exists in the system")
+    public void atLeastOnePlantExistsInTheSystem() {
+        plantActions.ensureAtLeastOnePlantExists();
+    }
+
+    @When("the admin creates a plant with the same name and category as an existing plant")
+    public void theAdminCreatesAPlantWithTheSameNameAndCategoryAsAnExistingPlant() {
+        plantActions.createDuplicatePlant();
+    }
+
+    @Then("the error message should contain {string}")
+    public void theErrorMessageShouldContain(String expectedMessage) {
+        plantActions.verifyErrorMessage(expectedMessage);
+    }
+
 @Then("the response should contain inventory statistics")
 public void theResponseShouldContainInventoryStatistics() {
     plantActions.verifyInventoryStatistics();

@@ -35,6 +35,8 @@ replay_pid*
 *.env
 .env
 
+QA Training App/.idea
+
 
 how-to-run.txt
 
