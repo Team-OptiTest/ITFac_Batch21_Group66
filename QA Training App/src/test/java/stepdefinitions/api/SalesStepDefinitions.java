@@ -5,7 +5,7 @@ import java.util.Map;
 
 import actions.AuthenticationActions;
 import actions.CategoryActions;
-import actions.PlantAction;
+import actions.PlantActions;
 import actions.SalesAction;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -17,7 +17,7 @@ import net.thucydides.model.util.EnvironmentVariables;
 public class SalesStepDefinitions {
 
     @Steps
-    PlantAction plantAction;
+    PlantActions plantActions;
 
     @Steps
     SalesAction salesAction;
@@ -32,50 +32,54 @@ public class SalesStepDefinitions {
     private int plantId;
     private int initialStock;
     private int currentQuantityBeforeSale;
+    private int categoryId;
+        private int initialQuantity;
+
 
     @Given("admin is authenticated")
     public void admin_is_authenticated() {
         authenticationActions.authenticateAsAdmin();
         String token = Serenity.sessionVariableCalled("authToken");
-        plantAction.setToken(token);
         salesAction.setToken(token);
     }
+    @Given("plant exists with sufficient stock")
+    public void plant_exists_with_sufficient_stock() {
+        // First, look for an existing plant with at least 10 units
+        Integer existingPlantId = plantActions.findExistingPlantWithStock();
 
-    @Given("a plant exists with quantity ≥ {int}")
-public void a_plant_exists_with_quantity_greater_than_or_equal(int minQuantity) {
-    // Try different category IDs until you find a sub-category
-    int[] possibleCategoryIds = {1, 2, 3, 4, 6, 7, 8, 9, 10};
-    boolean plantCreated = false;
-    
-    for (int categoryId : possibleCategoryIds) {
-        initialStock = minQuantity + 10;
-        
-        Map<String, Object> body = new HashMap<>();
-        body.put("name", "SalePlant" + (System.currentTimeMillis() % 1000));
-        body.put("price", 25.0);
-        body.put("quantity", initialStock);
-        
-        plantAction.createPlant(categoryId, body);
-        
-        if (plantAction.getLastResponse() != null && 
-            plantAction.getLastResponse().getStatusCode() == 201) {
-            plantId = plantAction.getLastCreatedPlantId();
-            plantCreated = true;
-            break;
+        if (existingPlantId != null && existingPlantId > 0) {
+            plantId = existingPlantId;
+            initialStock = plantActions.getPlantQuantity(plantId);
+            System.out.println("Reusing existing plant ID: " + plantId + " with stock: " + initialStock);
+        } else {
+            // Fallback: Create a category first since no suitable plant was found
+            categoryActions.createCategory("Cat_" + (System.currentTimeMillis() % 10000));
+            Integer lastId = categoryActions.getLastCreatedCategoryId();
+            categoryId = (lastId != null) ? lastId : 0;
+
+            if (categoryId == 0) {
+                throw new RuntimeException("Fallback failed: Could not create category. Status: "
+                        + categoryActions.getLastResponseStatusCode());
+            }
+
+            initialStock = 50;
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", "Fallback_" + (System.currentTimeMillis() % 10000));
+            body.put("price", 20.0);
+            body.put("quantity", initialStock);
+
+            
+plantActions.createPlantAndStoreId(categoryId, body);
+            plantId = plantActions.getLastCreatedPlantId();
+
+            if (plantId == 0) {
+                throw new RuntimeException("Fallback failed: Could not create plant in category " + categoryId
+                        + ". Status: " + plantActions.getLastResponseStatusCode());
+            }
         }
     }
+
     
-    if (!plantCreated) {
-        throw new RuntimeException("Failed to create plant. No valid sub-category found.");
-    }
-}
-    @When("admin gets the plant to note current quantity")
-    public void admin_gets_the_plant_to_note_current_quantity() {
-        plantAction.getPlant(plantId);
-        if (plantAction.getLastResponse() != null) {
-            currentQuantityBeforeSale = plantAction.getLastResponse().jsonPath().getInt("quantity");
-        }
-    }
 
     @When("admin creates a sale with quantity {int}")
     public void admin_creates_a_sale_with_quantity(int quantity) {
@@ -89,13 +93,21 @@ public void a_plant_exists_with_quantity_greater_than_or_equal(int minQuantity) 
 
     @When("admin gets the plant again")
     public void admin_gets_the_plant_again() {
-        plantAction.getPlant(plantId);
+        plantActions.getPlant(plantId);
     }
 
-    @Then("the plant quantity should be reduced by {int}")
+     @Then("the plant quantity should be reduced by {int}")
     public void the_plant_quantity_should_be_reduced_by(int reductionAmount) {
-        int currentQuantity = plantAction.getLastResponse().jsonPath().getInt("quantity");
-        int expectedQuantity = currentQuantityBeforeSale - reductionAmount;
+        // Get current plant quantity after sale
+        int currentQuantity = plantActions.getPlantQuantity(plantId);
+        int expectedQuantity = initialQuantity - reductionAmount;
+        
+        System.out.println("=== QUANTITY VERIFICATION ===");
+        System.out.println("Initial quantity: " + initialQuantity);
+        System.out.println("Reduction amount: " + reductionAmount);
+        System.out.println("Expected quantity: " + expectedQuantity);
+        System.out.println("Actual quantity: " + currentQuantity);
+        System.out.println("=============================");
         
         if (currentQuantity != expectedQuantity) {
             throw new AssertionError(
@@ -104,15 +116,16 @@ public void a_plant_exists_with_quantity_greater_than_or_equal(int minQuantity) 
             );
         }
         
+        // Cleanup - delete the test plant
         cleanupTestData();
     }
-
     private void cleanupTestData() {
         if (plantId != 0) {
             try {
-                plantAction.deletePlant(plantId);
+                plantActions.deletePlant(plantId);
+                System.out.println("Cleaned up test plant ID: " + plantId);
             } catch (Exception e) {
-                // Ignore cleanup errors
+                System.out.println("Warning: Failed to cleanup plant " + plantId + ": " + e.getMessage());
             }
         }
     }

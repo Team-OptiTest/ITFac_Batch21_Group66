@@ -16,6 +16,7 @@ public class CategoryActions {
     private List<Integer> existingCategoryIds;
     
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
+    private Integer lastCreatedCategoryId;
     
     private String getBaseUrl() {
         return EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -131,4 +132,12 @@ public void getCategoriesSummary() {
             .header("Authorization", "Bearer " + getAuthToken())
             .get(getBaseUrl() + "/api/categories/summary");
 }
+@Step("Get last created category ID")
+    public Integer getLastCreatedCategoryId() {
+        Integer sessionId = Serenity.sessionVariableCalled("lastCreatedCategoryId");
+        if (sessionId != null) {
+            return sessionId;
+        }
+        return lastCreatedCategoryId;
+    }
 }
