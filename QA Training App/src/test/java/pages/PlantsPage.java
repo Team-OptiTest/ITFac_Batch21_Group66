@@ -53,7 +53,8 @@ public class PlantsPage extends PageObject {
                         .located(By.xpath("//h1 | //h2"));
 
         public static final Target PLANT_NAME_ERROR = Target.the("Plant Name error")
-                        .located(By.xpath("//*[contains(text(), 'Plant name is required')]"));
+                        .located(By.xpath(
+                                        "//div[contains(@class, 'text-danger') and contains(., 'Plant name is required')]"));
 
         public static final Target PRICE_ERROR = Target.the("Price error")
                         .located(By.xpath("//*[contains(text(), 'Price is required')]"));

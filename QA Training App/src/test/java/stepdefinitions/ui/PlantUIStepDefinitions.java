@@ -50,6 +50,11 @@ public class PlantUIStepDefinitions {
                 loginPage.loginAsUser();
         }
 
+        @Given("the user is logged in as a user")
+        public void theUserIsLoggedInAsUser() {
+                loginPage.loginAsUser();
+        }
+
         @Given("the user is on the Plants page")
         public void theUserIsOnThePlantsPage() {
                 plantsPage.theUserIsOnThePlantsPage();
@@ -150,7 +155,7 @@ public class PlantUIStepDefinitions {
         @Then("the validation error {string} is displayed")
         public void theValidationErrorIsDisplayed(String errorMessage) {
                 Target errorTarget;
-                if (errorMessage.contains("Plant Name")) {
+                if (errorMessage.contains("Plant name")) {
                         errorTarget = PlantsPage.PLANT_NAME_ERROR;
                 } else if (errorMessage.contains("Price")) {
                         errorTarget = PlantsPage.PRICE_ERROR;
@@ -197,19 +202,6 @@ public class PlantUIStepDefinitions {
 
                                         return relocated || forbiddenMessage;
                                 }, is(true)));
-        }
-
-        @Then("validation error messages are displayed below specific fields")
-        public void validationErrorMessagesAreDisplayedBelowSpecificFields() {
-                user.should(
-                                seeThat("Plant Name validation error is visible",
-                                                net.serenitybdd.screenplay.questions.Visibility
-                                                                .of(PlantsPage.PLANT_NAME_ERROR),
-                                                is(true)),
-                                seeThat("Price validation error is visible",
-                                                net.serenitybdd.screenplay.questions.Visibility
-                                                                .of(PlantsPage.PRICE_ERROR),
-                                                is(true)));
         }
 
         // Delete Plant Step Definitions

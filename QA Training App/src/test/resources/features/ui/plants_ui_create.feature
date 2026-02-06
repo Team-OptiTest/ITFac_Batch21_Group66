@@ -3,12 +3,10 @@ Feature: Plant Management - UI Create Operations
   I want to add new plants through the UI
   So that I can manage the plant inventory
 
-  Background:
-    Given the user is logged in as an admin user
-    And the user is on the Plants page
-
   @UI @Plant
   Scenario: Add New Plant (Success)
+    Given the user is logged in as an admin user
+    And the user is on the Plants page
     When the user clicks on the "Add a Plant" button
     And the user enters "Daliya" as the Plant Name
     And the user selects a Category from the dropdown
@@ -22,6 +20,8 @@ Feature: Plant Management - UI Create Operations
 
   @UI @Plant @Validation
   Scenario: Add New Plant Validation (Failure)
+    Given the user is logged in as an admin user
+    And the user is on the Plants page
     When the user clicks on the "Add a Plant" button
     And the user leaves the "Plant Name" empty
     And the user selects a Category from the dropdown
@@ -29,9 +29,8 @@ Feature: Plant Management - UI Create Operations
     And the user enters "20" as the Quantity
     And the user clicks the Save button
     Then the form is not submitted
-    And validation error messages are displayed below specific fields
-    And the validation error "Plant Name is required" is displayed
     And the validation error "Price is required" is displayed
+    And the validation error "Plant name is required" is displayed
 
   @UI @Plant @AccessControl
   Scenario: Access Control - Normal User cannot add plant (Direct URL)
