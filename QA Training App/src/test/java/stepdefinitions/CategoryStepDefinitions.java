@@ -17,6 +17,7 @@ public class CategoryStepDefinitions {
     @Steps
     AuthenticationActions authenticationActions;
 
+
     @Given("the user is authenticated as admin")
     public void theUserIsAuthenticatedAsAdmin() {
         authenticationActions.authenticateAsAdmin();
@@ -30,48 +31,32 @@ public class CategoryStepDefinitions {
     @Given("a category named {string} exists")
     public void aCategoryNamedExists(String categoryName) {
         categoryActions.createCategory(categoryName);
-
-        // If creation fails (maybe duplicate), that's OK for our test setup
         System.out.println("Setup: Category '" + categoryName + "' should exist now");
     }
 
+    @Given("the user has a valid JWT token")
+    public void theUserHasAValidJWTToken() {
+        authenticationActions.authenticateAsAdmin();
+    }
+
+    @Given("the user has an expired JWT token:")
+    public void theUserHasAnExpiredJWTToken(String expiredToken) {
+        System.out.println("Expired token provided: " + expiredToken.substring(0, 50) + "...");
+    }
+    @Given("a category with ID {int} exists")
+    public void aCategoryWithIDExists(int categoryId) {
+        System.out.println("Assuming category with ID " + categoryId + " exists for testing");
+    }
+
+   
     @When("the admin attempts to create another category with name {string}")
     public void theAdminAttemptsToCreateAnotherCategoryWithName(String categoryName) {
-        // Try to create the same category again
         categoryActions.createCategory(categoryName);
     }
 
     @When("the admin creates a category with valid name {string}")
     public void theAdminCreatesACategoryWithName(String categoryName) {
         categoryActions.createCategory(categoryName);
-    }
-
-    @When("the admin requests categories summary")
-    public void theAdminRequestsCategoriesSummary() {
-        categoryActions.getCategoriesSummary();
-    }
-
-    @Then("the API should return {int} OK")
-    public void theAPIShouldReturnOK(int expectedStatusCode) {
-        int actualStatusCode = categoryActions.getLastResponseStatusCode();
-
-        assertThat(actualStatusCode)
-                .as("API should return " + expectedStatusCode + " status code")
-                .isEqualTo(expectedStatusCode);
-    }
-
-    @Then("the category should be created successfully")
-    public void theCategoryShouldBeCreatedSuccessfully() {
-        assertThat(categoryActions.getLastResponseStatusCode())
-                .as("Category creation should succeed")
-                .isIn(200, 201);
-    }
-
-    @Then("the API should return 400 Bad Request")
-    public void theAPIShouldReturn400BadRequest() {
-        assertThat(categoryActions.getLastResponseStatusCode())
-                .as("API should return 400 for duplicate")
-                .isEqualTo(400);
     }
 
     @When("the admin creates a category with less than 3 characters {string}")
@@ -94,6 +79,56 @@ public class CategoryStepDefinitions {
         categoryActions.createCategory(categoryName);
     }
 
+    @When("the admin deletes an existing category with ID {long}")
+    public void theAdminDeletesAnExistingCategoryWithId(long categoryId) {
+        categoryActions.deleteCategoryById((int) categoryId);
+    }
+
+    @When("the admin requests categories summary")
+    public void theAdminRequestsCategoriesSummary() {
+        categoryActions.getCategoriesSummary();
+    }
+
+    @When("the user requests categories summary")
+    public void theUserRequestsCategoriesSummary() {
+        categoryActions.getCategoriesSummary();
+    }
+
+    @When("the user requests categories summary with invalid token")
+    public void theUserRequestsCategoriesSummaryWithInvalidToken() {
+        categoryActions.getCategoriesSummary();
+    }
+    @When("a request is made to get category with ID {int} without JWT token")
+    public void aRequestIsMadeToGetCategoryWithIDWithoutJWTToken(int categoryId) {
+        categoryActions.getCategoryById(categoryId);
+    }
+
+    @When("a request is made to get categories without JWT token")
+    public void aRequestIsMadeToGetCategoriesWithoutJWTToken() {
+        categoryActions.getCategoriesSummary();
+    }
+
+    @Then("the API should return {int} OK")
+    public void theAPIShouldReturnOK(int expectedStatusCode) {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("API should return " + expectedStatusCode + " status code")
+            .isEqualTo(expectedStatusCode);
+    }
+
+    @Then("the category should be created successfully")
+    public void theCategoryShouldBeCreatedSuccessfully() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("Category creation should succeed")
+            .isIn(200, 201);
+    }
+
+    @Then("the API should return 400 Bad Request")
+    public void theAPIShouldReturn400BadRequest() {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("API should return 400 for duplicate")
+            .isEqualTo(400);
+    }
+
     @Then("the category creation should fail with validation error")
     public void theCategoryCreationShouldFailWithValidationError() {
         int statusCode = categoryActions.getLastResponseStatusCode();
@@ -103,14 +138,13 @@ public class CategoryStepDefinitions {
         System.out.println("Status code: " + statusCode);
         System.out.println("Response: " + responseBody);
 
-        // @API_Category_Create_004 - Verify that creating a category with invalid data fails
         assertThat(statusCode)
-                .as("Category creation should fail with 400 Bad Request")
-                .isEqualTo(400);
+            .as("Category creation should fail with 400 Bad Request")
+            .isEqualTo(400);
 
         assertThat(responseBody)
-                .as("Response should contain error details")
-                .isNotEmpty();
+            .as("Response should contain error details")
+            .isNotEmpty();
 
         System.out.println("=== VERIFICATION COMPLETE ===\n");
     }
@@ -124,11 +158,10 @@ public class CategoryStepDefinitions {
         System.out.println("Actual response: " + responseBody);
 
         assertThat(responseBody.toLowerCase())
-                .as("Error message should contain: " + expectedMessage)
-                .contains(expectedMessage.toLowerCase());
+            .as("Error message should contain: " + expectedMessage)
+            .contains(expectedMessage.toLowerCase());
 
         System.out.println("=== VERIFICATION COMPLETE ===\n");
-        //@API_Category_Create_005 - Verify that the error message contains specific text
     }
 
     @Then("the user should be denied permission to create a category")
@@ -138,16 +171,18 @@ public class CategoryStepDefinitions {
                 .isIn(403, 404);
     }
 
-    @When("the admin deletes that category")
-    public void theAdminDeletesThatCategory() {
-        categoryActions.deleteCategoryById(categoryActions.getLastCreatedCategoryId());
-    }
-
     @Then("the category should be deleted successfully")
     public void theCategoryShouldBeDeletedSuccessfully() {
         assertThat(categoryActions.getLastResponseStatusCode())
                 .as("Category deletion should succeed")
                 .isIn(204, 205);
+    }
+
+    @Then("the API should return {int} Unauthorized")
+    public void theAPIShouldReturnUnauthorized(int expectedStatusCode) {
+        assertThat(categoryActions.getLastResponseStatusCode())
+            .as("API should return " + expectedStatusCode + " Unauthorized")
+            .isEqualTo(expectedStatusCode);
     }
 
     @When("the user deletes that category")

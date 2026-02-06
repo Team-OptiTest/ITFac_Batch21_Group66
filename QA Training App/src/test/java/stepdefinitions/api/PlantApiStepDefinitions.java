@@ -35,6 +35,14 @@ public class PlantApiStepDefinitions {
         // environment
         // No action needed as this is just documenting the test precondition
     }
+    @Given("the user is authenticated with ROLE_USER")
+    public void theUserIsAuthenticatedWithROLE_USER() {
+        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.username");
+        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("test.user.password");
+        plantAction.authenticateAsUser(username, password);
+    }
 
     @When("I POST to {string} with following data:")
     public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
@@ -171,5 +179,15 @@ public class PlantApiStepDefinitions {
     @When("the admin creates a plant with a non-existent category ID")
     public void theAdminCreatesAPlantWithANonExistentCategoryID() {
         plantActions.createPlantWithNonExistentCategory();
+    }
+  
+    @When("I GET to {string}")
+    public void iGETTo(String endpoint) {
+        plantAction.getRequest(endpoint);
+    }
+
+    @Then("the response should contain inventory statistics")
+    public void theResponseShouldContainInventoryStatistics() {
+        plantAction.verifyInventoryStatistics();
     }
 }
