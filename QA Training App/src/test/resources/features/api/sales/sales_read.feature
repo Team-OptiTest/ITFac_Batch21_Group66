@@ -20,3 +20,13 @@ Feature: Sales API - Read Sales
     Given user is authenticated
     When user retrieves the sale with valid saleId
     Then the sale details should be returned successfully
+
+  Scenario: API_Sales_Read_005 - Retrieve Sale with Invalid ID - User
+    Given user is authenticated
+    When user attempts to retrieve a sale with non-existent ID
+    Then the API should return 404 Not Found with message "Sale not found"
+  Scenario: API_Sales_Read_006 - Retrieve Sale – Unauthorized Access
+    Given admin is authenticated
+    And a valid sale exists in the system
+    When an unauthenticated user attempts to retrieve the sale
+    Then the API should return 401 Unauthorized
