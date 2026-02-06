@@ -14,6 +14,7 @@ public class PlantActions {
         private String authToken;
         private Integer createdPlantId;
         private Map<String, Object> createdPlantData;
+        private boolean plantWasCreated = false;
         private io.restassured.specification.RequestSpecification requestSpec;
         private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables
                         .createEnvironmentVariables();
@@ -48,6 +49,11 @@ public class PlantActions {
                                 .body(plantData)
                                 .when()
                                 .post(fullUrl);
+
+                if (SerenityRest.lastResponse().getStatusCode() == 201
+                                || SerenityRest.lastResponse().getStatusCode() == 200) {
+                        this.plantWasCreated = true;
+                }
         }
 
         @Step("Verify response status code is {0}")
@@ -205,6 +211,10 @@ public class PlantActions {
                                 .when()
                                 .post(fullUrl);
 
+                if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
+                        this.plantWasCreated = true;
+                }
+
                 int statusCode = response.getStatusCode();
                 if (statusCode == 200 || statusCode == 201) {
                         try {
@@ -321,6 +331,10 @@ public class PlantActions {
                 this.authToken = token;
         }
 
+        public boolean wasPlantCreated() {
+                return this.plantWasCreated;
+        }
+
         public int getLastCreatedPlantId() {
                 return this.createdPlantId != null ? this.createdPlantId : 0;
         }
@@ -398,6 +412,7 @@ public class PlantActions {
                                         if (quantity != null && quantity.intValue() >= 10) {
                                                 this.createdPlantId = ((Number) plant.get("id")).intValue();
                                                 this.createdPlantData = plant;
+                                                this.plantWasCreated = false;
                                                 return this.createdPlantId;
                                         }
                                 }

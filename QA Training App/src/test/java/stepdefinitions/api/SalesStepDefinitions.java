@@ -105,7 +105,9 @@ public class SalesStepDefinitions {
         net.serenitybdd.rest.SerenityRest.then().body("quantity", equalTo(expectedStock));
 
         // Cleanup
-        plantActions.deletePlant(plantId);
+        if (plantActions.wasPlantCreated()) {
+            plantActions.deletePlant(plantId);
+        }
         if (categoryId != 0) {
             categoryActions.deleteCategoryById(categoryId);
             categoryId = 0;
@@ -129,7 +131,9 @@ public class SalesStepDefinitions {
 
         // Cleanup plant ensures we don't leave data behind even on negative tests
         if (plantId != 0) {
-            plantActions.deletePlant(plantId);
+            if (plantActions.wasPlantCreated()) {
+                plantActions.deletePlant(plantId);
+            }
             plantId = 0;
         }
         if (categoryId != 0) {
@@ -166,7 +170,9 @@ public class SalesStepDefinitions {
 
         // Cleanup the plant created in at_least_one_sale_exists_in_the_system
         if (plantId != 0) {
-            plantActions.deletePlant(plantId);
+            if (plantActions.wasPlantCreated()) {
+                plantActions.deletePlant(plantId);
+            }
             plantId = 0; // Reset to avoid double deletion
         }
         if (categoryId != 0) {
@@ -200,7 +206,9 @@ public class SalesStepDefinitions {
 
         // Cleanup plant
         if (plantId != 0) {
-            plantActions.deletePlant(plantId);
+            if (plantActions.wasPlantCreated()) {
+                plantActions.deletePlant(plantId);
+            }
             plantId = 0;
         }
         if (categoryId != 0) {
@@ -233,7 +241,9 @@ public class SalesStepDefinitions {
 
         // Cleanup plant
         if (plantId != 0) {
-            plantActions.deletePlant(plantId);
+            if (plantActions.wasPlantCreated()) {
+                plantActions.deletePlant(plantId);
+            }
             plantId = 0;
         }
         if (categoryId != 0) {
