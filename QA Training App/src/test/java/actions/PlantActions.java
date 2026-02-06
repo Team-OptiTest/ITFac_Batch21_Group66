@@ -357,9 +357,12 @@ public class PlantActions {
 
                     // Get the category ID from the existing plant
                     if (existingPlant.get("category") != null) {
-                        java.util.Map<String, Object> category = (java.util.Map<String, Object>) existingPlant.get("category");
-                        if (category.get("id") != null) {
-                            existingCategoryId = ((Number) category.get("id")).intValue();
+                        Object categoryObj = existingPlant.get("category");
+                        if (categoryObj instanceof java.util.Map) {
+                            java.util.Map<String, Object> category = (java.util.Map<String, Object>) categoryObj;
+                            if (category.get("id") != null) {
+                                existingCategoryId = ((Number) category.get("id")).intValue();
+                            }
                         }
                     }
 
@@ -428,9 +431,12 @@ public class PlantActions {
         // Get the category ID from the existing plant
         int categoryId = 5; // Default
         if (existingPlant.get("category") != null) {
-            java.util.Map<String, Object> category = (java.util.Map<String, Object>) existingPlant.get("category");
-            if (category.get("id") != null) {
-                categoryId = ((Number) category.get("id")).intValue();
+            Object categoryObj = existingPlant.get("category");
+            if (categoryObj instanceof java.util.Map) {
+                java.util.Map<String, Object> category = (java.util.Map<String, Object>) categoryObj;
+                if (category.get("id") != null) {
+                    categoryId = ((Number) category.get("id")).intValue();
+                }
             }
         }
 
