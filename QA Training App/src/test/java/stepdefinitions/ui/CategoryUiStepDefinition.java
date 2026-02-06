@@ -33,4 +33,34 @@ public class CategoryUiStepDefinition {
             .as("\"Add a category\" button should be visible to admin user")
             .isTrue();
     }
+
+    @When("the user clicks the Add a category button")
+    public void theUserClicksTheAddCategoryButton() {
+        categoryPage.clickAddCategoryButton();
+    }
+
+    @When("the user fills in the category name with {string}")
+    public void theUserFillsInTheCategoryNameWith(String categoryName) {
+        categoryPage.fillCategoryName(categoryName);
+    }
+
+    @When("the user clicks on the Save button")
+    public void theUserClicksTheSaveButton() {
+        categoryPage.clickSaveButton();
+    }
+
+    @Then("the user should see a success message confirming the category was created")
+    public void theUserShouldSeeASuccessMessageConfirmingTheCategoryWasCreated() {
+        assertThat(categoryPage.isSuccessMessageDisplayed())
+            .as("Success message should be displayed after creating a category")
+            .isTrue();
+    }
+
+    @Then("the new category {string} should be listed on the categories page")
+    public void theNewCategoryShouldBeListedOnTheCategoriesPage(String categoryName) {
+        assertThat(categoryPage.isCategoryVisibleInList(categoryName))
+            .as("Newly created category should be visible in the categories list")
+            .isTrue();
+    }
+
 }
