@@ -173,6 +173,55 @@ public class PlantUIStepDefinitions {
                                 net.serenitybdd.screenplay.questions.Visibility.of(errorTarget), is(true)));
         }
 
+        @Given("the normal user is authenticated")
+        public void theNormalUserIsAuthenticated() {
+                String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getOptionalProperty("test.user.username")
+                                .orElse("testuser");
+                String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getOptionalProperty("test.user.password")
+                                .orElse("test123");
+
+                user.attemptsTo(
+                                Login.asUser(username, password, environmentVariables));
+        }
+
+        @When("the user navigates directly to the add plant page")
+        public void theUserNavigatesDirectlyToTheAddPlantPage() {
+                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                                .from(environmentVariables)
+                                .getOptionalProperty("webdriver.base.url")
+                                .orElse("http://localhost:8080");
+                
+                String addPlantUrl = baseUrl + "/ui/plants/add";
+                
+                // Directly open the URL
+                BrowseTheWeb.as(user).getDriver().get(addPlantUrl);
+        }
+
+        @Then("the user is redirected to the dashboard or sees access denied")
+        public void theUserIsRedirectedToDashboardOrSeesAccessDenied() {
+                // Check if current URL is NOT /ui/plants/add (redirected)
+                // OR if a 403 / Access Denied message is visible
+                
+                user.should(seeThat("User is denied access",
+                                actor -> {
+                                        String currentUrl = BrowseTheWeb.as(actor).getDriver().getCurrentUrl();
+                                        // Condition 1: Redirected to dashboard or login or root
+                                        boolean relocated = !currentUrl.contains("/ui/plants/add");
+                                        
+                                        // Condition 2: Access Denied Page/Message
+                                        // Assuming standard Spring Boot white label error or app specific 403
+                                        boolean forbiddenMessage = BrowseTheWeb.as(actor).getDriver().getPageSource().contains("Forbidden") ||
+                                                                   BrowseTheWeb.as(actor).getDriver().getPageSource().contains("Access Denied") ||
+                                                                   BrowseTheWeb.as(actor).getDriver().getTitle().contains("403");
+                                                                   
+                                        return relocated || forbiddenMessage;
+                                }, is(true)));
+        }
+
         @Then("validation error messages are displayed below specific fields")
         public void validationErrorMessagesAreDisplayedBelowSpecificFields() {
                 user.should(

@@ -32,3 +32,9 @@ Feature: Plant Management - UI Create Operations
     And validation error messages are displayed below specific fields
     And the validation error "Plant Name is required" is displayed
     And the validation error "Price is required" is displayed
+
+  @UI @Plant @AccessControl
+  Scenario: Access Control - Normal User cannot add plant (Direct URL)
+    Given the normal user is authenticated
+    When the user navigates directly to the add plant page
+    Then the user is redirected to the dashboard or sees access denied
