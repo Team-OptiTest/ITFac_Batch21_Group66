@@ -1,10 +1,17 @@
 package pages;
 
 import net.serenitybdd.core.pages.PageObject;
+import net.serenitybdd.screenplay.Question;
+import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
+import net.serenitybdd.screenplay.questions.Text;
+import net.serenitybdd.screenplay.questions.Visibility;
 import net.serenitybdd.screenplay.targets.Target;
+import net.serenitybdd.screenplay.waits.WaitUntil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Quotes;
+
+import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
 
 public class PlantsPage extends PageObject {
 
@@ -48,7 +55,8 @@ public class PlantsPage extends PageObject {
                         .located(By.xpath("//*[contains(text(), 'Price is required')]"));
 
         public static final Target SEARCH_FIELD = Target.the("Search plant input box")
-                        .located(By.xpath("//input[@placeholder='Search plant' or @id='searchName' or @name='searchName']"));
+                        .located(By.xpath(
+                                        "//input[@placeholder='Search plant' or @id='searchName' or @name='searchName']"));
 
         public static final Target SEARCH_BUTTON = Target.the("Search button")
                         .located(By.xpath("//button[contains(text(), 'Search')]"));
@@ -60,6 +68,84 @@ public class PlantsPage extends PageObject {
 
         public static Target deleteButtonForPlant(String plantName) {
                 return Target.the("Delete button for plant '" + plantName + "'")
-                        .located(By.xpath("//table//tr[td[contains(text(), " + Quotes.escape(plantName) + ")]]//button[contains(@title, 'Delete')]"));
+                                .located(By.xpath("//table//tr[td[contains(text(), " + Quotes.escape(plantName)
+                                                + ")]]//button[contains(@title, 'Delete')]"));
+        }
+
+        // Migrated from PlantQuestions
+        public static Question<Boolean> successMessageIsDisplayed() {
+                return actor -> {
+                        try {
+                                actor.attemptsTo(
+                                                WaitUntil.the(SUCCESS_MESSAGE, isVisible())
+                                                                .forNoMoreThan(10).seconds());
+                                return Visibility.of(SUCCESS_MESSAGE).answeredBy(actor);
+                        } catch (Exception e) {
+                                return false;
+                        }
+                };
+        }
+
+        public static Question<String> successMessageText() {
+                return actor -> {
+                        try {
+                                actor.attemptsTo(
+                                                WaitUntil.the(SUCCESS_MESSAGE, isVisible())
+                                                                .forNoMoreThan(10).seconds());
+                                return Text.of(SUCCESS_MESSAGE).answeredBy(actor);
+                        } catch (Exception e) {
+                                return "";
+                        }
+                };
+        }
+
+        public static Question<Boolean> plantAppearsInTable(String plantName) {
+                return actor -> {
+                        try {
+                                actor.attemptsTo(
+                                                WaitUntil.the(plantInTable(plantName), isVisible())
+                                                                .forNoMoreThan(10).seconds());
+                                return Visibility.of(plantInTable(plantName)).answeredBy(actor);
+                        } catch (Exception e) {
+                                return false;
+                        }
+                };
+        }
+
+        public static Question<Boolean> plantIsRemovedFromTable(String plantName) {
+                return actor -> {
+                        try {
+                                actor.attemptsTo(
+                                                WaitUntil.the(plantInTable(plantName), isVisible())
+                                                                .forNoMoreThan(10).seconds());
+                                return Visibility.of(plantInTable(plantName)).answeredBy(actor);
+                        } catch (Exception e) {
+                                return false;
+                        }
+                };
+        }
+
+        public static Question<Boolean> plantDoesNotAppearInSearch(String plantName) {
+                return actor -> {
+                        try {
+                                actor.attemptsTo(
+                                                WaitUntil.the(plantInTable(plantName), isVisible())
+                                                                .forNoMoreThan(10).seconds());
+                                return Visibility.of(plantInTable(plantName)).answeredBy(actor);
+                        } catch (Exception e) {
+                                return false;
+                        }
+                };
+        }
+
+        public static Question<Boolean> isOnPlantsListPage() {
+                return actor -> {
+                        try {
+                                String currentUrl = BrowseTheWeb.as(actor).getDriver().getCurrentUrl();
+                                return currentUrl.contains("/ui/plants");
+                        } catch (Exception e) {
+                                return false;
+                        }
+                };
         }
 }
