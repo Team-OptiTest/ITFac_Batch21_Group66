@@ -1,13 +1,13 @@
 package stepdefinitions.api;
 
+import java.util.Map;
+
 import actions.AuthenticationActions;
 import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-
-import java.util.Map;
 
 public class PlantApiStepDefinitions {
 
@@ -152,4 +152,5 @@ public class PlantApiStepDefinitions {
         body.put("quantity", Integer.parseInt(newQuantity));
         plantActions.updatePlantQuantity(endpoint, body);
     }
+
 }
