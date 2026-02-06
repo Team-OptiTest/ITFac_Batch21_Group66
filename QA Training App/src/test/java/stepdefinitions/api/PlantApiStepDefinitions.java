@@ -21,25 +21,19 @@ public class PlantApiStepDefinitions {
 
     @Given("the admin is authenticated")
     public void theAdminIsAuthenticated() {
-        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.admin.username");
-        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.admin.password");
-
         authenticationActions.authenticateAsAdmin();
-    }
-
-    @Given("a valid category with ID {int} exists")
-    public void aValidCategoryWithIDExists(int id) {
     }
 
     @Given("the user is authenticated with ROLE_USER")
     public void theUserIsAuthenticatedWithROLE_USER() {
-        String username = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.username");
-        String password = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("test.user.password");
         authenticationActions.authenticateUser();
+    }
+
+    @Given("a valid category with ID {int} exists")
+    public void aValidCategoryWithIDExists(Integer categoryId) {
+        // This is a precondition step - we assume the category exists in the test
+        // environment
+        // No action needed as this is just documenting the test precondition
     }
 
     @When("I POST to {string} with following data:")
