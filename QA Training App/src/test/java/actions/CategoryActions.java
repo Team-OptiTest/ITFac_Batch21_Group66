@@ -9,6 +9,7 @@ import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
 import net.thucydides.model.util.EnvironmentVariables;
+import utils.TestUtils;
 
 public class CategoryActions {
 
@@ -48,7 +49,7 @@ public class CategoryActions {
     @Step("Send GET request for category with non-existent ID")
     public void getCategoryWithNonExistentId() {
         fetchExistingCategoryIds();
-        long nonExistentId = generateNonExistentId();
+        long nonExistentId = TestUtils.generateNonExistentId(existingCategoryIds);
         String token = getAuthToken();
         String viewUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
 
@@ -90,17 +91,6 @@ public class CategoryActions {
             return sessionId;
         }
         return lastCreatedCategoryId;
-    }
-
-    private long generateNonExistentId() {
-        long nonExistentId = 999999L;
-        if (existingCategoryIds != null && !existingCategoryIds.isEmpty()) {
-            nonExistentId = existingCategoryIds.stream()
-                    .mapToInt(Integer::intValue)
-                    .max()
-                    .orElse(0) + 99999;
-        }
-        return nonExistentId;
     }
 
     @Step("Create category with name: {0}")
@@ -175,7 +165,7 @@ public class CategoryActions {
     @Step("Delete category with non-existent ID")
     public void deleteCategoryWithNonExistentId() {
         fetchExistingCategoryIds();
-        long nonExistentId = generateNonExistentId();
+        long nonExistentId = TestUtils.generateNonExistentId(existingCategoryIds);
 
         String token = getAuthToken();
         String deleteUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
@@ -198,7 +188,7 @@ public class CategoryActions {
     @Step("Update category with non-existent ID")
     public void updateCategoryWithNonExistentId() {
         fetchExistingCategoryIds();
-        long nonExistentId = generateNonExistentId();
+        long nonExistentId = TestUtils.generateNonExistentId(existingCategoryIds);
 
         String token = getAuthToken();
         String updateUrl = getBaseUrl() + "/api/categories/" + nonExistentId;
@@ -273,7 +263,7 @@ public class CategoryActions {
     @Step("Create category with non-existent parent ID")
     public void createCategoryWithNonExistentParentId() {
         fetchExistingCategoryIds();
-        long nonExistentParentId = generateNonExistentId();
+        long nonExistentParentId = TestUtils.generateNonExistentId(existingCategoryIds);
 
         String token = getAuthToken();
         String createUrl = getBaseUrl() + "/api/categories";
