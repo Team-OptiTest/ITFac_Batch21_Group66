@@ -149,7 +149,7 @@ public class CategoryStepDefinitions {
         System.out.println("=== VERIFICATION COMPLETE ===\n");
     }
 
-    @Then("the error message should contain {string}")
+    @Then("the error message should be contained {string}")
     public void theErrorMessageShouldContain(String expectedMessage) {
         // Use SerenityRest.lastResponse() to support both Category and Plant API calls
         String responseBody = net.serenitybdd.rest.SerenityRest.lastResponse().getBody().asString();
@@ -179,7 +179,7 @@ public class CategoryStepDefinitions {
                 .isIn(204, 205);
     }
 
-    @Then("the API should return {int} Unauthorized")
+    @Then("the API should be returned {int} Unauthorized")
     public void theAPIShouldReturnUnauthorized(int expectedStatusCode) {
         assertThat(categoryActions.getLastResponseStatusCode())
                 .as("API should return " + expectedStatusCode + " Unauthorized")

@@ -352,7 +352,11 @@ public class PlantActions {
                         try {
                                 java.util.List<java.util.Map<String, Object>> plants = response.jsonPath()
                                                 .getList("content");
-                                if (plants == null || plants.isEmpty()) {
+                                
+                                // Check if list contains only nulls (which happens when projecting "content" on a root list)
+                                boolean isListOfNulls = plants != null && !plants.isEmpty() && plants.get(0) == null;
+                                
+                                if (plants == null || plants.isEmpty() || isListOfNulls) {
                                         plants = response.jsonPath().getList("$");
                                 }
                                 if (plants != null && !plants.isEmpty()) {
@@ -423,7 +427,11 @@ public class PlantActions {
                 }
 
                 java.util.List<java.util.Map<String, Object>> plants = response.jsonPath().getList("content");
-                if (plants == null || plants.isEmpty()) {
+                
+                // Check if list contains only nulls (which happens when projecting "content" on a root list)
+                boolean isListOfNulls = plants != null && !plants.isEmpty() && plants.get(0) == null;
+                
+                if (plants == null || plants.isEmpty() || isListOfNulls) {
                         plants = response.jsonPath().getList("$");
                 }
 
