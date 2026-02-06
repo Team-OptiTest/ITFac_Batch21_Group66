@@ -2,13 +2,11 @@ package stepdefinitions.api;
 
 import actions.AuthenticationActions;
 import actions.CategoryActions;
-import actions.PlantAction;
+import actions.PlantActions;
 import actions.SalesAction;
 import io.cucumber.java.en.*;
-import io.restassured.path.json.JsonPath;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.core.Serenity;
-import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.HashMap;
@@ -19,14 +17,14 @@ import static org.hamcrest.Matchers.equalTo;
 public class SalesStepDefinitions {
 
     @Steps
-    PlantAction plantAction;
+    PlantActions plantActions;
 
     @Steps
     SalesAction salesAction;
 
     @Steps
     CategoryActions categoryActions;
-    
+
     @Steps
     AuthenticationActions authenticationActions;
 
@@ -41,12 +39,12 @@ public class SalesStepDefinitions {
     public void admin_is_authenticated() {
         // Use central authentication action
         authenticationActions.authenticateAsAdmin();
-        
+
         // Retrieve token from session (AuthenticationActions puts it there)
         String token = Serenity.sessionVariableCalled("authToken");
-        
+
         // Propagate token to other actions
-        plantAction.setToken(token);
+        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
@@ -61,14 +59,14 @@ public class SalesStepDefinitions {
         body.put("name", "Plant " + (System.currentTimeMillis() % 10000));
         body.put("price", 20.0);
         body.put("quantity", initialStock);
-        
-        plantAction.createPlant(categoryId, body);
-        
-        plantId = plantAction.getLastCreatedPlantId();
-        
+
+        plantActions.createPlant(categoryId, body);
+
+        plantId = plantActions.getLastCreatedPlantId();
+
         if (plantId == 0) {
-             throw new RuntimeException("Failed to create plant in category " + categoryId 
-                 + ". Status: " + plantAction.getLastResponseStatusCode());
+            throw new RuntimeException("Failed to create plant in category " + categoryId
+                    + ". Status: " + plantActions.getLastResponseStatusCode());
         }
     }
 
@@ -86,15 +84,16 @@ public class SalesStepDefinitions {
 
     @Then("plant stock should be reduced accordingly")
     public void plant_stock_reduced() {
-        plantAction.getPlant(plantId);
-        plantAction.verifyStatusCode(200);
-        
+        plantActions.getPlant(plantId);
+        plantActions.verifyStatusCode(200);
+
         int expectedStock = initialStock - quantitySold;
         net.serenitybdd.rest.SerenityRest.then().body("quantity", equalTo(expectedStock));
-        
+
         // Cleanup
-        plantAction.deletePlant(plantId);
-        // categoryActions.deleteCategoryById(categoryId); // Do not delete the shared category
+        plantActions.deletePlant(plantId);
+        // categoryActions.deleteCategoryById(categoryId); // Do not delete the shared
+        // category
     }
 
     @When("admin creates a sale with quantity {int}")
@@ -112,19 +111,20 @@ public class SalesStepDefinitions {
     public void error_message_should_be(String message) {
         salesAction.verifyErrorMessage(message);
         salesAction.verifyErrorSchema();
-        
+
         // Cleanup plant ensures we don't leave data behind even on negative tests
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
-            plantId = 0;
+            plantActions.deletePlant(plantId);
         }
     }
+
     @When("admin creates a sale for plant {int} with quantity {int}")
     public void admin_creates_sale_for_plant_with_quantity(int plantId, int quantity) {
-        // Set local fields just in case they are used elsewhere, though not strictly needed for this specific test
+        // Set local fields just in case they are used elsewhere, though not strictly
+        // needed for this specific test
         this.plantId = plantId;
         this.quantitySold = quantity;
-        
+
         salesAction.createSale(plantId, quantity);
     }
 
@@ -143,10 +143,10 @@ public class SalesStepDefinitions {
     @Then("all sales should be returned successfully")
     public void all_sales_should_be_returned_successfully() {
         salesAction.verifySalesListReturned();
-        
+
         // Cleanup the plant created in at_least_one_sale_exists_in_the_system
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
+            plantActions.deletePlant(plantId);
             plantId = 0; // Reset to avoid double deletion
         }
     }
@@ -173,10 +173,10 @@ public class SalesStepDefinitions {
     public void the_deleted_sale_should_not_be_retrievable() {
         salesAction.getSaleById(saleId);
         salesAction.verifyStatusCode(404);
-        
+
         // Cleanup plant
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
+            plantActions.deletePlant(plantId);
             plantId = 0;
         }
     }
@@ -185,7 +185,7 @@ public class SalesStepDefinitions {
     public void user_is_authenticated() {
         authenticationActions.authenticateUser();
         String token = Serenity.sessionVariableCalled("authToken");
-        plantAction.setToken(token);
+        plantActions.setToken(token);
         salesAction.setToken(token);
     }
 
@@ -202,10 +202,10 @@ public class SalesStepDefinitions {
     @Then("the sale details should be returned successfully")
     public void the_sale_details_should_be_returned_successfully() {
         salesAction.verifySaleReturned(saleId);
-        
+
         // Cleanup plant
         if (plantId != 0) {
-            plantAction.deletePlant(plantId);
+            plantActions.deletePlant(plantId);
             plantId = 0;
         }
     }
@@ -222,8 +222,10 @@ public class SalesStepDefinitions {
 
     @Given("no user is logged in")
     public void no_user_is_logged_in() {
-        // We only clear salesAction token to simulate unauthenticated access to sales API.
-        // We keep plantAction token so we can still cleanup the plant record with admin rights.
+        // We only clear salesAction token to simulate unauthenticated access to sales
+        // API.
+        // We keep plantAction token so we can still cleanup the plant record with admin
+        // rights.
         salesAction.setToken(null);
     }
 
@@ -236,7 +238,7 @@ public class SalesStepDefinitions {
     public void multiple_sales_exist_in_the_system() {
         // Create at least 2 sales to test pagination/sorting
         a_sale_exists_with_a_known_valid_sale_id();
-        
+
         // Create another sale
         plant_exists_with_sufficient_stock();
         admin_creates_sale();
@@ -250,11 +252,12 @@ public class SalesStepDefinitions {
     @Then("the paginated sales should be returned successfully with page size {int}")
     public void the_paginated_sales_should_be_returned_successfully(int size) {
         salesAction.verifyPaginatedSalesResponse(size);
-        
+
         // Cleanup is handled by the steps that created the plants if we are careful.
-        // But here we might have multiple plants. 
+        // But here we might have multiple plants.
         // Actually, the current `plantId` only stores the LAST one.
         // This is a bit of a problem for robust cleanup.
-        // For now, I'll stick to the current pattern, but I should probably track all created plants.
+        // For now, I'll stick to the current pattern, but I should probably track all
+        // created plants.
     }
 }
