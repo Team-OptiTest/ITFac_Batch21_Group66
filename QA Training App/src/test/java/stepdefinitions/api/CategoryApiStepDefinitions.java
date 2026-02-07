@@ -1,4 +1,4 @@
-package stepdefinitions;
+package stepdefinitions.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,7 +9,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
 
-public class CategoryStepDefinitions {
+public class CategoryApiStepDefinitions {
 
     @Steps
     CategoryActions categoryActions;
@@ -311,5 +311,10 @@ public class CategoryStepDefinitions {
         assertThat(categoryActions.responseContainsMainCategoriesList())
                 .as("Response should contain a list of main categories")
                 .isTrue();
+    }
+
+    @Then("the admin deletes that category")
+    public void theAdminDeletesThatCategory() {
+        categoryActions.deleteCategoryById(categoryActions.getLastCreatedCategoryId());
     }
 }
