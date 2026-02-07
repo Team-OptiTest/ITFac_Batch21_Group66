@@ -18,3 +18,16 @@ Feature: Plant Update API
     When I PUT to "/api/plants/{id}" with new quantity "-5"
     Then the response status should be 400
     And the response error message should contain "Quantity cannot be negative"
+
+  @API @Plant @API_Plant_Update_004 @negative @validation @boundary @215098G
+  Scenario Outline: Verify admin cannot update plant name to less than 3 characters
+    Given the admin is authenticated
+    And a plant with ID exists in the system
+    When the admin updates a plant with name "<shortName>"
+    Then the response status should be 400
+    And the response error message should contain "Invalid request"
+
+    Examples:
+      | shortName |
+      | Ab        |
+      | a         |
