@@ -56,6 +56,8 @@ public class SellPlantPage extends PageObject {
         // Select the first non-placeholder option
         if (select.getOptions().size() > 1) {
             select.selectByIndex(1);
+        } else {
+            throw new IllegalStateException("No plants available in dropdown to select");
         }
     }
 
