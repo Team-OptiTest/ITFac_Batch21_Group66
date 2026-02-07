@@ -18,6 +18,8 @@ public class SalesPage extends PageObject {
     private static final By SALES_TABLE_SELECTOR = By.cssSelector("table.table-bordered");
     private static final By SUCCESS_MESSAGE_SELECTOR = By.cssSelector(".alert-success");
     private static final By ERROR_MESSAGE_SELECTOR = By.cssSelector(".alert-danger");
+    private static final By SALES_TABLE_ROWS = By.cssSelector("table.table-bordered tbody tr");
+    private static final By FIRST_DELETE_BUTTON = By.cssSelector("form[action^='/ui/sales/delete/'] button");
 
     public void navigateToSalesPage() {
         String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -101,6 +103,70 @@ public boolean isSellPlantButtonNotVisible() {
     public boolean isErrorMessageDisplayed() {
         try {
             return getDriver().findElement(ERROR_MESSAGE_SELECTOR).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean hasAtLeastOneSalesRecord() {
+        try {
+            waitForCondition().until(ExpectedConditions.presenceOfElementLocated(SALES_TABLE_SELECTOR));
+            return !getDriver().findElements(SALES_TABLE_ROWS).isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Extracts the unique sale ID from the first delete form's action attribute.
+     * e.g. action="/ui/sales/delete/73" → returns "73"
+     */
+    public String getFirstSaleDeleteId() {
+        try {
+            waitForCondition().until(ExpectedConditions.presenceOfElementLocated(FIRST_DELETE_BUTTON));
+            String action = getDriver()
+                    .findElement(By.cssSelector("form[action^='/ui/sales/delete/']"))
+                    .getAttribute("action");
+            // action is e.g. "/ui/sales/delete/73" — grab the last segment
+            return action.substring(action.lastIndexOf('/') + 1);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public void clickDeleteIconForFirstSale() {
+        waitForCondition().until(ExpectedConditions.presenceOfElementLocated(SALES_TABLE_ROWS));
+        getDriver().findElement(FIRST_DELETE_BUTTON).click();
+    }
+
+    public boolean isConfirmationPromptDisplayed() {
+        try {
+            getDriver().switchTo().alert();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void cancelConfirmationPrompt() {
+        try {
+            getDriver().switchTo().alert().dismiss();
+        } catch (Exception e) {
+            throw new RuntimeException("No confirmation prompt found to cancel", e);
+        }
+    }
+
+    /**
+     * Checks that a delete form for the given sale ID is still present on the page.
+     * This is reliable even when multiple rows share identical visible text,
+     * because the sale ID in the form action is unique per record.
+     */
+    public boolean isSaleWithIdStillVisible(String saleId) {
+        try {
+            waitForCondition().until(ExpectedConditions.presenceOfElementLocated(SALES_TABLE_ROWS));
+            return !getDriver()
+                    .findElements(By.cssSelector("form[action='/ui/sales/delete/" + saleId + "']"))
+                    .isEmpty();
         } catch (Exception e) {
             return false;
         }
