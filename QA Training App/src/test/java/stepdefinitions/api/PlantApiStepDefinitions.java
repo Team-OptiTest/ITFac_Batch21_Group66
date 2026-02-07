@@ -46,7 +46,7 @@ public class PlantApiStepDefinitions {
         Map<String, String> data = dataTable.asMaps().get(0);
 
         Map<String, Object> body = new java.util.HashMap<>();
-        String plantName = data.get("name") + "_" + System.currentTimeMillis();
+        String plantName = data.get("name");
         body.put("name", plantName);
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));

@@ -115,7 +115,7 @@ public class PlantUiStepDefinitions {
         @When("the user enters {string} as the Plant Name")
         public void theUserEntersAsThePlantName(String plantName) {
                 // Append timestamp to make the plant name unique for each test run
-                String uniquePlantName = plantName + "_" + System.currentTimeMillis();
+                String uniquePlantName = plantName;
                 net.serenitybdd.core.Serenity.setSessionVariable("uniquePlantName").to(uniquePlantName);
 
                 user.attemptsTo(
