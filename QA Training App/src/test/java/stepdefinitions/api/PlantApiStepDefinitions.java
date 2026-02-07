@@ -29,6 +29,11 @@ public class PlantApiStepDefinitions {
         authenticationActions.authenticateUser();
     }
 
+    @Given("the user has an invalid JWT token")
+    public void theUserHasAnInvalidJWTToken() {
+        authenticationActions.setInvalidJWTToken();
+    }
+
     @Given("a valid category with ID {int} exists")
     public void aValidCategoryWithIDExists(Integer categoryId) {
         // This is a precondition step - we assume the category exists in the test
@@ -202,8 +207,9 @@ public class PlantApiStepDefinitions {
     public void theAdminCreatesPlantWithNonExistentCategoryId() {
         plantActions.createPlantWithNonExistentCategory();
     }
+
     @Then("the response should be in read-only format")
     public void theResponseShouldBeInReadOnlyFormat() {
         plantActions.verifyReadOnlyFormat();
-}
+    }
 }
