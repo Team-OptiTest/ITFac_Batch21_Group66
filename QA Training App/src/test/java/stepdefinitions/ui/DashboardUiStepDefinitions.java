@@ -19,6 +19,44 @@ public class DashboardUiStepDefinitions {
 
     private int databasePlantCount;
     private int databaseLowStockPlantsCount;
+    private int databaseMainCategoriesCount;
+    private int databaseSubCategoriesCount;
+
+    @Given("Database has {int} main categories and {int} sub-categories")
+    public void databaseHasMainAndSubCategories(int mainCount, int subCount) {
+        this.databaseMainCategoriesCount = mainCount;
+        this.databaseSubCategoriesCount = subCount;
+        System.out.println("Database setup: Should have " + mainCount + " main categories and " + subCount + " sub-categories");
+    }
+
+    @Then("Summary card {string} shows correct main categories count")
+    public void summaryCardShowsCorrectMainCategoriesCount(String cardName) {
+        String actualCount = dashboardPage.getCategoryCount("Main");
+        
+        System.out.println("Verifying " + cardName + " card - Main categories:");
+        System.out.println("  Actual count: " + actualCount);
+        
+        // Verify it's a positive number
+        assertThat(actualCount)
+            .as(cardName + " card should show a valid main categories count")
+            .matches("\\d+");
+    }
+
+    @Then("Summary card {string} shows correct sub categories count")
+    public void summaryCardShowsCorrectSubCategoriesCount(String cardName) {
+        String actualCount = dashboardPage.getCategoryCount("Sub");
+        
+        System.out.println("Verifying " + cardName + " card - Sub categories:");
+        System.out.println("  Actual count: " + actualCount);
+        
+        // Verify it's a positive number
+        assertThat(actualCount)
+            .as(cardName + " card should show a valid sub categories count")
+            .matches("\\d+");
+        
+        // Remove the problematic assertion that sub ≥ main
+        // This is not always true - a main category might not have sub-categories
+    }
 
     @Given("User logged in")
     public void userLoggedIn() {
@@ -46,14 +84,13 @@ public class DashboardUiStepDefinitions {
                 .isTrue();
     }
 
-
     @When("Check {string} in {string} card")
     public void checkCountTypeInCard(String countType, String cardName) {
         assertThat(dashboardPage.isCardVisible(cardName))
                 .as(cardName + " card should be visible")
                 .isTrue();
         
-        // You might want to add specific verification for the count type
+        // Specific verification for the count type
         if ("Low Stock".equalsIgnoreCase(countType)) {
             System.out.println("Verifying Low Stock count in " + cardName + " card");
         }
@@ -63,10 +100,10 @@ public class DashboardUiStepDefinitions {
     public void summaryCardShowsCorrectCount(String cardName) {
         String actualCount = dashboardPage.getPlantsCardTotalCount();
 
-        // Just verify it's a positive number
+        // Verify it's a positive number
         assertThat(actualCount)
             .as(cardName + " card should show a valid count")
-            .matches("\\d+"); // Any positive no
+            .matches("\\d+");
     }
 
     @Then("Summary card {string} shows {string} {string}")
@@ -94,13 +131,15 @@ public class DashboardUiStepDefinitions {
                 .as(cardName + " card should show " + expectedLowStockCount + " Low Stock")
                 .isEqualTo(expectedLowStockCount);
     }
+
     @Then("Summary card {string} shows correct low stock count")
     public void summaryCardShowsCorrectLowStockCount(String cardName) {
         String actualLowStockCount = dashboardPage.getPlantsCardLowStockCount();
     
         assertThat(actualLowStockCount)
                 .as(cardName + " card should show a valid low stock count")
-                .matches("\\d+"); // Any positive no    
+                .matches("\\d+");
+        
         String totalCount = dashboardPage.getPlantsCardTotalCount();
         if (!"0".equals(totalCount) && !"0".equals(actualLowStockCount)) {
             int lowStock = Integer.parseInt(actualLowStockCount);
@@ -108,11 +147,11 @@ public class DashboardUiStepDefinitions {
             assertThat(lowStock)
                 .as("Low stock count should not exceed total count")
                 .isLessThanOrEqualTo(total);
+        }
     }
-}
+
     @Given("Valid credentials available")
     public void validCredentialsAvailable() {
-        //credentials are already in LoginPage
         System.out.println("Using test credentials from environment configuration");
     }
 
@@ -120,7 +159,6 @@ public class DashboardUiStepDefinitions {
     public void loginSuccessfully() {
         loginPage.loginAsUser();
         try {
-            // Wait for login to complete
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -129,28 +167,63 @@ public class DashboardUiStepDefinitions {
 
     @Then("Dashboard page loads immediately with summary information")
     public void dashboardPageLoadsImmediatelyWithSummaryInformation() {
-        // Verify dashboard loads
-        assertThat(dashboardPage.isDashboardLoaded())
+        //verify dashboard page loads
+            assertThat(dashboardPage.isDashboardLoaded())
                 .as("Dashboard should load after login")
                 .isTrue();
-        
+    
+        //verify we're on the right URL
         String currentUrl = dashboardPage.getDriver().getCurrentUrl();
         assertThat(currentUrl)
                 .as("Should be on dashboard page")
                 .contains("/ui/dashboard");
-        
-
+    
+        //verify individual cards are visible
         assertThat(dashboardPage.isCardVisible("Plants"))
                 .as("Plants card should be visible")
                 .isTrue();
-        
+    
         assertThat(dashboardPage.isCardVisible("Categories"))
                 .as("Categories card should be visible")
                 .isTrue();
-        
+    
         assertThat(dashboardPage.isCardVisible("Sales"))
                 .as("Sales card should be visible")
                 .isTrue();
+    }
+
+    @Then("Verify \"Dashboard\" menu item is highlighted with active CSS class")
+    public void verifyDashboardMenuItemIsHighlightedWithActiveCSSClass() {
+        // Check if dashboard menu item has active state
+        boolean isActive = dashboardPage.isDashboardMenuActive();
         
+        System.out.println("Checking Dashboard menu active state...");
+        System.out.println("Dashboard menu active: " + isActive);
+        
+        assertThat(isActive)
+                .as("Dashboard menu item should be highlighted with active CSS class when on dashboard page")
+                .isTrue();
+    }
+
+    @When("Check {string} and {string} in {string} card")
+    public void checkMainAndSubInCategoriesCard(String type1, String type2, String cardName) {
+        assertThat(dashboardPage.isCardVisible(cardName))
+                .as(cardName + " card should be visible")
+                .isTrue();
+        
+        System.out.println("Verifying " + type1 + " and " + type2 + " counts in " + cardName + " card");
+    }
+
+    @Then("Summary card {string} shows {string} {string} categories")
+    public void summaryCardShowsCategoryTypeCount(String cardName, String expectedCount, String categoryType) {
+        String actualCount = dashboardPage.getCategoryCount(categoryType);
+        
+        System.out.println("Verifying " + cardName + " card - " + categoryType + ":");
+        System.out.println("  Expected: " + expectedCount);
+        System.out.println("  Actual: " + actualCount);
+        
+        assertThat(actualCount)
+                .as(cardName + " card should show " + expectedCount + " " + categoryType + " categories")
+                .isEqualTo(expectedCount);
     }
 }

@@ -109,6 +109,26 @@ public class SalesUiStepDefinitions {
                 .isTrue();
     }
 
-    
+    @When("the user selects a plant from the dropdown")
+    public void theUserSelectsAPlantFromTheDropdown() {
+        sellPlantPage.selectFirstAvailablePlant();
+    }
+
+    @When("the user enters a valid quantity")
+    public void theUserEntersAValidQuantity() {
+        sellPlantPage.enterQuantity("1");
+    }
+
+    @When("the user clicks the Cancel button")
+    public void theUserClicksTheCancelButton() {
+        sellPlantPage.clickCancelButton();
+    }
+
+    @Then("the user should be redirected to the sales page")
+    public void theUserShouldBeRedirectedToTheSalesPage() {
+        assertThat(sellPlantPage.isOnSalesPage())
+                .as("User should be redirected to the sales page")
+                .isTrue();
+    }
 
 }

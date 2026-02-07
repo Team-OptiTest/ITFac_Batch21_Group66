@@ -4,11 +4,11 @@ import org.openqa.selenium.By;
 import net.serenitybdd.core.pages.PageObject;
 
 public class AddCategoryPage extends PageObject {
-    private static final By CATEGORY_NAME_FIELD = By.xpath("/html/body/div/div/div[2]/div[2]/form/div[1]/input");
-    private static final By PARENT_CATEGORY_SELECT_DROPDOWN = By
-            .xpath("/html/body/div/div/div[2]/div[2]/form/div[2]/select");
-    private static final By SAVE_BUTTON = By.xpath("/html/body/div/div/div[2]/div[2]/form/button");
-    private static final By VALIDATION_ERROR_MESSAGE = By.xpath("/html/body/div/div/div[2]/div[2]/form/div[1]/div");
+    // XPath locators for Add Category form
+    private static final By CATEGORY_NAME_FIELD = By.xpath("//input[@id='name'] | //input[@name='name'] | //label[contains(text(),'Category Name') or contains(text(),'Name')]/../input | //form//input[@type='text'][1]");
+    private static final By PARENT_CATEGORY_SELECT_DROPDOWN = By.cssSelector("select#parentId, select[name='parentId'], select[name='parent'], form select");
+    private static final By SAVE_BUTTON = By.cssSelector("button[type='submit'], button.btn-primary, form button");
+    private static final By VALIDATION_ERROR_MESSAGE = By.cssSelector(".invalid-feedback, .alert-danger");
 
     public void fillCategoryName(String categoryName) {
         getDriver().findElement(CATEGORY_NAME_FIELD).clear();
