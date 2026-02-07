@@ -1,5 +1,7 @@
 package stepdefinitions.ui;
 
+import java.util.UUID;
+
 import pages.AddCategoryPage;
 import pages.CategoryPage;
 import io.cucumber.java.en.Given;
@@ -106,7 +108,7 @@ public class CategoryUiStepDefinitions {
 
     @When("the user searches for a category that does not exist")
     public void theUserSearchesForACategoryThatDoesNotExist() {
-        String searchTerm = "NonExistent_" + System.currentTimeMillis();
+        String searchTerm = "NoMatch_" + UUID.randomUUID().toString().substring(0, 8);
         categoryPage.searchCategory(searchTerm);
     }
 
