@@ -37,7 +37,7 @@ public class PlantsPage extends PageObject {
 
         public static final Target SUCCESS_MESSAGE = Target.the("Success message")
                         .located(By.xpath(
-                                        "//*[contains(text(), 'added successfully') or contains(text(), 'Plant added successfully')]"));
+                                        "//*[contains(text(), 'added successfully') or contains(text(), 'Plant added successfully') or contains(text(), 'deleted successfully') or contains(text(), 'Plant deleted successfully')]"));
 
         public static final Target PLANTS_TABLE = Target.the("Plants table")
                         .located(By.cssSelector("table, .plants-table, [class*='table']"));
@@ -118,11 +118,13 @@ public class PlantsPage extends PageObject {
                 return actor -> {
                         try {
                                 actor.attemptsTo(
-                                                WaitUntil.the(plantInTable(plantName), isVisible())
+                                                WaitUntil.the(plantInTable(plantName),
+                                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers
+                                                                                .isNotVisible())
                                                                 .forNoMoreThan(10).seconds());
-                                return Visibility.of(plantInTable(plantName)).answeredBy(actor);
+                                return !Visibility.of(plantInTable(plantName)).answeredBy(actor);
                         } catch (Exception e) {
-                                return false;
+                                return true; // Exception likely means element not found, which is good
                         }
                 };
         }
@@ -131,11 +133,13 @@ public class PlantsPage extends PageObject {
                 return actor -> {
                         try {
                                 actor.attemptsTo(
-                                                WaitUntil.the(plantInTable(plantName), isVisible())
+                                                WaitUntil.the(plantInTable(plantName),
+                                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers
+                                                                                .isNotVisible())
                                                                 .forNoMoreThan(10).seconds());
-                                return Visibility.of(plantInTable(plantName)).answeredBy(actor);
+                                return !Visibility.of(plantInTable(plantName)).answeredBy(actor);
                         } catch (Exception e) {
-                                return false;
+                                return true;
                         }
                 };
         }

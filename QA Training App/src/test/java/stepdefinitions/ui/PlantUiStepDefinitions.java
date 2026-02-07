@@ -45,7 +45,7 @@ public class PlantUiStepDefinitions {
 
         @Given("the user is logged in as Admin with username {string} and password {string}")
         public void theUserIsLoggedInAsAdmin(String username, String password) {
-                loginPage.loginAsUser();
+                loginPage.loginAsAdmin();
         }
 
         @Given("the user is on the Plants page")
@@ -256,60 +256,16 @@ public class PlantUiStepDefinitions {
 
         @When("the user confirms the deletion in the browser dialog")
         public void theUserConfirmsTheDeletionInTheBrowserDialog() {
-                org.openqa.selenium.WebDriver driver = BrowseTheWeb.as(user).getDriver();
-
-                // Wait a moment for the dialog to appear
-                try {
-                        Thread.sleep(500);
-                } catch (InterruptedException e) {
-                        e.printStackTrace();
-                }
-                System.out.println("\n\n\n Alert Appeared\n\n\n");
-
-                // Accept the browser confirmation dialog (alert) IMMEDIATELY
-                // We must do this before any other driver operations
-                try {
-                        driver.switchTo().alert().accept();
-                        System.out.println("\n\n\n Alert Accepted - Waiting for page refresh\n\n\n");
-                } catch (Exception e) {
-                        System.out.println("\n\n\n Failed to accept alert: " + e.getMessage() + "\n\n\n");
-                }
-
-                // Wait for the page to be fully loaded (document ready)
+                WebDriver driver = BrowseTheWeb.as(user).getDriver();
+                // Wait for alert and accept
                 try {
                         org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(
-                                        driver, java.time.Duration.ofSeconds(10));
-                        wait.until(webDriver -> ((org.openqa.selenium.JavascriptExecutor) webDriver)
-                                        .executeScript("return document.readyState").equals("complete"));
-                        System.out.println("\n\n\n Page Fully Loaded\n\n\n");
+                                        driver, java.time.Duration.ofSeconds(5));
+                        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent());
+                        driver.switchTo().alert().accept();
                 } catch (Exception e) {
-                        System.out.println("\n\n\n Page load check failed: " + e.getMessage() + "\n\n\n");
-                }
-
-                // Additional wait for the page refresh and success message to appear
-                try {
-                        Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                        e.printStackTrace();
-                }
-                System.out.println("\n\n\n Plant Deleted - Ready to verify\n\n\n");
-
-                // DEBUG: Print page source to see what's actually there
-                try {
-                        String pageSource = driver.getPageSource();
-                        System.out.println("\n\n\n=== PAGE SOURCE AFTER DELETE ===\n");
-                        // Print first 2000 characters to see the content
-                        System.out.println(pageSource.substring(0, Math.min(2000, pageSource.length())));
-                        System.out.println("\n\n\n=== END PAGE SOURCE ===\n");
-
-                        // Check if success message text exists anywhere
-                        if (pageSource.contains("deleted successfully") || pageSource.contains("Plant deleted")) {
-                                System.out.println("\n\n\n SUCCESS MESSAGE FOUND IN PAGE SOURCE! \n\n\n");
-                        } else {
-                                System.out.println("\n\n\n SUCCESS MESSAGE NOT FOUND IN PAGE SOURCE! \n\n\n");
-                        }
-                } catch (Exception e) {
-                        System.out.println("\n\n\n Failed to get page source: " + e.getMessage() + "\n\n\n");
+                        // Log or ignore if alert didn't appear fast enough (though it should)
+                        System.out.println("Alert handling exception: " + e.getMessage());
                 }
         }
 
@@ -386,5 +342,42 @@ public class PlantUiStepDefinitions {
         @Then("non-matching plants are hidden")
         public void nonMatchingPlantsAreHidden() {
                 // Implicitly verified by the previous step
+        }
+
+        @When("the user searches for the created plant")
+        public void theUserSearchesForTheCreatedPlant() {
+                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
+                if (uniquePlantName == null) {
+                        throw new IllegalStateException("No plant was created in this session to search for.");
+                }
+                theUserSearchesForThePlant(uniquePlantName);
+        }
+
+        @When("the user clicks the Delete button for the created plant")
+        public void theUserClicksTheDeleteButtonForTheCreatedPlant() {
+                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
+                if (uniquePlantName == null) {
+                        throw new IllegalStateException("No plant was created in this session to delete.");
+                }
+                theUserClicksTheDeleteButtonForThePlant(uniquePlantName);
+        }
+
+        @Then("the created plant is removed from the table")
+        public void theCreatedPlantIsRemovedFromTheTable() {
+                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
+                if (uniquePlantName == null) {
+                        throw new IllegalStateException("No plant was created in this session to verify removal.");
+                }
+                thePlantIsRemovedFromTheTable(uniquePlantName);
+        }
+
+        @Then("the created plant no longer appears in search results")
+        public void theCreatedPlantNoLongerAppearsInSearchResults() {
+                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
+                if (uniquePlantName == null) {
+                        throw new IllegalStateException(
+                                        "No plant was created in this session to verify search results.");
+                }
+                thePlantNoLongerAppearsInSearchResults(uniquePlantName);
         }
 }
