@@ -3,16 +3,18 @@ package stepdefinitions.api;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
+
 import actions.AuthenticationActions;
 import actions.CategoryActions;
 import actions.PlantActions;
 import actions.SalesAction;
-import io.cucumber.java.en.*;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.model.util.EnvironmentVariables;
-
-import static org.hamcrest.Matchers.equalTo;
 
 public class SalesApiStepDefinitions {
 
@@ -35,8 +37,7 @@ public class SalesApiStepDefinitions {
     private int currentQuantityBeforeSale;
     private int categoryId;
     private int saleId;
-        private int initialQuantity;
-
+    private int initialQuantity;
 
     @Given("admin is authenticated")
     public void admin_is_authenticated() {
@@ -74,8 +75,7 @@ public class SalesApiStepDefinitions {
             body.put("price", 20.0);
             body.put("quantity", initialStock);
 
-
-plantActions.createPlantAndStoreId(categoryId, body);
+            plantActions.createPlantAndStoreId(categoryId, body);
             plantId = plantActions.getLastCreatedPlantId();
 
             if (plantId == 0) {
@@ -209,8 +209,8 @@ plantActions.createPlantAndStoreId(categoryId, body);
 
         if (currentQuantity != expectedQuantity) {
             throw new AssertionError(
-                    "Expected plant quantity: " + expectedQuantity +
-                            ", but got: " + currentQuantity
+                    "Expected plant quantity: " + expectedQuantity
+                    + ", but got: " + currentQuantity
             );
         }
 
@@ -384,7 +384,7 @@ plantActions.createPlantAndStoreId(categoryId, body);
             safety++;
         }
 
-                if (created < required) {
+        if (created < required) {
             // Provision a fallback plant with sufficient stock, then finish seeding.
             plant_exists_with_sufficient_stock();
             int fallbackId = plantId;
@@ -437,7 +437,7 @@ plantActions.createPlantAndStoreId(categoryId, body);
             String a = values.get(i);
             String b = values.get(i + 1);
 
-          // Skip comparison if either value is null
+            // Skip comparison if either value is null
             if (a == null || b == null) {
                 continue;
             }
@@ -461,6 +461,23 @@ plantActions.createPlantAndStoreId(categoryId, body);
                     throw new AssertionError("List is not sorted asc by " + field);
                 }
             }
+        }
+    }
+
+    @Then("verify plant quantity decreased by sale quantity")
+    public void verify_plant_quantity_decreased_by_sale_quantity() {
+        quantitySold = 1;
+        int currentQuantity = plantActions.getPlantQuantity(plantId);
+        int expectedQuantity = initialStock - quantitySold;
+        // Verify the quantity decreased correctly
+        if (currentQuantity != expectedQuantity) {
+            throw new AssertionError(
+                    "Plant quantity did not decrease correctly. "
+                    + "Initial: " + initialStock
+                    + ", Sold: " + quantitySold
+                    + ", Expected: " + expectedQuantity
+                    + ", Actual: " + currentQuantity
+            );
         }
     }
 }
