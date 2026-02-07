@@ -543,6 +543,10 @@ public class CategoryActions {
 
         // Create a main category if none exists
         createCategory("MainCatTest");
+        if (lastResponse == null || (lastResponse.getStatusCode() != 200 && lastResponse.getStatusCode() != 201)) {
+            System.out.println("Warning: Failed to create main category. Status: "
+                    + (lastResponse != null ? lastResponse.getStatusCode() : "null"));
+        }
     }
 
     @Step("Search categories with name: {0}")
