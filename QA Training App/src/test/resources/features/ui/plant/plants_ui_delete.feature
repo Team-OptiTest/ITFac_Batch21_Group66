@@ -4,7 +4,7 @@ Feature: Management of Plants - Delete
   So that I can remove obsolete plants
 
   @UI @UI_Plant_Delete_001 @215063V
-  Scenario: UI_Plant_Delete_001 Delete Plant (Success)
+  Scenario: Delete Plant (Success)
     Given the user is logged in as an admin user
     And the user is on the Plants page
     When the user clicks on the "Add a Plant" button
