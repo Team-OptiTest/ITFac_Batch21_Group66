@@ -10,12 +10,12 @@ public class SellPlantPage extends PageObject {
             By.xpath("//h3[text()='Sell Plant']");
 
     // Plant dropdown
-    private static final By PLANT_DROPDOWN =
-            By.cssSelector("select.form-select");
+   
+    private static final By PLANT_DROPDOWN = By.id("plantId");
+
 
     // Quantity input
-    private static final By QUANTITY_FIELD =
-            By.cssSelector("input[type='number']");
+    private static final By QUANTITY_FIELD = By.id("quantity");
 
     public boolean isSellPlantPageDisplayed() {
         try {
