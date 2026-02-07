@@ -5,18 +5,23 @@ import org.openqa.selenium.By;
 import net.serenitybdd.core.pages.PageObject;
 
 public class CategoryPage extends PageObject {
-
-    private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[3]/a[2]");
-    private static final By SUCCESS_MESSAGE = By.xpath("//*[contains(@class, 'alert-success')]");
-    private static final By SEARCH_INPUT_FIELD = By.cssSelector("input[name='name']");
-    private static final By SEARCH_BUTTON = By.xpath("//form//button[normalize-space()='Search']");
+    
+    // Locators based on actual HTML structure
+    private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("//select[@name='parentId'] | //select[@id='parentId'] | //form//select");
+    private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("//a[contains(text(),'Add A Category')] | //a[contains(@href,'/categories/add')]");
+    private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
+    private static final By SEARCH_INPUT_FIELD = By.name("name");
+    private static final By SEARCH_BUTTON = By.cssSelector("button.btn-primary[type='submit']");
     private static final By CATEGORY_TABLE_BODY = By.cssSelector("table tbody");
-    private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[2]/select");
-
+    
     public void navigateToCategoriesPage() {
         getDriver().get("http://localhost:8080/ui/categories");
     }
 
+    public void navigateToAddCategoryPage() {
+        getDriver().get("http://localhost:8080/ui/categories/add");
+    }
+    
     public boolean isAddCategoryButtonVisible() {
         return getDriver().findElement(ADD_CATEGORY_BUTTON_SELECTOR).isDisplayed();
     }
@@ -33,18 +38,8 @@ public class CategoryPage extends PageObject {
     public void clickAddCategoryButton() {
         try {
             getDriver().findElement(ADD_CATEGORY_BUTTON_SELECTOR).click();
-        } catch (Exception e1) {
-            try {
-                By altSelector1 = By.xpath("//a[contains(text(), 'Add A Category')]");
-                getDriver().findElement(altSelector1).click();
-            } catch (Exception e2) {
-                try {
-                    By altSelector2 = By.xpath("//button[contains(text(), 'Add A Category')]");
-                    getDriver().findElement(altSelector2).click();
-                } catch (Exception e3) {
-                    throw new RuntimeException("Could not find 'Add A Category' button with any selector", e1);
-                }
-            }
+        } catch (Exception e) {
+            throw new RuntimeException("Add Category button not found", e);
         }
     }
 
@@ -141,3 +136,4 @@ public class CategoryPage extends PageObject {
     }
 
 }
+
