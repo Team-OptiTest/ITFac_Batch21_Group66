@@ -23,7 +23,7 @@ public class SellPlantPage extends PageObject {
 
     // Cancel button
     private static final By CANCEL_BUTTON =
-            By.cssSelector("a.btn-secondary, a.btn-outline-secondary, a[href*='/ui/sales']");
+            By.cssSelector("a.btn-secondary[href$='/ui/sales'], a.btn-outline-secondary[href$='/ui/sales']");
 
     public boolean isSellPlantPageDisplayed() {
         try {
