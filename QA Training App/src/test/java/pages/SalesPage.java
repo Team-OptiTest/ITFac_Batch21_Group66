@@ -141,6 +141,7 @@ public boolean isSellPlantButtonNotVisible() {
 
     public boolean isConfirmationPromptDisplayed() {
         try {
+            waitForCondition().until(ExpectedConditions.alertIsPresent());
             getDriver().switchTo().alert();
             return true;
         } catch (Exception e) {
