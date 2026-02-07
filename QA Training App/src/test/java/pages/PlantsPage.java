@@ -17,6 +17,7 @@ public class PlantsPage extends PageObject {
         private static final By PRICE_FIELD = By.id("price");
         private static final By QUANTITY_FIELD = By.id("quantity");
         private static final By SAVE_BUTTON = By.xpath("//button[contains(text(), 'Save')] | //button[@type='submit']");
+        private static final By CANCEL_BUTTON = By.cssSelector("a.btn-secondary[href$='/ui/plants'], a.btn-outline-secondary[href$='/ui/plants'], a[href$='/ui/plants'][class*='btn']");
         private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
         private static final By PLANTS_TABLE = By.cssSelector("table, .plants-table, [class*='table']");
         private static final By PAGE_TITLE = By.xpath("//h1 | //h2");
@@ -77,6 +78,14 @@ public class PlantsPage extends PageObject {
                         getDriver().findElement(SAVE_BUTTON).click();
                 } catch (Exception e) {
                         throw new RuntimeException("Save button not found", e);
+                }
+        }
+
+        public void clickCancelButton() {
+                try {
+                        getDriver().findElement(CANCEL_BUTTON).click();
+                } catch (Exception e) {
+                        throw new RuntimeException("Cancel button not found", e);
                 }
         }
 
