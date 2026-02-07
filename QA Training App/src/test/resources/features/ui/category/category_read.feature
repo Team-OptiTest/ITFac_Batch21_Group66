@@ -35,7 +35,7 @@ Feature: Read Category
     When the user searches for a category that does not exist
     Then the message "No category found" should be displayed in the table body
 
-  @UI @Category_Read_003 @215013U
+  @UI @Category @Category_Read_003 @215013U
   Scenario: Filter categories by parent category
       Given the user is logged in as an admin user
       And the user navigates to the categories page
