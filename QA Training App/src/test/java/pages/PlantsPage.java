@@ -234,4 +234,26 @@ public class PlantsPage extends PageObject {
                         }
                 };
         }
+
+        public static final Target FILTER_CATEGORY_DROPDOWN = Target.the("Filter category dropdown")
+                        .located(By.cssSelector(
+                                        "select#category, select#categoryId, select#categoryFilter, select[name='category']"));
+
+        public static Question<Boolean> allVisiblePlantsBelongToCategory(String category) {
+                return actor -> {
+                        Target ROWS = Target.the("Plant rows").locatedBy("//table/tbody/tr");
+                        List<WebElementFacade> answers = ROWS.resolveAllFor(actor); // resolveAllFor returns
+                                                                                    // List<WebElementFacade>
+
+                        if (answers.isEmpty())
+                                return true;
+
+                        for (WebElementFacade row : answers) {
+                                if (!row.getText().toLowerCase().contains(category.toLowerCase())) {
+                                        return false;
+                                }
+                        }
+                        return true;
+                };
+        }
 }

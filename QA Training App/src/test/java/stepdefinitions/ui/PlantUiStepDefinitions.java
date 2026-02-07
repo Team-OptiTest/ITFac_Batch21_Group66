@@ -463,4 +463,25 @@ public class PlantUiStepDefinitions {
                                 PlantsPage.plantShowsPriceAndQuantity(plantName, price, quantity), is(true)));
         }
 
+        @Given("plants of different categories exist")
+        public void plantsOfDifferentCategoriesExist() {
+                user.attemptsTo(
+                                net.serenitybdd.screenplay.waits.WaitUntil.the(PlantsPage.FILTER_CATEGORY_DROPDOWN,
+                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible())
+                                                .forNoMoreThan(10).seconds());
+        }
+
+        @When("the user selects the {string} category from the filter")
+        public void theUserSelectsTheCategoryFromTheFilter(String categoryName) {
+                user.attemptsTo(
+                                SelectFromOptions.byVisibleText(categoryName)
+                                                .from(PlantsPage.FILTER_CATEGORY_DROPDOWN));
+        }
+
+        @Then("the list updates to show only plants belonging to the {string} category")
+        public void theListUpdatesToShowOnlyPlantsBelongingToTheCategory(String categoryName) {
+                user.should(
+                                seeThat("All visible plants belong to category " + categoryName,
+                                                PlantsPage.allVisiblePlantsBelongToCategory(categoryName), is(true)));
+        }
 }
