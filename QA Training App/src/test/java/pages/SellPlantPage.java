@@ -17,16 +17,16 @@ public class SellPlantPage extends PageObject {
    
     private static final By PLANT_DROPDOWN = By.id("plantId");
 
-    private static final By PLANT_DROPDOWN =
-            By.id("plantId");
-
     // Quantity input
-    private static final By QUANTITY_FIELD =
-            By.cssSelector("input[type='number']");
+     private static final By QUANTITY_FIELD = By.id("quantity");
 
     // Cancel button
     private static final By CANCEL_BUTTON =
             By.cssSelector("a.btn-secondary[href$='/ui/sales'], a.btn-outline-secondary[href$='/ui/sales']");
+     // Submit button
+    private static final By SELL_BUTTON =
+            By.xpath("/html/body/div/div/div[2]/div[2]/div/form/div[3]/button");
+
 
     public boolean isSellPlantPageDisplayed() {
         try {
@@ -84,4 +84,10 @@ public class SellPlantPage extends PageObject {
             return false;
         }
     }
+
+    public void clickSellButton() {
+    waitForCondition().until(ExpectedConditions.elementToBeClickable(SELL_BUTTON));
+    $(SELL_BUTTON).click();
+}
+
 }
