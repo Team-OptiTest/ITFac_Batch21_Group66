@@ -1,5 +1,7 @@
 package stepdefinitions.ui;
 
+import actions.AuthenticationActions;
+import actions.CategoryActions;
 import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -23,6 +25,12 @@ public class PlantUiStepDefinitions {
 
         @Steps
         PlantActions plantActions;
+
+        @Steps
+        AuthenticationActions authenticationActions;
+
+        @Steps
+        CategoryActions categoryActions;
 
         private String uniquePlantName;
         private String targetPlantName;
@@ -426,6 +434,25 @@ public class PlantUiStepDefinitions {
         @When("the user clicks Cancel to discard the plant")
         public void theUserClicksCancelToDiscardThePlant() {
                 plantsPage.clickCancelButton();
+        }
+
+        @Given("at least one main category exists")
+        public void atLeastOneMainCategoryExists() {
+                authenticationActions.authenticateAsAdmin();
+                categoryActions.ensureAtLeastOneMainCategoryExists();
+        }
+
+        @Then("main categories should not be displayed in the category dropdown")
+        public void mainCategoriesShouldNotBeDisplayedInTheCategoryDropdown() {
+                java.util.List<String> dropdownOptions = plantsPage.getCategoryDropdownOptionTexts();
+                authenticationActions.authenticateAsAdmin();
+                java.util.List<String> mainCategoryNames = categoryActions.getMainCategoryNames();
+
+                for (String mainCategoryName : mainCategoryNames) {
+                        assertThat(dropdownOptions)
+                                        .as("Main category '" + mainCategoryName + "' should not appear in the category dropdown")
+                                        .doesNotContain(mainCategoryName);
+                }
         }
 
         // Helper method for wait

@@ -61,3 +61,10 @@ Feature: Plant Management - UI Create Operations
     And the user clicks Cancel to discard the plant
     Then the user is redirected to the Plants list
     And the new plant "CancelTestPlant" should not appear in the table
+
+  @UI @Plant @UI_Plant_Create_006 @negative @215098G
+  Scenario: Verify admin cannot add plant under main category
+    Given the user is logged in as an admin user
+    And at least one main category exists
+    When the user navigates directly to the add plant page
+    Then main categories should not be displayed in the category dropdown
