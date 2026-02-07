@@ -7,7 +7,7 @@ Feature: Plant Management - UI Read Operations
     Given the user is logged in as an admin user
     And the user is on the Plants page
 
-  @UI @Plant @Reading @215063V
+  @UI @Plant @Reading
   Scenario: Filter Plants by Name
     Given multiple plants with different names exist
     When the user enters "Rose" in the "Search plant" input box

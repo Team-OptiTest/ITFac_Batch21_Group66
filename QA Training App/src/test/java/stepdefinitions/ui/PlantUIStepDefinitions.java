@@ -11,7 +11,6 @@ import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
 import net.serenitybdd.screenplay.actions.Click;
 import net.serenitybdd.screenplay.actions.Enter;
 import net.serenitybdd.screenplay.actions.SelectFromOptions;
-import net.serenitybdd.screenplay.actions.Open;
 import net.thucydides.model.util.EnvironmentVariables;
 import org.openqa.selenium.WebDriver;
 import net.serenitybdd.screenplay.targets.Target;
@@ -24,7 +23,7 @@ import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
-public class PlantUiStepDefinitions {
+public class PlantUIStepDefinitions {
 
         @Managed(driver = "chrome")
         private WebDriver driver;
@@ -45,16 +44,12 @@ public class PlantUiStepDefinitions {
 
         @Given("the user is logged in as Admin with username {string} and password {string}")
         public void theUserIsLoggedInAsAdmin(String username, String password) {
-                loginPage.loginAsAdmin();
+                loginPage.loginAsUser();
         }
 
         @Given("the user is on the Plants page")
         public void theUserIsOnThePlantsPage() {
-                String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
-                                .from(environmentVariables)
-                                .getOptionalProperty("webdriver.base.url")
-                                .orElse("http://localhost:8080");
-                user.attemptsTo(Open.url(baseUrl + "/ui/plants"));
+
         }
 
         @When("the user clicks on the {string} button")
@@ -256,16 +251,60 @@ public class PlantUiStepDefinitions {
 
         @When("the user confirms the deletion in the browser dialog")
         public void theUserConfirmsTheDeletionInTheBrowserDialog() {
-                WebDriver driver = BrowseTheWeb.as(user).getDriver();
-                // Wait for alert and accept
+                org.openqa.selenium.WebDriver driver = BrowseTheWeb.as(user).getDriver();
+
+                // Wait a moment for the dialog to appear
+                try {
+                        Thread.sleep(500);
+                } catch (InterruptedException e) {
+                        e.printStackTrace();
+                }
+                System.out.println("\n\n\n Alert Appeared\n\n\n");
+
+                // Accept the browser confirmation dialog (alert) IMMEDIATELY
+                // We must do this before any other driver operations
+                try {
+                        driver.switchTo().alert().accept();
+                        System.out.println("\n\n\n Alert Accepted - Waiting for page refresh\n\n\n");
+                } catch (Exception e) {
+                        System.out.println("\n\n\n Failed to accept alert: " + e.getMessage() + "\n\n\n");
+                }
+
+                // Wait for the page to be fully loaded (document ready)
                 try {
                         org.openqa.selenium.support.ui.WebDriverWait wait = new org.openqa.selenium.support.ui.WebDriverWait(
-                                        driver, java.time.Duration.ofSeconds(5));
-                        wait.until(org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent());
-                        driver.switchTo().alert().accept();
+                                        driver, java.time.Duration.ofSeconds(10));
+                        wait.until(webDriver -> ((org.openqa.selenium.JavascriptExecutor) webDriver)
+                                        .executeScript("return document.readyState").equals("complete"));
+                        System.out.println("\n\n\n Page Fully Loaded\n\n\n");
                 } catch (Exception e) {
-                        // Log or ignore if alert didn't appear fast enough (though it should)
-                        System.out.println("Alert handling exception: " + e.getMessage());
+                        System.out.println("\n\n\n Page load check failed: " + e.getMessage() + "\n\n\n");
+                }
+
+                // Additional wait for the page refresh and success message to appear
+                try {
+                        Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                        e.printStackTrace();
+                }
+                System.out.println("\n\n\n Plant Deleted - Ready to verify\n\n\n");
+
+                // DEBUG: Print page source to see what's actually there
+                try {
+                        String pageSource = driver.getPageSource();
+                        System.out.println("\n\n\n=== PAGE SOURCE AFTER DELETE ===\n");
+                        // Print first 2000 characters to see the content
+                        System.out.println(pageSource.substring(0, Math.min(2000, pageSource.length())));
+                        System.out.println("\n\n\n=== END PAGE SOURCE ===\n");
+
+                        // Check if success message text exists anywhere
+                        if (pageSource.contains("deleted successfully") || pageSource.contains("Plant deleted")) {
+                                System.out.println("\n\n\n SUCCESS MESSAGE FOUND IN PAGE SOURCE! \n\n\n");
+                        } else {
+                                System.out.println("\n\n\n SUCCESS MESSAGE NOT FOUND IN PAGE SOURCE! \n\n\n");
+                        }
+                } catch (Exception e) {
+                        System.out.println("\n\n\n Failed to get page source: " + e.getMessage() + "\n\n\n");
                 }
         }
 
@@ -293,91 +332,5 @@ public class PlantUiStepDefinitions {
                 user.should(
                                 seeThat("Plant does not appear in search results",
                                                 PlantsPage.plantDoesNotAppearInSearch(plantName), is(true)));
-        }
-
-        @Given("multiple plants with different names exist")
-        public void multiplePlantsWithDifferentNamesExist() {
-                // Ensure table is visible and likely has content
-                user.attemptsTo(
-                                net.serenitybdd.screenplay.waits.WaitUntil.the(PlantsPage.PLANTS_TABLE,
-                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible())
-                                                .forNoMoreThan(10).seconds());
-        }
-
-        @When("the user enters {string} in the {string} input box")
-        public void theUserEntersValInTheInputBox(String value, String inputBox) {
-                if ("Search plant".equalsIgnoreCase(inputBox)) {
-                        user.attemptsTo(Enter.theValue(value).into(PlantsPage.SEARCH_FIELD));
-                } else {
-                        // Use existing logic for other inputs if needed?
-                        // Or throw exception
-                        throw new IllegalArgumentException("Unknown input box: " + inputBox);
-                }
-        }
-
-        @When("the user clicks the {string} button")
-        public void theUserClicksTheButton(String buttonName) {
-                if ("Search".equalsIgnoreCase(buttonName)) {
-                        user.attemptsTo(Click.on(PlantsPage.SEARCH_BUTTON));
-                        // Small wait for update
-                        try {
-                                Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                                e.printStackTrace();
-                        }
-                } else if ("Save".equalsIgnoreCase(buttonName)) {
-                        user.attemptsTo(Click.on(PlantsPage.SAVE_BUTTON));
-                } else {
-                        throw new IllegalArgumentException("Unknown button: " + buttonName);
-                }
-        }
-
-        @Then("the list updates to show only plants matching {string}")
-        public void theListUpdatesToShowOnlyPlantsMatching(String term) {
-                user.should(
-                                seeThat("All visible plants match " + term,
-                                                PlantsPage.allVisiblePlantsMatch(term), is(true)));
-        }
-
-        @Then("non-matching plants are hidden")
-        public void nonMatchingPlantsAreHidden() {
-                // Implicitly verified by the previous step
-        }
-
-        @When("the user searches for the created plant")
-        public void theUserSearchesForTheCreatedPlant() {
-                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
-                if (uniquePlantName == null) {
-                        throw new IllegalStateException("No plant was created in this session to search for.");
-                }
-                theUserSearchesForThePlant(uniquePlantName);
-        }
-
-        @When("the user clicks the Delete button for the created plant")
-        public void theUserClicksTheDeleteButtonForTheCreatedPlant() {
-                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
-                if (uniquePlantName == null) {
-                        throw new IllegalStateException("No plant was created in this session to delete.");
-                }
-                theUserClicksTheDeleteButtonForThePlant(uniquePlantName);
-        }
-
-        @Then("the created plant is removed from the table")
-        public void theCreatedPlantIsRemovedFromTheTable() {
-                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
-                if (uniquePlantName == null) {
-                        throw new IllegalStateException("No plant was created in this session to verify removal.");
-                }
-                thePlantIsRemovedFromTheTable(uniquePlantName);
-        }
-
-        @Then("the created plant no longer appears in search results")
-        public void theCreatedPlantNoLongerAppearsInSearchResults() {
-                String uniquePlantName = net.serenitybdd.core.Serenity.sessionVariableCalled("uniquePlantName");
-                if (uniquePlantName == null) {
-                        throw new IllegalStateException(
-                                        "No plant was created in this session to verify search results.");
-                }
-                thePlantNoLongerAppearsInSearchResults(uniquePlantName);
         }
 }

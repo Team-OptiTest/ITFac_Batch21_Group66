@@ -10,7 +10,7 @@ import pages.LoginPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CategoryUiStepDefinitions {
+public class CategoryUiStepDefinition {
     
     @Steps
     LoginPage loginPage;
@@ -26,8 +26,8 @@ public class CategoryUiStepDefinitions {
         loginPage.loginAsAdmin();
     }
 
-    @Given("the user is logged in as a user")
-    public void theUserIsLoggedInAsAUser() {
+    @Given("the user is logged in as a regular user")
+    public void theUserIsLoggedInAsARegularUser() {
         loginPage.loginAsUser();
     }
     
@@ -88,13 +88,6 @@ public class CategoryUiStepDefinitions {
     public void theUserShouldSeeTheCategoryNameIsRequiredMessage() {
         assertThat(addCategoryPage.isValidationErrorMessageDisplayed())
             .as("Validation error message should be displayed when category name is empty")
-            .isTrue();
-    }
-
-    @Then("the user should see a list of categories displayed")
-    public void theUserShouldSeeAListOfCategoriesDisplayed() {
-        assertThat(categoryPage.isCategoryListDisplayed())
-            .as("Categories list should be displayed on the page")
             .isTrue();
     }
 

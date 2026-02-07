@@ -7,7 +7,7 @@ Feature: Plant Management - UI Create Operations
     Given the user is logged in as an admin user
     And the user is on the Plants page
 
-  @UI @Plant @215063V
+  @UI @Plant
   Scenario: Add New Plant (Success)
     When the user clicks on the "Add a Plant" button
     And the user enters "Daliya" as the Plant Name
@@ -20,7 +20,7 @@ Feature: Plant Management - UI Create Operations
     And the user is redirected to the Plants list
     And the new plant "Daliya" appears in the table
 
-  @UI @Plant @Validation @215063V
+  @UI @Plant @Validation
   Scenario: Add New Plant Validation (Failure)
     When the user clicks on the "Add a Plant" button
     And the user leaves the "Plant Name" empty
@@ -33,7 +33,7 @@ Feature: Plant Management - UI Create Operations
     And the validation error "Plant Name is required" is displayed
     And the validation error "Price is required" is displayed
 
-  @UI @Plant @AccessControl @215063V
+  @UI @Plant @AccessControl
   Scenario: Access Control - Normal User cannot add plant (Direct URL)
     Given the user is logged in as a user
     When the user navigates directly to the add plant page

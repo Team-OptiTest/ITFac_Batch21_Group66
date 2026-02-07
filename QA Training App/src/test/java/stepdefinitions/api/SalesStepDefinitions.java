@@ -12,9 +12,12 @@ import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.model.util.EnvironmentVariables;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.Matchers.equalTo;
 
-public class SalesApiStepDefinitions {
+public class SalesStepDefinitions {
 
     @Steps
     PlantActions plantActions;

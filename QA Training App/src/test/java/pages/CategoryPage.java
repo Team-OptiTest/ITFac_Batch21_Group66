@@ -64,12 +64,4 @@ public class CategoryPage extends PageObject {
         }
     }
 
-    public boolean isCategoryListDisplayed() {
-        try {
-            return getDriver().findElement(By.xpath("//table | //div[contains(@class, 'category')]")).isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
 }

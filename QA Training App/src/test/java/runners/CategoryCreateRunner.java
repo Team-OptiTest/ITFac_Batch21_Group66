@@ -1,4 +1,4 @@
-package runners.api;
+package runners;
 
 import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;
@@ -9,8 +9,8 @@ import static io.cucumber.junit.platform.engine.Constants.*;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("/features/api/category")
+@SelectClasspathResource("/features/category")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "stepdefinitions")
 @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "io.cucumber.core.plugin.SerenityReporterParallel,pretty")
-public class CategoryApiTestRunner {
+public class CategoryCreateRunner {
 }
