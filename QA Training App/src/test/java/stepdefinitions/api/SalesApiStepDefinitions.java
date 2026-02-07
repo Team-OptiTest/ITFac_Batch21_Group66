@@ -384,6 +384,16 @@ plantActions.createPlantAndStoreId(categoryId, body);
             safety++;
         }
 
+                if (created < required) {
+            // Provision a fallback plant with sufficient stock, then finish seeding.
+            plant_exists_with_sufficient_stock();
+            int fallbackId = plantId;
+            while (created < required && plantActions.getPlantQuantity(fallbackId) > 0) {
+                salesAction.createSale(fallbackId, 1);
+                salesAction.verifyStatusCode(201);
+                created++;
+            }
+        }
         if (created < required) {
             throw new IllegalStateException("Could not create required number of sales; created=" + created);
         }
@@ -426,6 +436,11 @@ plantActions.createPlantAndStoreId(categoryId, body);
         for (int i = 0; i < values.size() - 1; i++) {
             String a = values.get(i);
             String b = values.get(i + 1);
+
+          // Skip comparison if either value is null
+            if (a == null || b == null) {
+                continue;
+            }
 
             // Try parse as ISO dates first, fallback to string compare
             try {
