@@ -6,11 +6,12 @@ import net.serenitybdd.core.pages.PageObject;
 
 public class CategoryPage extends PageObject {
     
-    private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[3]/a[2]");
-    private static final By SUCCESS_MESSAGE = By.xpath("//*[contains(@class, 'alert-success')]");
-    private static final By SEARCH_INPUT_FIELD = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[1]/input");
-    private static final By SEARCH_BUTTON = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[3]/button");
-    private static final By PARENT_CATEGORY_DROPDOWN = By.name("parentId");
+    // Locators based on actual HTML structure
+    private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("//select[@name='parentId'] | //select[@id='parentId'] | //form//select");
+    private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("//a[contains(text(),'Add A Category')] | //a[contains(@href,'/categories/add')]");
+    private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
+    private static final By SEARCH_INPUT_FIELD = By.name("name");
+    private static final By SEARCH_BUTTON = By.cssSelector("button.btn-primary[type='submit']");
     
     public void navigateToCategoriesPage() {
         getDriver().get("http://localhost:8080/ui/categories");
