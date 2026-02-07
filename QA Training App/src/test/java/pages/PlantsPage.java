@@ -12,6 +12,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Quotes;
 
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
+import net.serenitybdd.core.pages.WebElementFacade;
+import java.util.List;
 
 public class PlantsPage extends PageObject {
 
@@ -146,6 +148,23 @@ public class PlantsPage extends PageObject {
                         } catch (Exception e) {
                                 return false;
                         }
+                };
+        }
+
+        public static Question<Boolean> allVisiblePlantsMatch(String term) {
+                return actor -> {
+                        Target ROWS = Target.the("Plant rows").locatedBy("//table/tbody/tr");
+                        List<WebElementFacade> rows = ROWS.resolveAllFor(actor);
+
+                        if (rows.isEmpty())
+                                return true; // Or false if we expect results
+
+                        for (WebElementFacade row : rows) {
+                                if (!row.getText().toLowerCase().contains(term.toLowerCase())) {
+                                        return false;
+                                }
+                        }
+                        return true;
                 };
         }
 }
