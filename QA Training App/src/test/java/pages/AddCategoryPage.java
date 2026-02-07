@@ -5,12 +5,17 @@ import net.serenitybdd.core.pages.PageObject;
 
 public class AddCategoryPage extends PageObject {
     private static final By CATEGORY_NAME_FIELD = By.xpath("/html/body/div/div/div[2]/div[2]/form/div[1]/input");
+    private static final By PARENT_CATEGORY_SELECT_DROPDOWN = By.xpath("/html/body/div/div/div[2]/div[2]/form/div[2]/select");
     private static final By SAVE_BUTTON = By.xpath("/html/body/div/div/div[2]/div[2]/form/button");
     private static final By VALIDATION_ERROR_MESSAGE = By.xpath("/html/body/div/div/div[2]/div[2]/form/div[1]/div");
 
      public void fillCategoryName(String categoryName) {
         getDriver().findElement(CATEGORY_NAME_FIELD).clear();
         getDriver().findElement(CATEGORY_NAME_FIELD).sendKeys(categoryName);
+    }
+
+    public void selectParentCategory(String parentCategory) {
+        getDriver().findElement(PARENT_CATEGORY_SELECT_DROPDOWN).sendKeys(parentCategory);
     }
 
     public void clickSaveButton() {
