@@ -35,7 +35,26 @@ public class CategoryUiStepDefinitions {
     public void theUserNavigatesToTheCategoriesPage() {
         categoryPage.navigateToCategoriesPage();
     }
-    
+
+    @Then("the user searches for {string} in the categories page")
+    public void theUserSearchesForInTheCategoriesPage(String searchTerm) {
+        categoryPage.searchCategory(searchTerm);
+    }
+
+    @Then("the user should see {string} in the search results")
+    public void theUserShouldSeeInTheSearchResults(String expectedText) {
+        assertThat(categoryPage.isCategoryVisibleInList(expectedText))
+            .as("Expected text should be visible in the search results")
+            .isTrue();
+    }
+
+    @Then("the user should not see {string} in the search results")
+    public void theUserShouldNotSeeInTheSearchResults(String unexpectedText) {
+        assertThat(categoryPage.isCategoryNotVisibleInList(unexpectedText))
+            .as("Unexpected text should not be visible in the search results")
+            .isTrue();
+    }
+
     @Then("the user should see the {string} button")
     public void theUserShouldSeeTheButton(String buttonText) {
         assertThat(categoryPage.isAddCategoryButtonVisible())
@@ -68,6 +87,21 @@ public class CategoryUiStepDefinitions {
     @When("the user clicks on the Save button")
     public void theUserClicksTheSaveButton() {
         addCategoryPage.clickSaveButton();
+    }
+
+    @When("the user clicks on the search input field")
+    public void theUserClicksOnTheSearchInputField() {
+        categoryPage.clickSearchInputField();
+    }
+
+    @When("the user enters {string} into the search input field")
+    public void theUserEntersIntoTheSearchInputField(String searchTerm) {
+        categoryPage.enterSearchTerm(searchTerm);
+    }
+
+    @When("the user clicks the search button")
+    public void theUserClicksTheSearchButton() {
+        categoryPage.clickSearchButton();
     }
 
     @Then("the user should see a success message confirming the category was created")
