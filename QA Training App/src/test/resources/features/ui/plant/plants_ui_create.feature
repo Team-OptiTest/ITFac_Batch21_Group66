@@ -3,12 +3,9 @@ Feature: Plant Management - UI Create Operations
   I want to add new plants through the UI
   So that I can manage the plant inventory
 
-  Background:
-    Given the user is logged in as an admin user
-    And the user is on the Plants page
-
   @UI @Plant @215063V
   Scenario: Add New Plant (Success)
+    Given the user is logged in as an admin user
     When the user clicks on the "Add a Plant" button
     And the user enters "Daliya" as the Plant Name
     And the user selects a Category from the dropdown
@@ -22,6 +19,7 @@ Feature: Plant Management - UI Create Operations
 
   @UI @Plant @Validation @215063V
   Scenario: Add New Plant Validation (Failure)
+    Given the user is logged in as an admin user
     When the user clicks on the "Add a Plant" button
     And the user leaves the "Plant Name" empty
     And the user selects a Category from the dropdown

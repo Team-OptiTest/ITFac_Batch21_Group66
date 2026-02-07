@@ -70,7 +70,7 @@ public class PlantsPage extends PageObject {
 
         public static Target deleteButtonForPlant(String plantName) {
                 return Target.the("Delete button for plant '" + plantName + "'")
-                                .located(By.xpath("//table//tr[td[contains(text(), " + Quotes.escape(plantName)
+                                .located(By.xpath("//table//tr[td[contains(., " + Quotes.escape(plantName)
                                                 + ")]]//button[contains(@title, 'Delete')]"));
         }
 
