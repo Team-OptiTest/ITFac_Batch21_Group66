@@ -115,7 +115,7 @@ public class PlantUiStepDefinitions {
         @When("the user enters {string} as the Plant Name")
         public void theUserEntersAsThePlantName(String plantName) {
                 // Append timestamp to make the plant name unique for each test run
-                String uniquePlantName = plantName + "_" + System.currentTimeMillis();
+                String uniquePlantName = plantName;
                 net.serenitybdd.core.Serenity.setSessionVariable("uniquePlantName").to(uniquePlantName);
 
                 user.attemptsTo(
@@ -127,6 +127,12 @@ public class PlantUiStepDefinitions {
                 // Select the first available category (index 1, as 0 is usually a placeholder)
                 user.attemptsTo(
                                 SelectFromOptions.byIndex(1).from(PlantsPage.CATEGORY_DROPDOWN));
+        }
+
+        @When("the user selects the {string} category")
+        public void theUserSelectsTheCategory(String categoryName) {
+                user.attemptsTo(
+                                SelectFromOptions.byVisibleText(categoryName).from(PlantsPage.CATEGORY_DROPDOWN));
         }
 
         @When("the user enters {string} as the Price")
