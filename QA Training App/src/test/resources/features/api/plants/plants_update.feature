@@ -31,3 +31,16 @@ Feature: Plant Update API
       | shortName |
       | Ab        |
       | a         |
+
+  @API @Plant @API_Plant_Update_004 @negative @validation @boundary @215098G
+  Scenario Outline: Verify admin cannot update plant name to more than 25 characters
+    Given the admin is authenticated
+    And a plant with ID exists in the system
+    When the admin updates a plant with name "<longName>"
+    Then the response status should be 400
+    And the response error message should contain "Invalid request"
+
+    Examples:
+      | longName                                                                                                   |
+      | ExtremelyLongNameForAPlant                                                                                 |
+      | Lorem ipsum Sed mollis mi sit amet justo ornare egestas. Praesent dignissim consectetur nibh eget accumsan |
