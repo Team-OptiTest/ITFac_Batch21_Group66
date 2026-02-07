@@ -131,4 +131,44 @@ public class SalesUiStepDefinitions {
                 .isTrue();
     }
 
+    // ---- Delete / Cancel Delete Steps ----
+
+    private String targetSaleId;
+
+    @Given("at least one sales record exists")
+    public void atLeastOneSalesRecordExists() {
+        assertThat(salesPage.hasAtLeastOneSalesRecord())
+                .as("At least one sales record should exist in the table")
+                .isTrue();
+    }
+
+    @When("the admin clicks the delete icon for a sales record")
+    public void theAdminClicksTheDeleteIconForASalesRecord() {
+
+        targetSaleId = salesPage.getFirstSaleDeleteId();
+        assertThat(targetSaleId)
+                .as("Sale ID should be captured before attempting delete")
+                .isNotBlank();
+        salesPage.clickDeleteIconForFirstSale();
+    }
+
+    @Then("a confirmation prompt should be displayed")
+    public void aConfirmationPromptShouldBeDisplayed() {
+        assertThat(salesPage.isConfirmationPromptDisplayed())
+                .as("A confirmation prompt (browser dialog) should be displayed")
+                .isTrue();
+    }
+
+    @When("the admin clicks cancel on the confirmation prompt")
+    public void theAdminClicksCancelOnTheConfirmationPrompt() {
+        salesPage.cancelConfirmationPrompt();
+    }
+
+    @Then("the sales record should still be visible on the page")
+    public void theSalesRecordShouldStillBeVisibleOnThePage() {
+        assertThat(salesPage.isSaleWithIdStillVisible(targetSaleId))
+                .as("Sale with ID " + targetSaleId + " should still be visible after cancelling deletion")
+                .isTrue();
+    }
+
 }
