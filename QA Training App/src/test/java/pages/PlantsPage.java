@@ -380,6 +380,24 @@ public class PlantsPage extends PageObject {
                 }
         }
 
+        // Category dropdown option methods
+        public java.util.List<String> getCategoryDropdownOptionTexts() {
+                try {
+                        org.openqa.selenium.WebElement dropdown = getDriver().findElement(CATEGORY_DROPDOWN);
+                        org.openqa.selenium.support.ui.Select select = new org.openqa.selenium.support.ui.Select(dropdown);
+                        java.util.List<String> optionTexts = new java.util.ArrayList<>();
+                        for (org.openqa.selenium.WebElement option : select.getOptions()) {
+                                String text = option.getText().trim();
+                                if (!text.isEmpty() && !text.equals("Select a category") && !text.startsWith("--")) {
+                                        optionTexts.add(text);
+                                }
+                        }
+                        return optionTexts;
+                } catch (Exception e) {
+                        return java.util.Collections.emptyList();
+                }
+        }
+
         // Page title verification
         public String getPageTitle() {
                 try {

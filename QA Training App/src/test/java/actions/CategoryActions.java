@@ -504,6 +504,47 @@ public class CategoryActions {
         }
     }
 
+    @Step("Get main category names")
+    public java.util.List<String> getMainCategoryNames() {
+        String token = getAuthToken();
+        String mainCategoriesUrl = getBaseUrl() + "/api/categories/main";
+
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(mainCategoriesUrl);
+
+        if (response.getStatusCode() == 200) {
+            try {
+                return response.jsonPath().getList("name", String.class);
+            } catch (Exception e) {
+                return java.util.Collections.emptyList();
+            }
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    @Step("Ensure at least one main category exists")
+    public void ensureAtLeastOneMainCategoryExists() {
+        String token = getAuthToken();
+        String mainCategoriesUrl = getBaseUrl() + "/api/categories/main";
+
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(mainCategoriesUrl);
+
+        if (response.getStatusCode() == 200) {
+            List<?> categories = response.jsonPath().getList("$");
+            if (categories != null && !categories.isEmpty()) {
+                return; // Main category already exists
+            }
+        }
+
+        // Create a main category if none exists
+        createCategory("MainCatTest");
+    }
+
     @Step("Search categories with name: {0}")
     public int searchAndGetCategoryIdFromName(String categoryName) {
         String token = getAuthToken();
