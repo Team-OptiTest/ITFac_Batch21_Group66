@@ -145,6 +145,13 @@ public class PlantUiStepDefinitions {
                                 .isTrue();
         }
 
+        @Then("the new plant {string} should not appear in the table")
+        public void theNewPlantShouldNotAppearInTheTable(String plantName) {
+                assertThat(plantsPage.isPlantNotVisibleInTable(plantName))
+                                .as("Plant '" + plantName + "' should not appear in the table")
+                                .isTrue();
+        }
+
         @When("the user leaves the {string} empty")
         public void theUserLeavesTheFieldEmpty(String fieldName) {
                 if ("Plant Name".equalsIgnoreCase(fieldName)) {
@@ -414,6 +421,11 @@ public class PlantUiStepDefinitions {
                 } else {
                         throw new IllegalArgumentException("Unsupported button check: " + buttonName);
                 }
+        }
+
+        @When("the user clicks Cancel to discard the plant")
+        public void theUserClicksCancelToDiscardThePlant() {
+                plantsPage.clickCancelButton();
         }
 
         // Helper method for wait
