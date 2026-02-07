@@ -1,5 +1,6 @@
 package actions;
 
+import java.util.Collections;
 import java.util.List;
 
 import io.restassured.response.Response;
@@ -153,6 +154,89 @@ public class CategoryActions {
                 .delete(deleteUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
+    }
+
+    @Step("Delete all categories via API")
+    public void deleteAllCategories() {
+        String token = getAuthToken();
+
+        // --- Delete all plants (with error handling and loop for pagination/partial deletes) ---
+        int plantDeletePass = 0;
+        while (true) {
+            plantDeletePass++;
+            Response plantsResponse = SerenityRest.given()
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .get(getBaseUrl() + "/api/plants");
+
+            if (plantsResponse.getStatusCode() != 200) {
+                System.out.println("Warning: Failed to fetch plants. Status: " + plantsResponse.getStatusCode());
+                System.out.println("Response: " + plantsResponse.getBody().asString());
+                break;
+            }
+
+            List<Integer> plantIds = plantsResponse.jsonPath().getList("id", Integer.class);
+            if (plantIds == null || plantIds.isEmpty()) {
+                if (plantDeletePass > 1) {
+                    System.out.println("All plants deleted after " + plantDeletePass + " passes.");
+                } else {
+                    System.out.println("No plants to delete.");
+                }
+                break;
+            }
+
+            for (Integer plantId : plantIds) {
+                Response deletePlantResponse = SerenityRest.given()
+                        .header("Authorization", "Bearer " + token)
+                        .when()
+                        .delete(getBaseUrl() + "/api/plants/" + plantId);
+                if (deletePlantResponse.getStatusCode() < 200 || deletePlantResponse.getStatusCode() >= 300) {
+                    System.out.println("Failed to delete plant ID " + plantId + " - Status: " + deletePlantResponse.getStatusCode());
+                    System.out.println("Response: " + deletePlantResponse.getBody().asString());
+                } else {
+                    System.out.println("Deleted plant ID " + plantId + " - Status: " + deletePlantResponse.getStatusCode());
+                }
+            }
+            // Loop again in case more plants remain (pagination or partial delete)
+        }
+
+        // --- Now delete all categories (with error handling) ---
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(getBaseUrl() + "/api/categories");
+
+        if (response.getStatusCode() != 200) {
+            System.out.println("Warning: Failed to fetch categories. Status: " + response.getStatusCode());
+            System.out.println("Response: " + response.getBody().asString());
+            return;
+        }
+
+        List<Integer> categoryIds = response.jsonPath().getList("id", Integer.class);
+
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            System.out.println("No categories to delete.");
+            return;
+        }
+
+        // Copy into a mutable list, then delete in reverse order so children are removed before parents
+        categoryIds = new java.util.ArrayList<>(categoryIds);
+        Collections.sort(categoryIds, Collections.reverseOrder());
+
+        for (Integer id : categoryIds) {
+            Response deleteResponse = SerenityRest.given()
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .delete(getBaseUrl() + "/api/categories/" + id);
+            if (deleteResponse.getStatusCode() < 200 || deleteResponse.getStatusCode() >= 300) {
+                System.out.println("Failed to delete category ID " + id + " - Status: " + deleteResponse.getStatusCode());
+                System.out.println("Response: " + deleteResponse.getBody().asString());
+            } else {
+                System.out.println("Deleted category ID " + id + " - Status: " + deleteResponse.getStatusCode());
+            }
+        }
+
+        System.out.println("All categories delete attempt complete.");
     }
 
     @Step("Get categories summary")
