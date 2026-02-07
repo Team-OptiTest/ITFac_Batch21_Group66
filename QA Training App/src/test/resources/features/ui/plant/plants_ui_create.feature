@@ -49,3 +49,15 @@ Feature: Plant Management - UI Create Operations
     Given the user is logged in as a user
     When the user navigates directly to the add plant page
     Then the user is redirected to the dashboard or sees access denied
+
+  @UI @UI_Plant_Create_005 @215098G
+  Scenario: Cancel Plant Creation - Admin
+    Given the user is logged in as an admin user
+    When the user navigates directly to the add plant page
+    And the user enters "CancelTestPlant" as the Plant Name
+    And the user selects a Category from the dropdown
+    And the user enters "25.00" as the Price
+    And the user enters "10" as the Quantity
+    And the user clicks Cancel to discard the plant
+    Then the user is redirected to the Plants list
+    And the new plant "CancelTestPlant" should not appear in the table
