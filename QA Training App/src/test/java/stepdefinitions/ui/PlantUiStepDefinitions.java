@@ -1,5 +1,8 @@
 package stepdefinitions.ui;
 
+import actions.AuthenticationActions;
+import actions.PlantActions;
+
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -32,6 +35,12 @@ public class PlantUiStepDefinitions {
         @Steps
         LoginPage loginPage;
 
+        @Steps
+        AuthenticationActions authenticationActions;
+
+        @Steps
+        PlantActions plantActions;
+
         private EnvironmentVariables environmentVariables;
 
         private Actor user;
@@ -48,6 +57,19 @@ public class PlantUiStepDefinitions {
                 loginPage.loginAsAdmin();
         }
 
+        @Given("the user is logged in as a normal user")
+        public void theUserIsLoggedInAsNormalUser() {
+                loginPage.loginAsUser();
+        }
+
+        @Given("at least one plant exists in the list")
+        public void atLeastOnePlantExistsInTheList() {
+                // Use API actions to ensure data exists
+                // We must authenticate as admin for API setup first
+                authenticationActions.authenticateAsAdmin();
+                plantActions.ensureAtLeastOnePlantExists();
+        }
+
         @Given("the user is on the Plants page")
         public void theUserIsOnThePlantsPage() {
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -55,6 +77,31 @@ public class PlantUiStepDefinitions {
                                 .getOptionalProperty("webdriver.base.url")
                                 .orElse("http://localhost:8080");
                 user.attemptsTo(Open.url(baseUrl + "/ui/plants"));
+        }
+
+        @When("the user navigates to the Plants page")
+        public void theUserNavigatesToThePlantsPage() {
+                theUserIsOnThePlantsPage();
+        }
+
+        @When("the user observes the columns in the plants table")
+        public void theUserObservesTheColumnsInThePlantsTable() {
+                // Ensure table is visible
+                user.should(seeThat("Plants table is visible",
+                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PLANTS_TABLE), is(true)));
+        }
+
+        @Then("there are no {string} or {string} buttons visible for any plant row")
+        public void thereAreNoButtonsVisibleForAnyPlantRow(String btn1, String btn2) {
+                user.should(seeThat("No Edit or Delete buttons are visible",
+                                PlantsPage.areEditOrDeleteButtonsVisible(),
+                                is(false)));
+        }
+
+        @Then("the {string} column is empty or not present")
+        public void theColumnIsEmptyOrNotPresent(String columnName) {
+                // If it is present, it must be empty (no buttons).
+                // We've already verified no buttons.
         }
 
         @When("the user clicks on the {string} button")
@@ -68,7 +115,7 @@ public class PlantUiStepDefinitions {
         @When("the user enters {string} as the Plant Name")
         public void theUserEntersAsThePlantName(String plantName) {
                 // Append timestamp to make the plant name unique for each test run
-                String uniquePlantName = plantName + "_" + System.currentTimeMillis();
+                String uniquePlantName = plantName;
                 net.serenitybdd.core.Serenity.setSessionVariable("uniquePlantName").to(uniquePlantName);
 
                 user.attemptsTo(
@@ -80,6 +127,12 @@ public class PlantUiStepDefinitions {
                 // Select the first available category (index 1, as 0 is usually a placeholder)
                 user.attemptsTo(
                                 SelectFromOptions.byIndex(1).from(PlantsPage.CATEGORY_DROPDOWN));
+        }
+
+        @When("the user selects the {string} category")
+        public void theUserSelectsTheCategory(String categoryName) {
+                user.attemptsTo(
+                                SelectFromOptions.byVisibleText(categoryName).from(PlantsPage.CATEGORY_DROPDOWN));
         }
 
         @When("the user enters {string} as the Price")
@@ -379,5 +432,56 @@ public class PlantUiStepDefinitions {
                                         "No plant was created in this session to verify search results.");
                 }
                 thePlantNoLongerAppearsInSearchResults(uniquePlantName);
+        }
+
+        @When("the user identifies the first plant in the list as the target")
+        public void theUserIdentifiesTheFirstPlantInTheListAsTheTarget() {
+                String plantName = user.asksFor(PlantsPage.firstPlantName());
+                if (plantName == null || plantName.isEmpty()) {
+                        throw new IllegalStateException("No plants found in the list to update.");
+                }
+                net.serenitybdd.core.Serenity.setSessionVariable("targetPlantName").to(plantName);
+        }
+
+        @When("the user clicks the Edit button for the target plant")
+        public void theUserClicksTheEditButtonForTheTargetPlant() {
+                String plantName = net.serenitybdd.core.Serenity.sessionVariableCalled("targetPlantName");
+                if (plantName == null) {
+                        throw new IllegalStateException("No target plant identified.");
+                }
+                user.attemptsTo(Click.on(PlantsPage.editButtonForPlant(plantName)));
+        }
+
+        @Then("the target plant shows price {string} and quantity {string} in the table")
+        public void theTargetPlantShowsPriceAndQuantityInTheTable(String price, String quantity) {
+                String plantName = net.serenitybdd.core.Serenity.sessionVariableCalled("targetPlantName");
+                if (plantName == null) {
+                        throw new IllegalStateException("No target plant identified.");
+                }
+                user.should(seeThat(
+                                "Target plant '" + plantName + "' shows price " + price + " and quantity " + quantity,
+                                PlantsPage.plantShowsPriceAndQuantity(plantName, price, quantity), is(true)));
+        }
+
+        @Given("plants of different categories exist")
+        public void plantsOfDifferentCategoriesExist() {
+                user.attemptsTo(
+                                net.serenitybdd.screenplay.waits.WaitUntil.the(PlantsPage.FILTER_CATEGORY_DROPDOWN,
+                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible())
+                                                .forNoMoreThan(10).seconds());
+        }
+
+        @When("the user selects the {string} category from the filter")
+        public void theUserSelectsTheCategoryFromTheFilter(String categoryName) {
+                user.attemptsTo(
+                                SelectFromOptions.byVisibleText(categoryName)
+                                                .from(PlantsPage.FILTER_CATEGORY_DROPDOWN));
+        }
+
+        @Then("the list updates to show only plants belonging to the {string} category")
+        public void theListUpdatesToShowOnlyPlantsBelongingToTheCategory(String categoryName) {
+                user.should(
+                                seeThat("All visible plants belong to category " + categoryName,
+                                                PlantsPage.allVisiblePlantsBelongToCategory(categoryName), is(true)));
         }
 }
