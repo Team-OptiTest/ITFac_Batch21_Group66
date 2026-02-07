@@ -104,6 +104,19 @@ public class CategoryUiStepDefinitions {
         categoryPage.clickSearchButton();
     }
 
+    @When("the user searches for a category that does not exist")
+    public void theUserSearchesForACategoryThatDoesNotExist() {
+        String searchTerm = "NonExistent_" + System.currentTimeMillis();
+        categoryPage.searchCategory(searchTerm);
+    }
+
+    @Then("the message {string} should be displayed in the table body")
+    public void theMessageShouldBeDisplayedInTheTableBody(String expectedMessage) {
+        assertThat(categoryPage.isMessageDisplayedInTableBody(expectedMessage))
+            .as("Expected table body message should be displayed: " + expectedMessage)
+            .isTrue();
+    }
+
     @Then("the user should see a success message confirming the category was created")
     public void theUserShouldSeeASuccessMessageConfirmingTheCategoryWasCreated() {
         assertThat(categoryPage.isSuccessMessageDisplayed())

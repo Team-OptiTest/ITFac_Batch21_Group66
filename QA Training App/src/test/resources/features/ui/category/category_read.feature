@@ -3,13 +3,13 @@ Feature: Read Category
     I want to be able to view categories
     So that I can see how plants are organized
 
-  @Ui @Category_Read_001 @215013U
+  @UI @Category @UI_Category_Read_001 @215013U
   Scenario: Categories page displays list of categories
     Given the user is logged in as a user
     When the user navigates to the categories page
     Then the user should see a list of categories displayed
 
-  @Ui @Category_Read_002 @215013U
+  @UI @Category @UI_Category_Read_002 @215013U
   Scenario: Search for a category by name
     Given the user is logged in as an admin user
     And the user navigates to the categories page
@@ -33,4 +33,4 @@ Feature: Read Category
     Given the user is logged in as a user
     And the user navigates to the categories page
     When the user searches for a category that does not exist
-    Then the message "No category found" should be displayed
+    Then the message "No category found" should be displayed in the table body
