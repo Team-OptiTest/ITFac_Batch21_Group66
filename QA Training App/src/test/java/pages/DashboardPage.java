@@ -12,16 +12,14 @@ public class DashboardPage extends PageObject {
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
 
     // Dashboard title
-    private static final By DASHBOARD_TITLE = By.xpath("//h3[contains(text(), 'Dashboard')]");
-
+    private static final By DASHBOARD_TITLE = By.cssSelector("h3.mb-4");
     // Plants card specific elements
     private static final By PLANTS_CARD = By.xpath("//div[contains(@class, 'card')][.//h6[contains(text(), 'Plants')]]");
     private static final By PLANTS_CARD_TITLE = By.xpath("//h6[contains(text(), 'Plants')]");
 
     // Total plants count - Using the exact element from HTML
-    private static final By TOTAL_PLANTS_COUNT = By.xpath(
-            "//h6[contains(text(), 'Plants')]/ancestor::div[contains(@class, 'card-body')]//div[contains(@class, 'fw-bold fs-5') and ../div[contains(text(), 'Total')]]"
-    );
+    private static final By TOTAL_PLANTS_COUNT = By.id("plants-total-count");
+
 
     // Alternative simpler XPath
     private static final By TOTAL_PLANTS_COUNT_SIMPLE = By.xpath(
@@ -29,9 +27,8 @@ public class DashboardPage extends PageObject {
     );
 
     // Low stock plants count
-    private static final By LOW_STOCK_PLANTS_COUNT = By.xpath(
-            "//h6[contains(text(), 'Plants')]/ancestor::div[contains(@class, 'card-body')]//div[contains(@class, 'fw-bold fs-5') and ../div[contains(text(), 'Low Stock')]]"
-    );
+    private static final By LOW_STOCK_PLANTS_COUNT = By.id("plants-low-stock");
+
 
     private static final By CATEGORIES_CARD = By.xpath("//h6[contains(text(), 'Categories')]");
     private static final By SALES_CARD = By.xpath("//h6[contains(text(), 'Sales')]");
