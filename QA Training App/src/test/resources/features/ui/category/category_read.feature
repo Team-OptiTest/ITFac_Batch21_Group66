@@ -8,3 +8,22 @@ Feature: Read Category
         Given the user is logged in as a user
         When the user navigates to the categories page
         Then the user should see a list of categories displayed
+
+    @Ui @Category_Read_002 @215013U
+    Scenario: Search for a category by name
+        Given the user is logged in as an admin user
+        And the user navigates to the categories page
+        And the user clicks the Add a category button
+        And the user fills in the category name with "result"
+        And the user clicks on the Save button
+        And the user navigates to the categories page
+        And the user clicks the Add a category button
+        And the user fills in the category name with "ignore"
+        And the user clicks on the Save button
+        And the user is logged in as a user
+        And the user navigates to the categories page
+        When the user clicks on the search input field
+        And the user enters "result" into the search input field
+        And the user clicks the search button
+        Then the user should see "result" in the search results
+        And the user should not see "ignore" in the search results
