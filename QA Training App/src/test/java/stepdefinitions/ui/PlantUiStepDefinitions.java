@@ -36,9 +36,6 @@ public class PlantUiStepDefinitions {
         LoginPage loginPage;
 
         @Steps
-        AuthenticationActions authenticationActions;
-
-        @Steps
         PlantActions plantActions;
 
         private EnvironmentVariables environmentVariables;
@@ -66,7 +63,7 @@ public class PlantUiStepDefinitions {
         public void atLeastOnePlantExistsInTheList() {
                 // Use API actions to ensure data exists
                 // We must authenticate as admin for API setup first
-                authenticationActions.authenticateAsAdmin();
+                loginPage.loginAsAdmin();
                 plantActions.ensureAtLeastOnePlantExists();
         }
 
@@ -483,5 +480,22 @@ public class PlantUiStepDefinitions {
                 user.should(
                                 seeThat("All visible plants belong to category " + categoryName,
                                                 PlantsPage.allVisiblePlantsBelongToCategory(categoryName), is(true)));
+        }
+
+        @Then("the list of plants is displayed with valid data")
+        public void theListOfPlantsIsDisplayedWithValidData() {
+                user.should(seeThat("Plants table is visible",
+                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PLANTS_TABLE), is(true)));
+        }
+
+        @Then("the {string} button is not present")
+        public void theButtonIsNotPresent(String buttonName) {
+                if ("Add a Plant".equalsIgnoreCase(buttonName)) {
+                        user.should(seeThat("Add a Plant button is not visible",
+                                        net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.ADD_PLANT_BUTTON),
+                                        is(false)));
+                } else {
+                        throw new IllegalArgumentException("Unsupported button check: " + buttonName);
+                }
         }
 }
