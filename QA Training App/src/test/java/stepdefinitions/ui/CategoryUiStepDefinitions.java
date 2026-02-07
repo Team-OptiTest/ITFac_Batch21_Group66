@@ -79,6 +79,28 @@ public class CategoryUiStepDefinitions {
         addCategoryPage.fillCategoryName(categoryName);
     }
 
+    @When("the user selects {string} as the parent category")
+    public void theUserSelectsParentCategoryAsTheParentCategory(String parentCategory) {
+        addCategoryPage.selectParentCategory(parentCategory);
+    }
+
+    @When("the user clicks on the parent category filter dropdown")
+    public void theUserClicksOnTheParentCategoryFilterDropdown() {
+        categoryPage.clickParentCategoryFilterDropdown();
+    }
+
+    @When("the user selects {string} from the dropdown")
+    public void theUserSelectsFromTheDropdown(String option) {
+        categoryPage.selectFromDropdown(option);
+    }
+
+    @Then("the user should see {string} in the filtered results")
+    public void theUserShouldSeeInTheFilteredResults(String expectedText) {
+        assertThat(categoryPage.isCategoryVisibleInList(expectedText))
+            .as("Expected text should be visible in the filtered results")
+            .isTrue();
+    }
+
     @When("the user leaves the category name field empty")
     public void theUserLeavesTheCategoryNameFieldEmpty() {
         addCategoryPage.fillCategoryName("");
