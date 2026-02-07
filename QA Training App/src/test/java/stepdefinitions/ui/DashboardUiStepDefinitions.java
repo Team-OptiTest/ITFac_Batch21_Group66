@@ -110,4 +110,47 @@ public class DashboardUiStepDefinitions {
                 .isLessThanOrEqualTo(total);
     }
 }
+    @Given("Valid credentials available")
+    public void validCredentialsAvailable() {
+        //credentials are already in LoginPage
+        System.out.println("Using test credentials from environment configuration");
+    }
+
+    @When("Login successfully")
+    public void loginSuccessfully() {
+        loginPage.loginAsUser();
+        try {
+            // Wait for login to complete
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    @Then("Dashboard page loads immediately with summary information")
+    public void dashboardPageLoadsImmediatelyWithSummaryInformation() {
+        // Verify dashboard loads
+        assertThat(dashboardPage.isDashboardLoaded())
+                .as("Dashboard should load after login")
+                .isTrue();
+        
+        String currentUrl = dashboardPage.getDriver().getCurrentUrl();
+        assertThat(currentUrl)
+                .as("Should be on dashboard page")
+                .contains("/ui/dashboard");
+        
+
+        assertThat(dashboardPage.isCardVisible("Plants"))
+                .as("Plants card should be visible")
+                .isTrue();
+        
+        assertThat(dashboardPage.isCardVisible("Categories"))
+                .as("Categories card should be visible")
+                .isTrue();
+        
+        assertThat(dashboardPage.isCardVisible("Sales"))
+                .as("Sales card should be visible")
+                .isTrue();
+        
+    }
 }

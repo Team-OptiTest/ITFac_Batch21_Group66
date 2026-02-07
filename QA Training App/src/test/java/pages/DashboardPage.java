@@ -11,7 +11,6 @@ public class DashboardPage extends PageObject {
 
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
 
-    // ========== DASHBOARD ELEMENTS ==========
     // Dashboard title
     private static final By DASHBOARD_TITLE = By.xpath("//h3[contains(text(), 'Dashboard')]");
 
@@ -34,15 +33,11 @@ public class DashboardPage extends PageObject {
             "//h6[contains(text(), 'Plants')]/ancestor::div[contains(@class, 'card-body')]//div[contains(@class, 'fw-bold fs-5') and ../div[contains(text(), 'Low Stock')]]"
     );
 
-    // ========== OTHER CARDS (for future use) ==========
     private static final By CATEGORIES_CARD = By.xpath("//h6[contains(text(), 'Categories')]");
     private static final By SALES_CARD = By.xpath("//h6[contains(text(), 'Sales')]");
     private static final By INVENTORY_CARD = By.xpath("//h6[contains(text(), 'Inventory')]");
 
-    // ========== PAGE METHODS ==========
-    /**
-     * Navigate to the Dashboard page
-     */
+    
     public void navigateToDashboard() {
         String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
                 .from(environmentVariables)
@@ -50,6 +45,24 @@ public class DashboardPage extends PageObject {
                 .orElse("http://localhost:8080");
         getDriver().get(baseUrl + "/ui/dashboard");
         waitForCondition().until(ExpectedConditions.presenceOfElementLocated(DASHBOARD_TITLE));
+    }
+    public boolean isDashboardLoadedImmediately() {
+    try {
+        // Check if we're already on dashboard URL
+        String currentUrl = getDriver().getCurrentUrl();
+        boolean isOnDashboard = currentUrl.contains("/ui/dashboard");
+        
+        // Check if dashboard elements are visible
+        boolean hasTitle = getDriver().findElement(DASHBOARD_TITLE).isDisplayed();
+        boolean hasCards = isCardVisible("Plants") && isCardVisible("Categories");
+        
+        return isOnDashboard && hasTitle && hasCards;
+    } catch (Exception e) {
+        return false;
+    }
+    }
+    public String getCurrentUrl() {
+    return getDriver().getCurrentUrl();
     }
 
     /**
