@@ -14,7 +14,7 @@ public class SalesPage extends PageObject {
 
     //SALES LIST PAGE ELEMENTS
     private static final By SELL_PLANT_BUTTON_CSS = By.cssSelector("body > div > div > div.main-content > div:nth-child(2) > a");
-    private static final By SELL_PLANT_BUTTON_XPATH = By.xpath("//a[contains(text(), 'Sell Plant')]");
+  //  private static final By SELL_PLANT_BUTTON_XPATH = By.xpath("/html/body/div/div/div[2]/div[2]/a");
     private static final By SALES_TABLE_SELECTOR = By.cssSelector("table.table-bordered");
     private static final By SUCCESS_MESSAGE_SELECTOR = By.cssSelector(".alert-success");
     private static final By ERROR_MESSAGE_SELECTOR = By.cssSelector(".alert-danger");
@@ -37,32 +37,25 @@ public class SalesPage extends PageObject {
         waitForCondition().until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
     }
 
-    public boolean isSellPlantButtonVisible() {
-        try {
-            // Try friend's CSS selector first
-            return getDriver().findElement(SELL_PLANT_BUTTON_CSS).isDisplayed();
-        } catch (Exception e1) {
-            try {
-                // Try your XPath selector as fallback
-                return getDriver().findElement(SELL_PLANT_BUTTON_XPATH).isDisplayed();
-            } catch (Exception e2) {
-                return false;
-            }
-        }
+   public boolean isSellPlantButtonVisible() {
+    try {
+        // Wait until the element is visible
+        waitForCondition().until(ExpectedConditions.visibilityOfElementLocated(SELL_PLANT_BUTTON_CSS));
+        return $(SELL_PLANT_BUTTON_CSS).isVisible();
+    } catch (Exception e) {
+        return false;
     }
+}
 
-    //Check if Sell Plant button is NOT visible (for regular users)
-    public boolean isSellPlantButtonNotVisible() {
-        try {
-            // Try both selectors - if either is found, button is visible
-            boolean cssVisible = getDriver().findElement(SELL_PLANT_BUTTON_CSS).isDisplayed();
-            boolean xpathVisible = getDriver().findElement(SELL_PLANT_BUTTON_XPATH).isDisplayed();
-            return !(cssVisible || xpathVisible);
-        } catch (Exception e) {
-            // Element not found means it's not visible
-            return true;
-        }
+  // Check if Sell Plant button is NOT visible (for regular users)
+public boolean isSellPlantButtonNotVisible() {
+    try {
+        return !$(SELL_PLANT_BUTTON_CSS).isVisible();
+    } catch (Exception e) {
+        // Element not found = not visible
+        return true;
     }
+}
 
     public boolean isRedirectedFromSellPlantPage() {
         try {
