@@ -11,16 +11,16 @@ import pages.LoginPage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CategoryUiStepDefinitions {
-    
+
     @Steps
     LoginPage loginPage;
-    
+
     @Steps
     CategoryPage categoryPage;
 
     @Steps
     AddCategoryPage addCategoryPage;
-    
+
     @Given("the user is logged in as an admin user")
     public void theUserIsLoggedInAsAnAdminUser() {
         loginPage.loginAsAdmin();
@@ -30,7 +30,7 @@ public class CategoryUiStepDefinitions {
     public void theUserIsLoggedInAsAUser() {
         loginPage.loginAsUser();
     }
-    
+
     @When("the user navigates to the categories page")
     public void theUserNavigatesToTheCategoriesPage() {
         categoryPage.navigateToCategoriesPage();
@@ -44,29 +44,29 @@ public class CategoryUiStepDefinitions {
     @Then("the user should see {string} in the search results")
     public void theUserShouldSeeInTheSearchResults(String expectedText) {
         assertThat(categoryPage.isCategoryVisibleInList(expectedText))
-            .as("Expected text should be visible in the search results")
-            .isTrue();
+                .as("Expected text should be visible in the search results")
+                .isTrue();
     }
 
     @Then("the user should not see {string} in the search results")
     public void theUserShouldNotSeeInTheSearchResults(String unexpectedText) {
         assertThat(categoryPage.isCategoryNotVisibleInList(unexpectedText))
-            .as("Unexpected text should not be visible in the search results")
-            .isTrue();
+                .as("Unexpected text should not be visible in the search results")
+                .isTrue();
     }
 
     @Then("the user should see the {string} button")
     public void theUserShouldSeeTheButton(String buttonText) {
         assertThat(categoryPage.isAddCategoryButtonVisible())
-            .as("\"Add a category\" button should be visible to admin user")
-            .isTrue();
+                .as("\"Add a category\" button should be visible to admin user")
+                .isTrue();
     }
 
     @Then("the user should not see the {string} button")
     public void theUserShouldNotSeeTheAddCategoryButton(String buttonText) {
         assertThat(categoryPage.isAddCategoryButtonNotVisible())
-            .as("\"Add a category\" button should not be visible to regular user")
-            .isTrue();
+                .as("\"Add a category\" button should not be visible to regular user")
+                .isTrue();
     }
 
     @When("the user clicks the Add a category button")
@@ -79,7 +79,7 @@ public class CategoryUiStepDefinitions {
         addCategoryPage.fillCategoryName(categoryName);
     }
 
-    @When("the user selects {string} as the parent category")
+    @When("the user selects {string} as parent category")
     public void theUserSelectsParentCategoryAsTheParentCategory(String parentCategory) {
         addCategoryPage.selectParentCategory(parentCategory);
     }
@@ -97,13 +97,18 @@ public class CategoryUiStepDefinitions {
     @Then("the user should see {string} in the filtered results")
     public void theUserShouldSeeInTheFilteredResults(String expectedText) {
         assertThat(categoryPage.isCategoryVisibleInList(expectedText))
-            .as("Expected text should be visible in the filtered results")
-            .isTrue();
+                .as("Expected text should be visible in the filtered results")
+                .isTrue();
     }
 
     @When("the user leaves the category name field empty")
     public void theUserLeavesTheCategoryNameFieldEmpty() {
         addCategoryPage.fillCategoryName("");
+    }
+
+    @When("the user selects {string} as the parent category")
+    public void theUserSelectsParentCategory(String parentName) {
+        addCategoryPage.selectParentCategory(parentName);
     }
 
     @When("the user clicks on the Save button")
@@ -129,29 +134,29 @@ public class CategoryUiStepDefinitions {
     @Then("the user should see a success message confirming the category was created")
     public void theUserShouldSeeASuccessMessageConfirmingTheCategoryWasCreated() {
         assertThat(categoryPage.isSuccessMessageDisplayed())
-            .as("Success message should be displayed after creating a category")
-            .isTrue();
+                .as("Success message should be displayed after creating a category")
+                .isTrue();
     }
 
     @Then("the new category {string} should be listed on the categories page")
     public void theNewCategoryShouldBeListedOnTheCategoriesPage(String categoryName) {
         assertThat(categoryPage.isCategoryVisibleInList(categoryName))
-            .as("Newly created category should be visible in the categories list")
-            .isTrue();
+                .as("Newly created category should be visible in the categories list")
+                .isTrue();
     }
 
     @Then("the user should see a validation error message indicating that the category name is required")
     public void theUserShouldSeeTheCategoryNameIsRequiredMessage() {
         assertThat(addCategoryPage.isValidationErrorMessageDisplayed())
-            .as("Validation error message should be displayed when category name is empty")
-            .isTrue();
+                .as("Validation error message should be displayed when category name is empty")
+                .isTrue();
     }
 
     @Then("the user should see a list of categories displayed")
     public void theUserShouldSeeAListOfCategoriesDisplayed() {
         assertThat(categoryPage.isCategoryListDisplayed())
-            .as("Categories list should be displayed on the page")
-            .isTrue();
+                .as("Categories list should be displayed on the page")
+                .isTrue();
     }
 
 }

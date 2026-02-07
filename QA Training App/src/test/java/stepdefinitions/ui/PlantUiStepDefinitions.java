@@ -129,6 +129,12 @@ public class PlantUiStepDefinitions {
                                 SelectFromOptions.byIndex(1).from(PlantsPage.CATEGORY_DROPDOWN));
         }
 
+        @When("the user selects the {string} category")
+        public void theUserSelectsTheCategory(String categoryName) {
+                user.attemptsTo(
+                                SelectFromOptions.byVisibleText(categoryName).from(PlantsPage.CATEGORY_DROPDOWN));
+        }
+
         @When("the user enters {string} as the Price")
         public void theUserEntersAsThePrice(String price) {
                 user.attemptsTo(
