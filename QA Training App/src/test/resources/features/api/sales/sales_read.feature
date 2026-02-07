@@ -30,7 +30,6 @@ Feature: Sales API - Read Sales
     When user attempts to retrieve a sale with non-existent ID
     Then the API should return 404 Not Found with message "Sale not found"
 
-
   @215116M @API_Sales_Read_006 @Unauthorized @Negative
   Scenario: API_Sales_Read_006 - Retrieve Sale – Unauthorized Access
     Given admin is authenticated
@@ -45,3 +44,10 @@ Feature: Sales API - Read Sales
     When user retrieves sales page with params "page=0&size=5&sort=soldAt,desc"
     Then the response should contain pagination metadata for page 0 and size 5
     And the response content should be sorted by "soldAt" "desc"
+
+  @API @Sales @API_Sales_Read_001 @negative @215098G
+  Scenario: Verify user receives 404 error when viewing non-existent sale
+    Given user is authenticated
+    When user attempts to retrieve a sale with non-existent ID
+    Then the API should return code 404 Not Found
+    And the response should contain message "Sale not found"

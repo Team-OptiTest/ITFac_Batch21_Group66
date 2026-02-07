@@ -339,6 +339,30 @@ public class PlantActions {
                 .put(fullUrl);
     }
 
+        @Step("Update plant with name: {0}")
+        public void updatePlantName(String name) {
+        if (this.createdPlantId == null) {
+            throw new IllegalStateException(
+                "createdPlantId is null — plant creation failed; cannot proceed with name update");
+        }
+
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+            .getProperty("api.base.url");
+
+        String fullUrl = baseUrl + "/api/plants/" + this.createdPlantId;
+
+        Map<String, Object> completeBody = this.createdPlantData != null
+            ? new java.util.HashMap<>(this.createdPlantData)
+            : new java.util.HashMap<>();
+        completeBody.put("name", name);
+
+        getAuthenticatedRequest()
+            .contentType(ContentType.JSON)
+            .body(completeBody)
+            .when()
+            .put(fullUrl);
+        }
+
     @Step("Ensure at least one plant exists in the system")
     public void ensureAtLeastOnePlantExists() {
         String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)

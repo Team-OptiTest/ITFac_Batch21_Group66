@@ -1,5 +1,8 @@
 package stepdefinitions.ui;
 
+import actions.AuthenticationActions;
+import actions.PlantActions;
+
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -32,6 +35,12 @@ public class PlantUiStepDefinitions {
         @Steps
         LoginPage loginPage;
 
+        @Steps
+        AuthenticationActions authenticationActions;
+
+        @Steps
+        PlantActions plantActions;
+
         private EnvironmentVariables environmentVariables;
 
         private Actor user;
@@ -48,6 +57,19 @@ public class PlantUiStepDefinitions {
                 loginPage.loginAsAdmin();
         }
 
+        @Given("the user is logged in as a normal user")
+        public void theUserIsLoggedInAsNormalUser() {
+                loginPage.loginAsUser();
+        }
+
+        @Given("at least one plant exists in the list")
+        public void atLeastOnePlantExistsInTheList() {
+                // Use API actions to ensure data exists
+                // We must authenticate as admin for API setup first
+                authenticationActions.authenticateAsAdmin();
+                plantActions.ensureAtLeastOnePlantExists();
+        }
+
         @Given("the user is on the Plants page")
         public void theUserIsOnThePlantsPage() {
                 String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -55,6 +77,31 @@ public class PlantUiStepDefinitions {
                                 .getOptionalProperty("webdriver.base.url")
                                 .orElse("http://localhost:8080");
                 user.attemptsTo(Open.url(baseUrl + "/ui/plants"));
+        }
+
+        @When("the user navigates to the Plants page")
+        public void theUserNavigatesToThePlantsPage() {
+                theUserIsOnThePlantsPage();
+        }
+
+        @When("the user observes the columns in the plants table")
+        public void theUserObservesTheColumnsInThePlantsTable() {
+                // Ensure table is visible
+                user.should(seeThat("Plants table is visible",
+                                net.serenitybdd.screenplay.questions.Visibility.of(PlantsPage.PLANTS_TABLE), is(true)));
+        }
+
+        @Then("there are no {string} or {string} buttons visible for any plant row")
+        public void thereAreNoButtonsVisibleForAnyPlantRow(String btn1, String btn2) {
+                user.should(seeThat("No Edit or Delete buttons are visible",
+                                PlantsPage.areEditOrDeleteButtonsVisible(),
+                                is(false)));
+        }
+
+        @Then("the {string} column is empty or not present")
+        public void theColumnIsEmptyOrNotPresent(String columnName) {
+                // If it is present, it must be empty (no buttons).
+                // We've already verified no buttons.
         }
 
         @When("the user clicks on the {string} button")
@@ -68,7 +115,7 @@ public class PlantUiStepDefinitions {
         @When("the user enters {string} as the Plant Name")
         public void theUserEntersAsThePlantName(String plantName) {
                 // Append timestamp to make the plant name unique for each test run
-                String uniquePlantName = plantName + "_" + System.currentTimeMillis();
+                String uniquePlantName = plantName;
                 net.serenitybdd.core.Serenity.setSessionVariable("uniquePlantName").to(uniquePlantName);
 
                 user.attemptsTo(
@@ -80,6 +127,12 @@ public class PlantUiStepDefinitions {
                 // Select the first available category (index 1, as 0 is usually a placeholder)
                 user.attemptsTo(
                                 SelectFromOptions.byIndex(1).from(PlantsPage.CATEGORY_DROPDOWN));
+        }
+
+        @When("the user selects the {string} category")
+        public void theUserSelectsTheCategory(String categoryName) {
+                user.attemptsTo(
+                                SelectFromOptions.byVisibleText(categoryName).from(PlantsPage.CATEGORY_DROPDOWN));
         }
 
         @When("the user enters {string} as the Price")

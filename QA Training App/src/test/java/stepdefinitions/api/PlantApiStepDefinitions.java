@@ -173,6 +173,11 @@ public class PlantApiStepDefinitions {
         plantActions.updatePlantQuantity(endpoint, body);
     }
 
+    @When("the admin updates a plant with name {string}")
+    public void theAdminUpdatesPlantWithName(String name) {
+        plantActions.updatePlantName(name);
+    }
+
     @Given("at least one plant exists in the system")
     public void atLeastOnePlantExistsInTheSystem() {
         plantActions.ensureAtLeastOnePlantExists();
