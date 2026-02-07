@@ -5,17 +5,18 @@ import org.openqa.selenium.By;
 import net.serenitybdd.core.pages.PageObject;
 
 public class CategoryPage extends PageObject {
-    
+
     private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[3]/a[2]");
     private static final By SUCCESS_MESSAGE = By.xpath("//*[contains(@class, 'alert-success')]");
-    private static final By SEARCH_INPUT_FIELD = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[1]/input");
-    private static final By SEARCH_BUTTON = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[3]/button");
+    private static final By SEARCH_INPUT_FIELD = By.cssSelector("input[name='name']");
+    private static final By SEARCH_BUTTON = By.xpath("//form//button[normalize-space()='Search']");
+    private static final By CATEGORY_TABLE_BODY = By.cssSelector("table tbody");
     private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[2]/select");
-    
+
     public void navigateToCategoriesPage() {
         getDriver().get("http://localhost:8080/ui/categories");
     }
-    
+
     public boolean isAddCategoryButtonVisible() {
         return getDriver().findElement(ADD_CATEGORY_BUTTON_SELECTOR).isDisplayed();
     }
@@ -40,12 +41,12 @@ public class CategoryPage extends PageObject {
                 try {
                     By altSelector2 = By.xpath("//button[contains(text(), 'Add A Category')]");
                     getDriver().findElement(altSelector2).click();
-                }catch (Exception e3) {
-                        throw new RuntimeException("Could not find 'Add A Category' button with any selector", e1);
-                    }
+                } catch (Exception e3) {
+                    throw new RuntimeException("Could not find 'Add A Category' button with any selector", e1);
                 }
             }
         }
+    }
 
     public void clickParentCategoryFilterDropdown() {
         try {
@@ -62,7 +63,7 @@ public class CategoryPage extends PageObject {
             throw new RuntimeException("Parent category dropdown not found", e);
         }
     }
-    
+
     public boolean isSuccessMessageDisplayed() {
         try {
             return getDriver().findElement(SUCCESS_MESSAGE).isDisplayed();
@@ -98,9 +99,9 @@ public class CategoryPage extends PageObject {
 
     public void searchCategory(String searchTerm) {
         try {
-            getDriver().findElement(By.id("searchInput")).clear();
-            getDriver().findElement(By.id("searchInput")).sendKeys(searchTerm);
-            getDriver().findElement(By.id("searchButton")).click();
+            getDriver().findElement(SEARCH_INPUT_FIELD).clear();
+            getDriver().findElement(SEARCH_INPUT_FIELD).sendKeys(searchTerm);
+            getDriver().findElement(SEARCH_BUTTON).click();
         } catch (Exception e) {
             throw new RuntimeException("Search input or button not found", e);
         }
@@ -128,6 +129,14 @@ public class CategoryPage extends PageObject {
             getDriver().findElement(SEARCH_BUTTON).click();
         } catch (Exception e) {
             throw new RuntimeException("Search button not found", e);
+        }
+    }
+
+    public boolean isMessageDisplayedInTableBody(String messageText) {
+        try {
+            return getDriver().findElement(CATEGORY_TABLE_BODY).getText().contains(messageText);
+        } catch (Exception e) {
+            return false;
         }
     }
 

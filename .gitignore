@@ -42,3 +42,6 @@ how-to-run.txt
 
 # Maven output directory
 */target
+
+.vscode
+.idea
