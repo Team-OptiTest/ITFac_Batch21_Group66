@@ -202,4 +202,8 @@ public class PlantApiStepDefinitions {
     public void theAdminCreatesPlantWithNonExistentCategoryId() {
         plantActions.createPlantWithNonExistentCategory();
     }
+    @Then("the response should be in read-only format")
+    public void theResponseShouldBeInReadOnlyFormat() {
+        plantActions.verifyReadOnlyFormat();
+}
 }

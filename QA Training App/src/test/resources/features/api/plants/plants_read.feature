@@ -3,7 +3,7 @@ Feature: Plant Retrieval API
   I want to retrieve plants from the system
   So that I can view the plant catalog
 
-  @API @Plant @Pagination @215063V
+  @API @Pagination @215063V
   Scenario: Get Paginated Plant List
     Given the user is authenticated with ROLE_USER
     When I GET to "/api/plants/paged" with query params "page=0&size=10"
@@ -63,7 +63,7 @@ Feature: Plant Retrieval API
     When I GET to "/api/plants/paged" with query params "page=0&size=1001&sort=name"
     Then the response status should be 400
 
-  @simple @API_Plant_Read_004 @pagination @default @215027P
+  @API @Plant_Read_004 @pagination @default @215027P
   Scenario: Get paginated plant list with default values
     Given the user is authenticated with ROLE_USER
     When I GET to "/api/plants/paged" with query params "page=0&size=10&sort=name"
@@ -73,8 +73,15 @@ Feature: Plant Retrieval API
     And the response page size should be 10
     And the response should contain pagination metadata
 
-  @simple @API_Plant_Read_005 @security @authentication @215027P
+  @API @Plant_Read_005 @security @authentication @215027P
   Scenario: API rejects invalid JWT token for plant retrieval
     Given the user has an invalid JWT token
     When I GET to "/api/plants/paged" with query params "page=0&size=10&sort=name"
     Then the response status should be 401 Unauthorized
+
+  @API @Plant_Read_001 @215027P
+  Scenario: Plants summary API returns inventory statistics
+    Given the user is authenticated with ROLE_USER
+    When I GET to "/api/plants/summary"
+    Then the response status should be 200
+    And the response should be in read-only format
