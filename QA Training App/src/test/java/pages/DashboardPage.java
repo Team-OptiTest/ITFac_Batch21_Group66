@@ -113,14 +113,38 @@ public class DashboardPage extends PageObject {
     /**
      * Get low stock plants count
      */
-    public String getPlantsCardLowStockCount() {
+   public String getPlantsCardLowStockCount() {
+    try {
+        // First try the specific XPath
+        waitForCondition().until(ExpectedConditions.visibilityOfElementLocated(LOW_STOCK_PLANTS_COUNT));
+        String count = getDriver().findElement(LOW_STOCK_PLANTS_COUNT).getText().trim();
+        
+        // Debug output
+        System.out.println("Found low stock count using XPath: '" + count + "'");
+        return count;
+    } catch (Exception e) {
+        System.out.println("XPath method failed, trying alternative...");
+        
+        // Alternative: Look for "Low Stock" text and get the preceding number
         try {
-            waitForCondition().until(ExpectedConditions.visibilityOfElementLocated(LOW_STOCK_PLANTS_COUNT));
-            return getDriver().findElement(LOW_STOCK_PLANTS_COUNT).getText().trim();
-        } catch (Exception e) {
-            return "0";
+            String pageSource = getDriver().getPageSource();
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                "<div class=\"fw-bold fs-5\"[^>]*>\\s*(\\d+)\\s*</div>\\s*<div class=\"small text-muted\">Low Stock</div>"
+            );
+            java.util.regex.Matcher matcher = pattern.matcher(pageSource);
+            
+            if (matcher.find()) {
+                String count = matcher.group(1).trim();
+                System.out.println("Found low stock count using regex: '" + count + "'");
+                return count;
+            }
+        } catch (Exception ex) {
+            System.out.println("Alternative method also failed: " + ex.getMessage());
         }
+        
+        return "0";
     }
+}
 
     /**
      * Check if Plants card is visible
