@@ -35,7 +35,7 @@ Feature: Plant Retrieval API
 
   @API @Plant @API_Plant_Read_010 @negative @215098G
   Scenario: Verify user receives 404 error when getting plants by non-existent category
-    Given the user is authenticated as user
+    Given the user is authenticated with ROLE_USER
     When the user attempts to get plants by a non-existent category ID
     Then the API should return 404 Not Found
     And the error message should contain "Category not found"
