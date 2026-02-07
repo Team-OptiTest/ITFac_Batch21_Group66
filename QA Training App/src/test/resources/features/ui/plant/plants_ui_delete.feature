@@ -4,10 +4,10 @@ Feature: Management of Plants - Delete
   So that I can remove obsolete plants
 
   Background:
-    Given the user is logged in as Admin with username "admin" and password "admin"
 
   @ui @delete_plant @215063V
   Scenario: UI_Plant_Delete_001 Delete Plant (Success)
+    Given the user is logged in as Admin with username "admin" and password "admin"
     Given the user is on the Plants page
     # Create a plant to delete (Pre-condition step to ensure a known plant exists)
     When the user clicks on the "Add a Plant" button

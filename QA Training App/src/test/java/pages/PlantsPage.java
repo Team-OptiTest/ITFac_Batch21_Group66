@@ -171,4 +171,24 @@ public class PlantsPage extends PageObject {
                         return true;
                 };
         }
+
+        public static Question<Boolean> areEditOrDeleteButtonsVisible() {
+                return actor -> {
+                        Target EDIT_BUTTONS = Target.the("Edit buttons").locatedBy(
+                                        "//table//button[contains(text(), 'Edit') or contains(@title, 'Edit')] | //table//a[contains(text(), 'Edit')]");
+                        Target DELETE_BUTTONS = Target.the("Delete buttons").locatedBy(
+                                        "//table//button[contains(text(), 'Delete') or contains(@title, 'Delete')] | //table//a[contains(text(), 'Delete')]");
+
+                        return !EDIT_BUTTONS.resolveAllFor(actor).isEmpty()
+                                        || !DELETE_BUTTONS.resolveAllFor(actor).isEmpty();
+                };
+        }
+
+        public static Question<Boolean> isActionsColumnPresent() {
+                return actor -> {
+                        Target ACTIONS_HEADER = Target.the("Actions column header")
+                                        .locatedBy("//th[contains(text(), 'Actions')]");
+                        return !ACTIONS_HEADER.resolveAllFor(actor).isEmpty();
+                };
+        }
 }
