@@ -9,7 +9,7 @@ Feature: Read Category
     When the user navigates to the categories page
     Then the user should see a list of categories displayed
 
-  @Ui @Category_Read_002 @215013U
+  @UI @Category_Read_002 @215013U
   Scenario: Search for a category by name
     Given the user is logged in as an admin user
     When the user navigates to the categories page
@@ -31,7 +31,7 @@ Feature: Read Category
     Then the user should see "result" in the search results
     And the user should not see "ignore" in the search results
 
-  @Ui @Category_Read_003 @215013U
+  @UI @Category_Read_003 @215013U
   Scenario: Filter categories by parent category
     Given the user is logged in as an admin user
     When the user navigates to the categories page
