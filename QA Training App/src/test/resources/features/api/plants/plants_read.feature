@@ -21,8 +21,11 @@ Feature: Plant Retrieval API
   @API @Plant @Category @215063V
   Scenario: Get Plant by Category
     Given the user is authenticated with ROLE_USER
-    And a valid category with ID 5 exists
-    When I GET to "/api/plants/category/5"
+    And a category is created with name "ChildCat5" and parent "ParentCat5"
+    When I POST to "/api/plants/category/" with category "ChildCat5" and following data:
+      | name    | price | quantity |
+      | Sunrose | 15.50 |      100 |
+    When I GET to "/api/plants/category/"
     Then the response status should be 200
     And the response should contain an array of plants
 

@@ -328,4 +328,55 @@ public class CategoryActions {
             return false;
         }
     }
+
+    @Step("Create category and a parent category with name: {0} and parentName {1}")
+    public void createCategoryAndSubCategory(String categoryName, String parentCategory){
+        String requestBody = String.format("{\"name\":\"%s\"}", parentCategory);
+        String token = getAuthToken();
+
+        lastResponse = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(requestBody)
+                .when()
+                .post(getBaseUrl() + "/api/categories");
+
+        // Only try to extract ID if the request was successful
+        if (lastResponse.getStatusCode() == 201 || lastResponse.getStatusCode() == 200) {
+            try {
+                int parentId = lastResponse.jsonPath().getInt("id");
+                String createUrl = getBaseUrl() + "/api/categories";
+                String categoryRequestBody = String.format("{\"name\":\"%s\",\"parent\": { \"name\": \"%s\", \"id\": \"%d\"}}", categoryName, parentCategory, parentId);
+
+                Response categeoryResponse = SerenityRest.given()
+                        .header("Authorization", "Bearer " + token)
+                        .header("Content-Type", "application/json")
+                        .body(categoryRequestBody)
+                        .when()
+                        .post(createUrl);
+
+                Serenity.setSessionVariable("childCatIdForPlantRead").to(categeoryResponse.jsonPath().getInt("id"));
+
+            } catch (Exception e) {
+                System.out.println("Could not extract category ID: " + e.getMessage());
+            }
+        } else {
+            // Request failed - don't try to extract ID
+            System.out.println("Category creation failed with status: " + lastResponse.getStatusCode());
+        }
+    }
+
+    @Step("Search categories with name: {0}")
+    public int searchAndGetCategoryIdFromName(String categoryName) {
+        String token = getAuthToken();
+        String searchUrl = getBaseUrl() + "/api/categories";
+
+        var request = SerenityRest.given()
+                .header("Authorization", "Bearer " + token);
+        if (categoryName != null) {
+            request = request.queryParam("name", categoryName);
+        }
+        lastResponse = request.when().get(searchUrl);
+        return lastResponse.getBody().jsonPath().getList("id", Integer.class).getFirst();
+    }
 }
