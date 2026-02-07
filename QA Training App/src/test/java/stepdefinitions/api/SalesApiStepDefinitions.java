@@ -277,8 +277,18 @@ public class SalesApiStepDefinitions {
     }
 
     @When("user attempts to retrieve a sale with non-existent ID")
-    public void user_attempts_to_retrieve_sale_with_non_existent_id() {
+    public void user_attempts_to_retrieve_a_sale_with_non_existent_id() {
         salesAction.getSaleWithNonExistentId();
+    }
+
+    @Then("the API should return code {int} Not Found")
+    public void the_api_should_return_code_not_found(int expectedStatusCode) {
+        salesAction.verifyStatusCode(expectedStatusCode);
+    }
+
+    @Then("the response should contain message {string}")
+    public void the_response_should_contain_message(String expectedMessage) {
+        salesAction.verifyErrorMessageContains(expectedMessage);
     }
 
     @Then("the API should return {int} Not Found with message {string}")

@@ -1,7 +1,6 @@
 package actions;
 
 import net.serenitybdd.annotations.Step;
-import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
@@ -10,6 +9,7 @@ import net.serenitybdd.core.Serenity;
 import io.restassured.http.ContentType;
 import static org.hamcrest.Matchers.*;
 import java.util.List;
+import utils.TestUtils;
 
 public class SalesAction {
 
@@ -53,6 +53,12 @@ public class SalesAction {
     public void verifyErrorMessage(String expectedMessage) {
         SerenityRest.then()
                 .body("message", equalTo(expectedMessage));
+    }
+
+    @Step("Verify error message contains")
+    public void verifyErrorMessageContains(String expectedMessage) {
+        SerenityRest.then()
+                .body("message", containsString(expectedMessage));
     }
 
     @Step("Retrieve all sales")
@@ -111,7 +117,7 @@ public class SalesAction {
     @Step("Get a sale with non-existent ID")
     public void getSaleWithNonExistentId() {
         // Use a non-existent ID generated from existing sale IDs
-        int nonExistentId = (int) utils.TestUtils.generateNonExistentId(getAllSaleIds());
+        int nonExistentId = (int) TestUtils.generateNonExistentId(getAllSaleIds());
         SerenityRest.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
