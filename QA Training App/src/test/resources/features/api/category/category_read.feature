@@ -21,37 +21,37 @@ Feature: Category Read Operations
     Then the API should be returned 401 Unauthorized
 
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify admin can fetch category list
     Given the user is authenticated as admin
     When the admin fetches the category list
     Then the category list should be retrieved successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify user can fetch category list
     Given the user is authenticated as user
     When the user fetches the category list
     Then the category list should be retrieved successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify user can search categories via API
     Given the user is authenticated as user
     When the user searches for categories with name "Temp"
     Then the search results should be returned successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify admin can search categories via API
     Given the user is authenticated as admin
     When the admin searches for categories with name "Temp"
     Then the search results should be returned successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify user can filter categories by parent category
     Given the user is authenticated as user
     When the user filters categories by parent ID "1"
     Then the filtered categories should be retrieved successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify admin can filter categories by parent category
     Given the user is authenticated as admin
     When the admin filters categories by parent ID "1"
