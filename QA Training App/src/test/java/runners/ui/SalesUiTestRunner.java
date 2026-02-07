@@ -1,13 +1,17 @@
 package runners.ui;
 
-import org.junit.runner.RunWith;
-import io.cucumber.junit.CucumberOptions;
-import net.serenitybdd.cucumber.CucumberWithSerenity;
-@RunWith(CucumberWithSerenity.class)
-@CucumberOptions(
-    features = "src/test/resources/features/ui/sales",
-    glue = "stepdefinitions.ui",
-    plugin = {"pretty"}
-)
+import org.junit.platform.suite.api.ConfigurationParameter;
+import org.junit.platform.suite.api.IncludeEngines;
+import org.junit.platform.suite.api.SelectClasspathResource;
+import org.junit.platform.suite.api.Suite;
+
+import io.cucumber.junit.platform.engine.Constants;
+
+@Suite
+@IncludeEngines("cucumber")
+@SelectClasspathResource("features/ui/sales")
+@ConfigurationParameter(key = Constants.GLUE_PROPERTY_NAME, value = "stepdefinitions.ui")
+@ConfigurationParameter(key = Constants.PLUGIN_PROPERTY_NAME,
+        value = "io.cucumber.core.plugin.SerenityReporterParallel,pretty,summary")
 public class SalesUiTestRunner {
 }
