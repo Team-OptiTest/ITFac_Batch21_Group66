@@ -46,14 +46,13 @@ public class DashboardUiStepDefinitions {
                 .isTrue();
     }
 
-
     @When("Check {string} in {string} card")
     public void checkCountTypeInCard(String countType, String cardName) {
         assertThat(dashboardPage.isCardVisible(cardName))
                 .as(cardName + " card should be visible")
                 .isTrue();
         
-        // You might want to add specific verification for the count type
+        // Specific verification for the count type
         if ("Low Stock".equalsIgnoreCase(countType)) {
             System.out.println("Verifying Low Stock count in " + cardName + " card");
         }
@@ -63,10 +62,10 @@ public class DashboardUiStepDefinitions {
     public void summaryCardShowsCorrectCount(String cardName) {
         String actualCount = dashboardPage.getPlantsCardTotalCount();
 
-        // Just verify it's a positive number
+        // Verify it's a positive number
         assertThat(actualCount)
             .as(cardName + " card should show a valid count")
-            .matches("\\d+"); // Any positive no
+            .matches("\\d+");
     }
 
     @Then("Summary card {string} shows {string} {string}")
@@ -94,13 +93,15 @@ public class DashboardUiStepDefinitions {
                 .as(cardName + " card should show " + expectedLowStockCount + " Low Stock")
                 .isEqualTo(expectedLowStockCount);
     }
+
     @Then("Summary card {string} shows correct low stock count")
     public void summaryCardShowsCorrectLowStockCount(String cardName) {
         String actualLowStockCount = dashboardPage.getPlantsCardLowStockCount();
     
         assertThat(actualLowStockCount)
                 .as(cardName + " card should show a valid low stock count")
-                .matches("\\d+"); // Any positive no    
+                .matches("\\d+");
+        
         String totalCount = dashboardPage.getPlantsCardTotalCount();
         if (!"0".equals(totalCount) && !"0".equals(actualLowStockCount)) {
             int lowStock = Integer.parseInt(actualLowStockCount);
@@ -108,11 +109,11 @@ public class DashboardUiStepDefinitions {
             assertThat(lowStock)
                 .as("Low stock count should not exceed total count")
                 .isLessThanOrEqualTo(total);
+        }
     }
-}
+
     @Given("Valid credentials available")
     public void validCredentialsAvailable() {
-        //credentials are already in LoginPage
         System.out.println("Using test credentials from environment configuration");
     }
 
@@ -120,7 +121,6 @@ public class DashboardUiStepDefinitions {
     public void loginSuccessfully() {
         loginPage.loginAsUser();
         try {
-            // Wait for login to complete
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -129,7 +129,6 @@ public class DashboardUiStepDefinitions {
 
     @Then("Dashboard page loads immediately with summary information")
     public void dashboardPageLoadsImmediatelyWithSummaryInformation() {
-        // Verify dashboard loads
         assertThat(dashboardPage.isDashboardLoaded())
                 .as("Dashboard should load after login")
                 .isTrue();
@@ -139,7 +138,6 @@ public class DashboardUiStepDefinitions {
                 .as("Should be on dashboard page")
                 .contains("/ui/dashboard");
         
-
         assertThat(dashboardPage.isCardVisible("Plants"))
                 .as("Plants card should be visible")
                 .isTrue();
@@ -151,6 +149,18 @@ public class DashboardUiStepDefinitions {
         assertThat(dashboardPage.isCardVisible("Sales"))
                 .as("Sales card should be visible")
                 .isTrue();
+    }
+
+    @Then("Verify \"Dashboard\" menu item is highlighted with active CSS class")
+    public void verifyDashboardMenuItemIsHighlightedWithActiveCSSClass() {
+        // Check if dashboard menu item has active state
+        boolean isActive = dashboardPage.isDashboardMenuActive();
         
+        System.out.println("Checking Dashboard menu active state...");
+        System.out.println("Dashboard menu active: " + isActive);
+        
+        assertThat(isActive)
+                .as("Dashboard menu item should be highlighted with active CSS class when on dashboard page")
+                .isTrue();
     }
 }
