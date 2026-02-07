@@ -6,7 +6,7 @@ import net.serenitybdd.core.pages.PageObject;
 public class SalesPage extends PageObject {
 
     private static final By SELL_PLANT_BUTTON =
-        By.xpath("/html/body/div/div/div[2]/div[2]/a");
+        By.cssSelector("body > div > div > div.main-content > div:nth-child(2) > a");
 
     public void navigateToSalesPage() {
         getDriver().get("http://localhost:8080/ui/sales");
