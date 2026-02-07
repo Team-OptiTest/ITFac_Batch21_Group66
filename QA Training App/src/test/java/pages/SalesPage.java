@@ -130,7 +130,7 @@ public boolean isSellPlantButtonNotVisible() {
             // action is e.g. "/ui/sales/delete/73" — grab the last segment
             return action.substring(action.lastIndexOf('/') + 1);
         } catch (Exception e) {
-            return "";
+            throw new IllegalStateException("Unable to extract sale id from delete action", e);
         }
     }
 
