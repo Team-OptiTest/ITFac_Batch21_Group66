@@ -23,7 +23,7 @@ Feature: Create Category
   Scenario: Validation error when creating a category with an empty name
     Given the user is logged in as an admin user
     When the user navigates to the categories page
-    And the user clicks the Add a category button
+    And the user navigates to the add categories page
     And the user leaves the category name field empty
     And the user clicks on the Save button
     Then the user should see a validation error message indicating that the category name is required

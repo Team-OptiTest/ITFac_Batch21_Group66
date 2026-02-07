@@ -36,6 +36,11 @@ public class CategoryUiStepDefinitions {
         categoryPage.navigateToCategoriesPage();
     }
 
+    @When("the user navigates to the add categories page")
+    public void theUserNavigatesToTheAddCategoriesPage() {
+        categoryPage.navigateToAddCategoryPage();
+    }
+
     @Then("the user searches for {string} in the categories page")
     public void theUserSearchesForInTheCategoriesPage(String searchTerm) {
         categoryPage.searchCategory(searchTerm);
