@@ -3,6 +3,7 @@ package stepdefinitions.api;
 import java.util.Map;
 
 import actions.AuthenticationActions;
+import actions.CategoryActions;
 import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -15,6 +16,9 @@ public class PlantApiStepDefinitions {
 
     @Steps
     PlantActions plantActions;
+
+    @Steps
+    CategoryActions categoryActions;
 
     @Steps
     AuthenticationActions authenticationActions;
@@ -34,17 +38,27 @@ public class PlantApiStepDefinitions {
         authenticationActions.setInvalidJWTToken();
     }
 
-    @Given("a valid category with ID {int} exists")
-    public void aValidCategoryWithIDExists(Integer categoryId) {
-        // This is a precondition step - we assume the category exists in the test
-        // environment
-        // No action needed as this is just documenting the test precondition
+    @Given("a category is created with name {string} and parent {string}")
+    public void aValidCategoryWithIDExists(String categoryName, String parentName) {
+        categoryActions.createCategoryAndSubCategory(categoryName, parentName);
+    }
+
+    @When("I POST to {string} with category {string} and following data:")
+    public void iPOSTToWithFollowingData(String endpoint, String categoryName, io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> data = dataTable.asMaps().getFirst();
+        Map<String, Object> body = new java.util.HashMap<>();
+        String plantName = data.get("name");
+        body.put("name", plantName);
+        body.put("price", Double.parseDouble(data.get("price")));
+        body.put("quantity", Integer.parseInt(data.get("quantity")));
+        String[] parts = endpoint.split("/");
+        int categoryId = categoryActions.searchAndGetCategoryIdFromName(categoryName);
+        plantActions.createPlant(categoryId, body);
     }
 
     @When("I POST to {string} with following data:")
-    public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
-        Map<String, String> data = dataTable.asMaps().get(0);
-
+    public void iPOSTWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> data = dataTable.asMaps().getFirst();
         Map<String, Object> body = new java.util.HashMap<>();
         String plantName = data.get("name");
         body.put("name", plantName);
@@ -52,7 +66,6 @@ public class PlantApiStepDefinitions {
         body.put("quantity", Integer.parseInt(data.get("quantity")));
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
-
         plantActions.createPlant(categoryId, body);
     }
 
@@ -123,10 +136,12 @@ public class PlantApiStepDefinitions {
     @Given("a plant with ID exists in the system")
     public void aPlantWithIDExistsInTheSystem() {
         Map<String, Object> body = new java.util.HashMap<>();
-        body.put("name", "TestPlant_" + System.currentTimeMillis());
+        body.put("name", "PlantForDelete");
         body.put("price", 25.00);
         body.put("quantity", 100);
-        plantActions.createPlantAndStoreId(5, body);
+        categoryActions.createCategoryAndSubCategory("ChildCat4", "ParentCat4");
+        var categoryId = categoryActions.searchAndGetCategoryIdFromName("ChildCat4");
+        plantActions.createPlantAndStoreId(categoryId, body);
     }
 
     @When("I DELETE to {string}")
