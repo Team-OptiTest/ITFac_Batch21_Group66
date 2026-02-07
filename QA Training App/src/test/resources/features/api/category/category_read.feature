@@ -5,13 +5,13 @@ Feature: Category Read Operations
   So that I can see category details
 
 
-  @simple @API_Category_Read_004 @dashboard @summary
+  @API @Category_Read_004 @dashboard @summary @215027P
   Scenario: Categories summary API returns aggregated data
     Given the user has a valid JWT token
     When the user requests categories summary
     Then the API should return 200 OK
 
-  @simple @API_Category_Read_005 @security @authentication
+  @API @Category_Read_005 @security @authentication @215027P
   Scenario: Categories summary API rejects invalid JWT token
     Given the user has an expired JWT token:
     """
@@ -21,37 +21,37 @@ Feature: Category Read Operations
     Then the API should be returned 401 Unauthorized
 
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify admin can fetch category list
     Given the user is authenticated as admin
     When the admin fetches the category list
     Then the category list should be retrieved successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify user can fetch category list
     Given the user is authenticated as user
     When the user fetches the category list
     Then the category list should be retrieved successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify user can search categories via API
     Given the user is authenticated as user
     When the user searches for categories with name "Temp"
     Then the search results should be returned successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify admin can search categories via API
     Given the user is authenticated as admin
     When the admin searches for categories with name "Temp"
     Then the search results should be returned successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify user can filter categories by parent category
     Given the user is authenticated as user
     When the user filters categories by parent ID "1"
     Then the filtered categories should be retrieved successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Verify admin can filter categories by parent category
     Given the user is authenticated as admin
     When the admin filters categories by parent ID "1"
@@ -70,3 +70,8 @@ Feature: Category Read Operations
     When the user requests the main categories
     Then the API should return 200 OK
     And the response should contain a list of main categories
+
+  @API @Category_Read_006 @security @authentication @215027P
+  Scenario: API rejects requests without JWT token
+    When a request is made to get categories without JWT token
+    Then the API should be returned 401 Unauthorized

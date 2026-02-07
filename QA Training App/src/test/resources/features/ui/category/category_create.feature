@@ -3,13 +3,13 @@ Feature: Create Category
     I want to be able to create categories 
     So that I can organize plants
 
-  @Ui @Category_Create_001
+  @Ui @Category_Create_001 @215013U
   Scenario: "Add a category" button visible to admin user
     Given the user is logged in as an admin user
     When the user navigates to the categories page
     Then the user should see the "Add a category" button
 
-  @Ui @Category_Create_002
+  @Ui @Category_Create_002 @215013U
   Scenario: Admin user can create a category
     Given the user is logged in as an admin user
     When the user navigates to the categories page
@@ -19,7 +19,7 @@ Feature: Create Category
     Then the user should see a success message confirming the category was created
     And the new category "abcd" should be listed on the categories page
   
-  @Ui @Category_Create_003
+  @Ui @Category_Create_003 @215013U
   Scenario: Validation error when creating a category with an empty name
     Given the user is logged in as an admin user
     When the user navigates to the categories page
@@ -28,8 +28,8 @@ Feature: Create Category
     And the user clicks on the Save button
     Then the user should see a validation error message indicating that the category name is required
 
-  @Ui @Category_Create_004
+  @Ui @Category_Create_004 @215013U
   Scenario: "Add a category" button not visible to regular user
-    Given the user is logged in as a regular user
+    Given the user is logged in as a user
     When the user navigates to the categories page
     Then the user should not see the "Add a category" button

@@ -3,14 +3,14 @@ Feature: Category Update
   I want to update existing categories
   So that I can modify category information
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Update category with valid data
     Given the user is authenticated as admin
     And a category named "new" exists
     When the admin updates that category with name "Updatednew"
     Then the category should be updated successfully
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Update category as a user
     Given the user is authenticated as admin
     And a category named "abc" exists
@@ -18,7 +18,7 @@ Feature: Category Update
     When the user updates that category with name "updatedAbc"
     Then the category update should fail
 
-  @API @Category
+  @API @Category @215013U
   Scenario: Update category with an invalid ID
     Given the user is authenticated as admin
     When the admin updates a category with non-existent ID

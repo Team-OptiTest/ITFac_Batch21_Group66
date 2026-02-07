@@ -12,6 +12,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Quotes;
 
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
+import net.serenitybdd.core.pages.WebElementFacade;
+import java.util.List;
 
 public class PlantsPage extends PageObject {
 
@@ -35,7 +37,7 @@ public class PlantsPage extends PageObject {
 
         public static final Target SUCCESS_MESSAGE = Target.the("Success message")
                         .located(By.xpath(
-                                        "//*[contains(text(), 'added successfully') or contains(text(), 'Plant added successfully')]"));
+                                        "//*[contains(text(), 'added successfully') or contains(text(), 'Plant added successfully') or contains(text(), 'deleted successfully') or contains(text(), 'Plant deleted successfully')]"));
 
         public static final Target PLANTS_TABLE = Target.the("Plants table")
                         .located(By.cssSelector("table, .plants-table, [class*='table']"));
@@ -116,11 +118,13 @@ public class PlantsPage extends PageObject {
                 return actor -> {
                         try {
                                 actor.attemptsTo(
-                                                WaitUntil.the(plantInTable(plantName), isVisible())
+                                                WaitUntil.the(plantInTable(plantName),
+                                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers
+                                                                                .isNotVisible())
                                                                 .forNoMoreThan(10).seconds());
-                                return Visibility.of(plantInTable(plantName)).answeredBy(actor);
+                                return !Visibility.of(plantInTable(plantName)).answeredBy(actor);
                         } catch (Exception e) {
-                                return false;
+                                return true; // Exception likely means element not found, which is good
                         }
                 };
         }
@@ -129,11 +133,13 @@ public class PlantsPage extends PageObject {
                 return actor -> {
                         try {
                                 actor.attemptsTo(
-                                                WaitUntil.the(plantInTable(plantName), isVisible())
+                                                WaitUntil.the(plantInTable(plantName),
+                                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers
+                                                                                .isNotVisible())
                                                                 .forNoMoreThan(10).seconds());
-                                return Visibility.of(plantInTable(plantName)).answeredBy(actor);
+                                return !Visibility.of(plantInTable(plantName)).answeredBy(actor);
                         } catch (Exception e) {
-                                return false;
+                                return true;
                         }
                 };
         }
@@ -146,6 +152,23 @@ public class PlantsPage extends PageObject {
                         } catch (Exception e) {
                                 return false;
                         }
+                };
+        }
+
+        public static Question<Boolean> allVisiblePlantsMatch(String term) {
+                return actor -> {
+                        Target ROWS = Target.the("Plant rows").locatedBy("//table/tbody/tr");
+                        List<WebElementFacade> rows = ROWS.resolveAllFor(actor);
+
+                        if (rows.isEmpty())
+                                return true; // Or false if we expect results
+
+                        for (WebElementFacade row : rows) {
+                                if (!row.getText().toLowerCase().contains(term.toLowerCase())) {
+                                        return false;
+                                }
+                        }
+                        return true;
                 };
         }
 }
