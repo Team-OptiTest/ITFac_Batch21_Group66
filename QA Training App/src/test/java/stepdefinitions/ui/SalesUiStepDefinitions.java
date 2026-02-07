@@ -146,6 +146,9 @@ public class SalesUiStepDefinitions {
     public void theAdminClicksTheDeleteIconForASalesRecord() {
 
         targetSaleId = salesPage.getFirstSaleDeleteId();
+        assertThat(targetSaleId)
+                .as("Sale ID should be captured before attempting delete")
+                .isNotBlank();
         salesPage.clickDeleteIconForFirstSale();
     }
 
