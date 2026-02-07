@@ -25,6 +25,11 @@ public class SellPlantPage extends PageObject {
     private static final By CANCEL_BUTTON =
             By.cssSelector("a.btn-secondary, a.btn-outline-secondary, a[href*='/ui/sales']");
 
+    /**
+     * Determines whether the Sell Plant page title is currently visible.
+     *
+     * @return true if the Sell Plant page title is visible, false otherwise (including when an exception occurs)
+     */
     public boolean isSellPlantPageDisplayed() {
         try {
             return $(PAGE_TITLE).isVisible();
@@ -41,6 +46,11 @@ public class SellPlantPage extends PageObject {
         }
     }
 
+    /**
+     * Checks whether the quantity input field is visible on the page.
+     *
+     * @return `true` if the quantity input is visible, `false` otherwise (returns `false` if an error occurs while checking visibility).
+     */
     public boolean isQuantityFieldDisplayed() {
         try {
             return $(QUANTITY_FIELD).isVisible();
@@ -49,6 +59,12 @@ public class SellPlantPage extends PageObject {
         }
     }
 
+    /**
+     * Selects the first available plant option from the plant dropdown.
+     *
+     * Waits for the plant dropdown to be present; if there is at least one selectable option
+     * besides the placeholder, selects that option by index, otherwise leaves the selection unchanged.
+     */
     public void selectFirstAvailablePlant() {
         waitForCondition().until(ExpectedConditions.presenceOfElementLocated(PLANT_DROPDOWN));
         WebElement dropdown = getDriver().findElement(PLANT_DROPDOWN);
@@ -59,17 +75,32 @@ public class SellPlantPage extends PageObject {
         }
     }
 
+    /**
+     * Set the quantity value in the page's quantity input field.
+     *
+     * Waits for the quantity field to be present, clears any existing value, and types the provided quantity.
+     *
+     * @param quantity the value to enter into the quantity input (provided as a string)
+     */
     public void enterQuantity(String quantity) {
         waitForCondition().until(ExpectedConditions.presenceOfElementLocated(QUANTITY_FIELD));
         $(QUANTITY_FIELD).clear();
         $(QUANTITY_FIELD).type(quantity);
     }
 
+    /**
+     * Waits for the page's cancel button to become clickable and clicks it.
+     */
     public void clickCancelButton() {
         waitForCondition().until(ExpectedConditions.elementToBeClickable(CANCEL_BUTTON));
         $(CANCEL_BUTTON).click();
     }
 
+    /**
+     * Checks whether the current browser URL corresponds to the sales listing page (excluding the "/ui/sales/new" path).
+     *
+     * @return true if the current URL contains "/ui/sales" and does not contain "/ui/sales/new", false otherwise.
+     */
     public boolean isOnSalesPage() {
         try {
             waitForCondition().until(ExpectedConditions.urlContains("/ui/sales"));

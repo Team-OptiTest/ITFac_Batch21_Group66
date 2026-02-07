@@ -102,6 +102,9 @@ public class SalesUiStepDefinitions {
                 .isTrue();
     }
 
+    /**
+     * Verifies that the quantity input field is visible on the Sell Plant page.
+     */
     @Then("the quantity field should be visible")
     public void theQuantityFieldShouldBeVisible() {
         assertThat(sellPlantPage.isQuantityFieldDisplayed())
@@ -109,21 +112,35 @@ public class SalesUiStepDefinitions {
                 .isTrue();
     }
 
+    /**
+     * Selects the first available plant from the plant dropdown on the Sell Plant page.
+     */
     @When("the user selects a plant from the dropdown")
     public void theUserSelectsAPlantFromTheDropdown() {
         sellPlantPage.selectFirstAvailablePlant();
     }
 
+    /**
+     * Enters a valid quantity ("1") into the quantity field on the Sell Plant page.
+     */
     @When("the user enters a valid quantity")
     public void theUserEntersAValidQuantity() {
         sellPlantPage.enterQuantity("1");
     }
 
+    /**
+     * Clicks the Cancel button on the Sell Plant page to abort the sell workflow.
+     */
     @When("the user clicks the Cancel button")
     public void theUserClicksTheCancelButton() {
         sellPlantPage.clickCancelButton();
     }
 
+    /**
+     * Verifies the user is redirected to the sales page.
+     *
+     * Asserts that the current page is the sales page and fails the test if it is not.
+     */
     @Then("the user should be redirected to the sales page")
     public void theUserShouldBeRedirectedToTheSalesPage() {
         assertThat(sellPlantPage.isOnSalesPage())
