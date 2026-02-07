@@ -609,6 +609,23 @@ public class PlantActions {
 
     }
 
+            @Step("Send GET request for plants with non-existent category ID")
+            public void getPlantsByNonExistentCategoryId() {
+            java.util.List<Integer> existingCategoryIds = fetchExistingCategoryIds();
+            long nonExistentCategoryId = TestUtils.generateNonExistentId(existingCategoryIds);
+            String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+            String categoryEndpoint = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.endpoints.plants.category");
+
+            String viewUrl = baseUrl + categoryEndpoint + nonExistentCategoryId;
+
+            SerenityRest.given()
+                .header("Authorization", "Bearer " + getAuthToken())
+                .when()
+                .get(viewUrl);
+            }
+
     @Step("Verify read-only format")
     public void verifyReadOnlyFormat() {
         net.serenitybdd.rest.SerenityRest.restAssuredThat(response
