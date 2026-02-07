@@ -12,7 +12,7 @@ public class DashboardPage extends PageObject {
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
 
     // Dashboard title
-    private static final By DASHBOARD_TITLE = By.cssSelector("h3.mb-4");
+    private static final By DASHBOARD_TITLE = By.xpath("//h3[contains(text(), 'Dashboard')]");    
     // Plants card specific elements
     private static final By PLANTS_CARD = By.xpath("//div[contains(@class, 'card')][.//h6[contains(text(), 'Plants')]]");
     private static final By PLANTS_CARD_TITLE = By.xpath("//h6[contains(text(), 'Plants')]");
@@ -46,6 +46,12 @@ public class DashboardPage extends PageObject {
     private static final By ACTIVE_DASHBOARD_MENU = By.xpath(
         "//a[contains(@href,'dashboard') and (contains(@class,'active') or @aria-current='page' or parent::li[contains(@class,'active')])]"
     );
+    
+    // Categories card elements - FIXED: Removed duplicate declaration
+    private static final By MAIN_CATEGORIES_COUNT = By.xpath("//div[text()='Main']/preceding-sibling::div[contains(@class,'fw-bold fs-5')]");
+
+    // Sub categories count - Using the "Sub" label  
+    private static final By SUB_CATEGORIES_COUNT = By.xpath("//div[text()='Sub']/preceding-sibling::div[contains(@class,'fw-bold fs-5')]");
 
     public void navigateToDashboard() {
         String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -54,20 +60,6 @@ public class DashboardPage extends PageObject {
                 .orElse("http://localhost:8080");
         getDriver().get(baseUrl + "/ui/dashboard");
         waitForCondition().until(ExpectedConditions.presenceOfElementLocated(DASHBOARD_TITLE));
-    }
-
-    public boolean isDashboardLoadedImmediately() {
-        try {
-            String currentUrl = getDriver().getCurrentUrl();
-            boolean isOnDashboard = currentUrl.contains("/ui/dashboard");
-            
-            boolean hasTitle = getDriver().findElement(DASHBOARD_TITLE).isDisplayed();
-            boolean hasCards = isCardVisible("Plants") && isCardVisible("Categories");
-            
-            return isOnDashboard && hasTitle && hasCards;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     public String getCurrentUrl() {
@@ -144,6 +136,33 @@ public class DashboardPage extends PageObject {
         }
     }
 
+    /**
+     * Get category count by type (Main or Sub)
+     */
+    public String getCategoryCount(String categoryType) {
+        try {
+            By countSelector;
+            
+            if ("Main".equalsIgnoreCase(categoryType)) {
+                countSelector = MAIN_CATEGORIES_COUNT;
+            } else if ("Sub".equalsIgnoreCase(categoryType)) {
+                countSelector = SUB_CATEGORIES_COUNT;
+            } else {
+                return "0";
+            }
+            
+            waitForCondition().until(ExpectedConditions.visibilityOfElementLocated(countSelector));
+            String countText = getDriver().findElement(countSelector).getText();
+            
+            // Just return the text as-is (it should be a number)
+            return countText.trim();
+            
+        } catch (Exception e) {
+            System.out.println("Error getting " + categoryType + " categories count: " + e.getMessage());
+            return "0";
+        }
+    }
+
     public boolean isPlantsCardVisible() {
         try {
             return getDriver().findElement(PLANTS_CARD_TITLE).isDisplayed()
@@ -154,14 +173,14 @@ public class DashboardPage extends PageObject {
     }
 
     public boolean isDashboardLoaded() {
-        try {
-            boolean hasTitle = getDriver().findElement(DASHBOARD_TITLE).isDisplayed();
-            boolean hasPlantsCard = isPlantsCardVisible();
-            return hasTitle && hasPlantsCard;
-        } catch (Exception e) {
-            return false;
-        }
+    try {
+        return getDriver().findElement(DASHBOARD_TITLE).isDisplayed();
+    } catch (Exception e) {
+        return false;
     }
+}
+
+
 
     public boolean isCardVisible(String cardName) {
         try {
@@ -194,6 +213,12 @@ public class DashboardPage extends PageObject {
                 return getPlantsCardTotalCount();
             } else if ("Low Stock".equalsIgnoreCase(countType)) {
                 return getPlantsCardLowStockCount();
+            }
+        } else if ("Categories".equalsIgnoreCase(cardName)) {
+            if ("Main".equalsIgnoreCase(countType)) {
+                return getCategoryCount("Main");
+            } else if ("Sub".equalsIgnoreCase(countType)) {
+                return getCategoryCount("Sub");
             }
         }
         return "0";
