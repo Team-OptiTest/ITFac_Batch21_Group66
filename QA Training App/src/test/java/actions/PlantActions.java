@@ -5,6 +5,7 @@ import java.util.Map;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import net.serenitybdd.annotations.Step;
+import net.serenitybdd.core.Serenity;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
@@ -153,7 +154,8 @@ public class PlantActions {
         String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.base.url");
 
-        String fullUrl = baseUrl + endpoint;
+        var catId = Serenity.sessionVariableCalled("childCatIdForPlantRead");
+        String fullUrl = baseUrl + endpoint + catId;
 
         getAuthenticatedRequest()
                 .contentType(ContentType.JSON)
@@ -186,7 +188,8 @@ public class PlantActions {
         int statusCode = response.getStatusCode();
         if (statusCode == 200 || statusCode == 201) {
             try {
-                this.createdPlantId = response.jsonPath().getInt("id");
+                int createdPlantIdFoDelete = response.jsonPath().getInt("id");
+                Serenity.setSessionVariable("createdPlantId").to(createdPlantIdFoDelete);
                 this.createdPlantData = new java.util.HashMap<>(plantData);
             } catch (Exception e) {
                 System.out.println("Could not extract plant ID: " + e.getMessage());
@@ -203,7 +206,8 @@ public class PlantActions {
 
     @Step("Delete plant: {0}")
     public void deletePlant(String endpoint) {
-        if (this.createdPlantId == null) {
+        var idForDelete = Serenity.sessionVariableCalled("createdPlantId");
+        if (idForDelete == null) {
             throw new IllegalStateException(
                     "createdPlantId is null — plant creation failed; cannot proceed with deletion");
         }
@@ -211,7 +215,7 @@ public class PlantActions {
         String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.base.url");
 
-        String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(this.createdPlantId));
+        String fullUrl = baseUrl + endpoint.replace("{id}", String.valueOf(idForDelete));
 
         getAuthenticatedRequest()
                 .contentType(ContentType.JSON)
@@ -221,7 +225,8 @@ public class PlantActions {
 
     @Step("Verify plant no longer exists")
     public void verifyPlantNoLongerExists() {
-        if (this.createdPlantId == null) {
+        var idForDelete = Serenity.sessionVariableCalled("createdPlantId");
+        if (idForDelete == null) {
             throw new IllegalStateException(
                     "createdPlantId is null — plant creation failed; cannot proceed with verification");
         }
@@ -229,7 +234,7 @@ public class PlantActions {
         String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.base.url");
 
-        String fullUrl = baseUrl + "/api/plants/" + this.createdPlantId;
+        String fullUrl = baseUrl + "/api/plants/" + idForDelete;
 
         io.restassured.response.Response response = getAuthenticatedRequest()
                 .contentType(ContentType.JSON)
