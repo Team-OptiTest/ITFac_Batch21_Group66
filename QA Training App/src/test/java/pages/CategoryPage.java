@@ -12,6 +12,7 @@ public class CategoryPage extends PageObject {
     private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
     private static final By SEARCH_INPUT_FIELD = By.name("name");
     private static final By SEARCH_BUTTON = By.cssSelector("button.btn-primary[type='submit']");
+    private static final By CATEGORY_TABLE_BODY = By.cssSelector("table tbody");
     
     public void navigateToCategoriesPage() {
         getDriver().get("http://localhost:8080/ui/categories");
@@ -57,7 +58,7 @@ public class CategoryPage extends PageObject {
             throw new RuntimeException("Parent category dropdown not found", e);
         }
     }
-    
+
     public boolean isSuccessMessageDisplayed() {
         try {
             return getDriver().findElement(SUCCESS_MESSAGE).isDisplayed();
@@ -123,6 +124,14 @@ public class CategoryPage extends PageObject {
             getDriver().findElement(SEARCH_BUTTON).click();
         } catch (Exception e) {
             throw new RuntimeException("Search button not found", e);
+        }
+    }
+
+    public boolean isMessageDisplayedInTableBody(String messageText) {
+        try {
+            return getDriver().findElement(CATEGORY_TABLE_BODY).getText().contains(messageText);
+        } catch (Exception e) {
+            return false;
         }
     }
 

@@ -433,4 +433,55 @@ public class PlantUiStepDefinitions {
                 }
                 thePlantNoLongerAppearsInSearchResults(uniquePlantName);
         }
+
+        @When("the user identifies the first plant in the list as the target")
+        public void theUserIdentifiesTheFirstPlantInTheListAsTheTarget() {
+                String plantName = user.asksFor(PlantsPage.firstPlantName());
+                if (plantName == null || plantName.isEmpty()) {
+                        throw new IllegalStateException("No plants found in the list to update.");
+                }
+                net.serenitybdd.core.Serenity.setSessionVariable("targetPlantName").to(plantName);
+        }
+
+        @When("the user clicks the Edit button for the target plant")
+        public void theUserClicksTheEditButtonForTheTargetPlant() {
+                String plantName = net.serenitybdd.core.Serenity.sessionVariableCalled("targetPlantName");
+                if (plantName == null) {
+                        throw new IllegalStateException("No target plant identified.");
+                }
+                user.attemptsTo(Click.on(PlantsPage.editButtonForPlant(plantName)));
+        }
+
+        @Then("the target plant shows price {string} and quantity {string} in the table")
+        public void theTargetPlantShowsPriceAndQuantityInTheTable(String price, String quantity) {
+                String plantName = net.serenitybdd.core.Serenity.sessionVariableCalled("targetPlantName");
+                if (plantName == null) {
+                        throw new IllegalStateException("No target plant identified.");
+                }
+                user.should(seeThat(
+                                "Target plant '" + plantName + "' shows price " + price + " and quantity " + quantity,
+                                PlantsPage.plantShowsPriceAndQuantity(plantName, price, quantity), is(true)));
+        }
+
+        @Given("plants of different categories exist")
+        public void plantsOfDifferentCategoriesExist() {
+                user.attemptsTo(
+                                net.serenitybdd.screenplay.waits.WaitUntil.the(PlantsPage.FILTER_CATEGORY_DROPDOWN,
+                                                net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible())
+                                                .forNoMoreThan(10).seconds());
+        }
+
+        @When("the user selects the {string} category from the filter")
+        public void theUserSelectsTheCategoryFromTheFilter(String categoryName) {
+                user.attemptsTo(
+                                SelectFromOptions.byVisibleText(categoryName)
+                                                .from(PlantsPage.FILTER_CATEGORY_DROPDOWN));
+        }
+
+        @Then("the list updates to show only plants belonging to the {string} category")
+        public void theListUpdatesToShowOnlyPlantsBelongingToTheCategory(String categoryName) {
+                user.should(
+                                seeThat("All visible plants belong to category " + categoryName,
+                                                PlantsPage.allVisiblePlantsBelongToCategory(categoryName), is(true)));
+        }
 }

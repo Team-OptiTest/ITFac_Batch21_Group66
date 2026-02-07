@@ -23,3 +23,15 @@ Feature: Sales Management - Access Control
     Given the user is logged in as an admin
     When the user navigates to the sales page
     Then the user should be able to see the "Sell Plant" button
+
+  @UI_Sales_Create_004 @Admin @215116M
+  Scenario: Access Sell Plant Page - Admin
+    Given the user is logged in as an admin
+    When the user navigates directly to the sell plant page
+    Then the Sell Plant page should be displayed
+    And the plant dropdown should be visible
+    And the quantity field should be visible
+
+
+    
+
