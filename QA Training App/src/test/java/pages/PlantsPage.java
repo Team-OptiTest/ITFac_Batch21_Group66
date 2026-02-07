@@ -14,6 +14,7 @@ import org.openqa.selenium.support.ui.Quotes;
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
 import net.serenitybdd.core.pages.WebElementFacade;
 import java.util.List;
+import java.time.Duration;
 
 public class PlantsPage extends PageObject {
 
@@ -37,7 +38,7 @@ public class PlantsPage extends PageObject {
 
         public static final Target SUCCESS_MESSAGE = Target.the("Success message")
                         .located(By.xpath(
-                                        "//*[contains(text(), 'added successfully') or contains(text(), 'Plant added successfully') or contains(text(), 'deleted successfully') or contains(text(), 'Plant deleted successfully')]"));
+                                        "//*[contains(text(), 'added successfully') or contains(text(), 'Plant added successfully') or contains(text(), 'deleted successfully') or contains(text(), 'Plant deleted successfully') or contains(text(), 'updated successfully') or contains(text(), 'Plant updated successfully')]"));
 
         public static final Target PLANTS_TABLE = Target.the("Plants table")
                         .located(By.cssSelector("table, .plants-table, [class*='table']"));
@@ -73,6 +74,17 @@ public class PlantsPage extends PageObject {
                                 .located(By.xpath("//table//tr[td[contains(text(), " + Quotes.escape(plantName)
                                                 + ")]]//button[contains(@title, 'Delete')]"));
         }
+
+        public static Target editButtonForPlant(String plantName) {
+                return Target.the("Edit button for plant '" + plantName + "'")
+                                .located(By.xpath("//table//tr[td[contains(text(), " + Quotes.escape(plantName)
+                                                + ")]]//button[contains(@title, 'Edit') or contains(text(), 'Edit')] | //table//tr[td[contains(text(), "
+                                                + Quotes.escape(plantName)
+                                                + ")]]//a[contains(@title, 'Edit') or contains(text(), 'Edit')]"));
+        }
+
+        public static final Target FIRST_PLANT_NAME = Target.the("Name of first plant")
+                        .located(By.xpath("//table//tbody//tr[1]//td[1]"));
 
         // Migrated from PlantQuestions
         public static Question<Boolean> successMessageIsDisplayed() {
@@ -189,6 +201,37 @@ public class PlantsPage extends PageObject {
                         Target ACTIONS_HEADER = Target.the("Actions column header")
                                         .locatedBy("//th[contains(text(), 'Actions')]");
                         return !ACTIONS_HEADER.resolveAllFor(actor).isEmpty();
+                };
+        }
+
+        public static Question<String> firstPlantName() {
+                return actor -> {
+                        try {
+                                actor.attemptsTo(
+                                                WaitUntil.the(FIRST_PLANT_NAME, isVisible())
+                                                                .forNoMoreThan(10).seconds());
+                                return Text.of(FIRST_PLANT_NAME).answeredBy(actor);
+                        } catch (Exception e) {
+                                return null;
+                        }
+                };
+        }
+
+        public static Question<Boolean> plantShowsPriceAndQuantity(String plantName, String price, String quantity) {
+                return actor -> {
+                        Target row = Target.the("Row for " + plantName)
+                                        .located(By.xpath("//table//tr[td[contains(text(), " + Quotes.escape(plantName)
+                                                        + ")]]"));
+                        try {
+                                actor.attemptsTo(WaitUntil.the(row, isVisible()).forNoMoreThan(Duration.ofSeconds(10)));
+                                String rowText = row.resolveFor(actor).getText();
+                                // Simple check if the row implies correctness.
+                                // Note: Price might be formatted (e.g. $25.00), so we might need loose
+                                // matching.
+                                return rowText.contains(price) && rowText.contains(quantity);
+                        } catch (Exception e) {
+                                return false;
+                        }
                 };
         }
 }
