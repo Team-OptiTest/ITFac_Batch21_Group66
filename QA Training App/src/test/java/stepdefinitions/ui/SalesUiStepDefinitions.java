@@ -8,6 +8,7 @@ import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
 import pages.LoginPage;
 import pages.SalesPage;
+import pages.SellPlantPage;
 
 public class SalesUiStepDefinitions {
 
@@ -16,6 +17,10 @@ public class SalesUiStepDefinitions {
 
     @Steps
     SalesPage salesPage;
+
+    @Steps
+    SellPlantPage sellPlantPage;
+
 
     @Given("the user is logged in as an admin")
     public void theUserIsLoggedInAsAnAdmin() {
@@ -82,4 +87,28 @@ public class SalesUiStepDefinitions {
                 .as("Sales table should be displayed")
                 .isTrue();
     }
+
+        @Then("the Sell Plant page should be displayed")
+    public void theSellPlantPageShouldBeDisplayed() {
+        assertThat(sellPlantPage.isSellPlantPageDisplayed())
+                .as("Sell Plant page should be displayed for admin")
+                .isTrue();
+    }
+
+    @Then("the plant dropdown should be visible")
+    public void thePlantDropdownShouldBeVisible() {
+        assertThat(sellPlantPage.isPlantDropdownDisplayed())
+                .as("Plant dropdown should be visible")
+                .isTrue();
+    }
+
+    @Then("the quantity field should be visible")
+    public void theQuantityFieldShouldBeVisible() {
+        assertThat(sellPlantPage.isQuantityFieldDisplayed())
+                .as("Quantity field should be visible")
+                .isTrue();
+    }
+
+    
+
 }

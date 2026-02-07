@@ -32,7 +32,8 @@ Feature: Plant Management - UI Create Operations
   @UI @UI_Plant_Create_003 @215063V
   Scenario: Add New Plant Validation (Failure)
     Given the user is logged in as an admin user
-    When the user clicks on the "Add a Plant" button
+    When the user navigates to the Plants page
+    And the user clicks on the "Add a Plant" button
     And the user leaves the "Plant Name" empty
     And the user selects a Category from the dropdown
     And the user leaves the "Price" empty
