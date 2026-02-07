@@ -2,6 +2,8 @@ package stepdefinitions.ui;
 
 import java.util.UUID;
 
+import actions.AuthenticationActions;
+import actions.CategoryActions;
 import pages.AddCategoryPage;
 import pages.CategoryPage;
 import io.cucumber.java.en.Given;
@@ -23,6 +25,12 @@ public class CategoryUiStepDefinitions {
     @Steps
     AddCategoryPage addCategoryPage;
 
+    @Steps
+    AuthenticationActions authenticationActions;
+
+    @Steps
+    CategoryActions categoryActions;
+
     @Given("the user is logged in as an admin user")
     public void theUserIsLoggedInAsAnAdminUser() {
         loginPage.loginAsAdmin();
@@ -31,6 +39,12 @@ public class CategoryUiStepDefinitions {
     @Given("the user is logged in as a user")
     public void theUserIsLoggedInAsAUser() {
         loginPage.loginAsUser();
+    }
+
+    @Given("no categories exist in the database")
+    public void noCategoriesExistInTheDatabase() {
+        authenticationActions.authenticateAsAdmin();
+        categoryActions.deleteAllCategories();
     }
 
     @When("the user navigates to the categories page")
