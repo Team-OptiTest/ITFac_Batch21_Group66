@@ -9,9 +9,9 @@ import io.cucumber.junit.platform.engine.Constants;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features/ui/sales")
+@SelectClasspathResource("features/ui/dashboard")
 @ConfigurationParameter(key = Constants.GLUE_PROPERTY_NAME, value = "stepdefinitions.ui")
 @ConfigurationParameter(key = Constants.PLUGIN_PROPERTY_NAME,
         value = "io.cucumber.core.plugin.SerenityReporterParallel,pretty,summary")
-public class SalesUiTestRunner {
+public class DashboardUiTestRunner {
 }

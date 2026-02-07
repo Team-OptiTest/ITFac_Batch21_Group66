@@ -11,6 +11,7 @@ public class CategoryPage extends PageObject {
     private static final By SEARCH_INPUT_FIELD = By.cssSelector("input[name='name']");
     private static final By SEARCH_BUTTON = By.xpath("//form//button[normalize-space()='Search']");
     private static final By CATEGORY_TABLE_BODY = By.cssSelector("table tbody");
+    private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("/html/body/div[1]/div/div[2]/div[2]/form/div[2]/select");
 
     public void navigateToCategoriesPage() {
         getDriver().get("http://localhost:8080/ui/categories");
@@ -44,6 +45,22 @@ public class CategoryPage extends PageObject {
                     throw new RuntimeException("Could not find 'Add A Category' button with any selector", e1);
                 }
             }
+        }
+    }
+
+    public void clickParentCategoryFilterDropdown() {
+        try {
+            getDriver().findElement(PARENT_CATEGORY_DROPDOWN).click();
+        } catch (Exception e) {
+            throw new RuntimeException("Parent category dropdown not found", e);
+        }
+    }
+
+    public void selectFromDropdown(String optionText) {
+        try {
+            getDriver().findElement(PARENT_CATEGORY_DROPDOWN).sendKeys(optionText);
+        } catch (Exception e) {
+            throw new RuntimeException("Parent category dropdown not found", e);
         }
     }
 
