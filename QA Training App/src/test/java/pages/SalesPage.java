@@ -11,6 +11,7 @@ import net.thucydides.model.util.EnvironmentVariables;
 import java.util.List;
 
 
+
 public class SalesPage extends PageObject {
 
     private final EnvironmentVariables environmentVariables = SystemEnvironmentVariables.createEnvironmentVariables();
@@ -23,6 +24,7 @@ public class SalesPage extends PageObject {
     private static final By ERROR_MESSAGE_SELECTOR = By.cssSelector(".alert-danger");
     private static final By FIRST_DELETE_BUTTON = By.cssSelector("form[action^='/ui/sales/delete/'] button");
     // Sales table headers
+    private static final By SALES_TABLE_BODY = By.cssSelector("table.table-bordered tbody");
 
 // Sales first row cells
 private static final By SALES_TABLE_HEADERS = By.cssSelector("table.table-bordered thead th");
@@ -258,5 +260,24 @@ public boolean firstSalesRowHasValidData() {
         return false;
     }
 }
+// public boolean isMessageDisplayedInSalesTableBody(String messageText) {
+//     try {
+//         waitForCondition().until(ExpectedConditions.presenceOfElementLocated(SALES_TABLE_BODY));
+//         String bodyText = getDriver().findElement(SALES_TABLE_BODY).getText();
+//         return bodyText != null && bodyText.toLowerCase().contains(messageText.toLowerCase());
+//     } catch (Exception e) {
+//         return false;
+//     }
+// }
+public boolean isSalesTableEmpty() {
+    return findAll("table tbody tr").isEmpty();
+}
+
+public boolean isMessageDisplayedInSalesTableBody(String message) {
+    return find("table tbody").getText().contains(message);
+}
+
+
+
 
 }

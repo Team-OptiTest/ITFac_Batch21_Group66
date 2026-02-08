@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import actions.AuthenticationActions;
 import actions.CategoryActions;
@@ -15,6 +16,12 @@ import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.model.util.EnvironmentVariables;
+
+
+
+
+
+
 
 public class SalesApiStepDefinitions {
 
@@ -490,4 +497,9 @@ public class SalesApiStepDefinitions {
             );
         }
     }
+
+
 }
+
+
+
