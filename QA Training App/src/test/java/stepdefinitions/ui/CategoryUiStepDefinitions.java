@@ -2,6 +2,9 @@ package stepdefinitions.ui;
 
 import java.util.UUID;
 
+import pages.AddCategoryPage;
+import pages.CategoryPage;
+import pages.EditCategoryPage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import actions.AuthenticationActions;
@@ -26,6 +29,7 @@ public class CategoryUiStepDefinitions {
     AddCategoryPage addCategoryPage;
 
     @Steps
+    EditCategoryPage editCategoryPage;
     AuthenticationActions authenticationActions;
 
     @Steps
@@ -55,6 +59,13 @@ public class CategoryUiStepDefinitions {
     @When("the user navigates to the add categories page")
     public void theUserNavigatesToTheAddCategoriesPage() {
         categoryPage.navigateToAddCategoryPage();
+    }
+
+    @When("verify that the user is on the add category page")
+    public void verifyThatTheUserIsOnTheAddCategoryPage() {
+        assertThat(addCategoryPage.getDriver().getCurrentUrl())
+                .as("User should be navigated to the add category page")
+                .contains("/ui/categories/add");
     }
 
     @Then("the user searches for {string} in the categories page")
@@ -177,6 +188,11 @@ public class CategoryUiStepDefinitions {
                 .isTrue();
     }
 
+    @When("the user clicks the delete button for the {string} category")
+    public void theUserClicksTheDeleteButtonForTheCategory(String categoryName) {
+        categoryPage.clickDeleteButtonForCategory(categoryName);
+    }
+
     @Then("the new category {string} should be listed on the categories page")
     public void theNewCategoryShouldBeListedOnTheCategoriesPage(String categoryName) {
         assertThat(categoryPage.isCategoryVisibleInList(categoryName))
@@ -198,6 +214,78 @@ public class CategoryUiStepDefinitions {
                 .isTrue();
     }
 
+    @Then("the user should see a success message confirming the category was deleted")
+    public void theUserShouldSeeASuccessMessageConfirmingTheCategoryWasDeleted() {
+        assertThat(categoryPage.isSuccessMessageDisplayed())
+                .as("Success message should be displayed after deleting a category")
+                .isTrue();
+    }
+
+    @Then("the {string} category should no longer be listed on the categories page")
+    public void theCategoryShouldNoLongerBeListedOnTheCategoriesPage(String categoryName) {
+        assertThat(categoryPage.isCategoryNotVisibleInList(categoryName))
+                .as("Deleted category should no longer be visible in the categories list")
+                .isTrue();
+    }
+
+    @When("the user confirms the deletion")
+    public void theUserConfirmsTheDeletion() {
+        categoryPage.confirmDeletion();
+    }
+    
+    @Then("the user clicks on the edit button for the {string} category")
+    public void theUserClicksOnTheEditButtonForTheCategory(String categoryName) {
+        editCategoryPage.clickEditButtonForCategory(categoryName);
+    }
+
+    @When("the user clicks the edit button for the {string} category")
+    public void theUserClicksTheEditButtonForTheCategory(String categoryName) {
+        editCategoryPage.clickEditButtonForCategory(categoryName);
+    }
+
+    @Then("the user should be navigated to the edit category page")
+    public void theUserShouldBeNavigatedToTheEditCategoryPage() {
+        editCategoryPage.isUserInEditPage();
+    }
+
+    @Then("the user updates the category name to {string}")
+    public void theUserUpdatesTheCategoryNameTo(String newCategoryName) {
+        editCategoryPage.fillCategoryName(newCategoryName);
+    }
+
+    @Then("the user should not be redirected to the edit category page")
+    public void theUserShouldNotBeRedirectedToTheEditCategoryPage() {
+        assertThat(editCategoryPage.getDriver().getCurrentUrl())
+                .as("User should not be navigated to the edit category page")
+                .doesNotContain("/ui/categories/edit");
+    }
+
+    @Then("the user should see a success message confirming the category was updated")
+    public void theUserShouldSeeASuccessMessageConfirmingTheCategoryWasUpdated() {
+        assertThat(categoryPage.isSuccessMessageDisplayed())
+                .as("Success message should be displayed after updating a category")
+                .isTrue();
+    }
+
+    @Then("the {string} should be listed on the categories page")
+    public void theCategoryShouldBeListedOnTheCategoriesPage(String categoryName) {
+        assertThat(categoryPage.isCategoryVisibleInList(categoryName))
+                .as("Category should be visible in the categories list")
+                .isTrue();
+    }
+
+    @Then("the delete button for each category should be disabled to the user")
+    public void theDeleteButtonForCategoryShouldBeDisabledToTheUser() {
+        assertThat(categoryPage.categoryDeleteButtonsDisabledForUser())
+                .as("Delete buttons should be disabled for non-admin users")
+                .isTrue();
+    }
+
+    @Then("the user logs out")
+    public void theUserLogsOut() {
+        loginPage.logout();
+    }
+    
     @Then("the user is redirected from the category page")
     public void userIsRedirectedFromCategoryPage() {
         assertThat(categoryPage.isRedirectedFromAddCategoryPage()).isTrue();
