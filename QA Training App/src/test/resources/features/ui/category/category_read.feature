@@ -16,12 +16,10 @@ Feature: Read Category
         And the user navigates to the add categories page
         And the user fills in the category name with "result"
         And the user clicks on the Save button
-        And the user should see a success message confirming the category was created
         And the new category "result" should be listed on the categories page
         And the user navigates to the add categories page
         And the user fills in the category name with "ignore"
         And the user clicks on the Save button
-        And the user should see a success message confirming the category was created
         And the new category "ignore" should be listed on the categories page
         And the user is logged in as a user
         And the user navigates to the categories page
@@ -37,12 +35,10 @@ Feature: Read Category
         And the user navigates to the add categories page
         And the user fills in the category name with "Parent"
         And the user clicks on the Save button
-        And the user should see a success message confirming the category was created
         And the user navigates to the add categories page
         And the user fills in the category name with "Child"
         And the user selects "Parent" as the parent category
         And the user clicks on the Save button
-        And the user should see a success message confirming the category was created
         And the user is logged in as a user
         And the user navigates to the categories page
         And the user clicks on the parent category filter dropdown

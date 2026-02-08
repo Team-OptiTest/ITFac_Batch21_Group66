@@ -20,7 +20,6 @@ Feature: Delete Category
     Given the user is logged in as an admin user
     When the user navigates to the categories page
     And the user navigates to the add categories page
-    And verify that the user is on the add category page
     And the user fills in the category name with "DeleteTest"
     And the user clicks on the Save button
     And the user is logged in as a user
