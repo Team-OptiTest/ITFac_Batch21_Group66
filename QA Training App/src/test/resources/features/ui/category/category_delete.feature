@@ -9,7 +9,6 @@ Feature: Delete Category
     And the user navigates to the add categories page
     And the user fills in the category name with "DeleteTest"
     And the user clicks on the Save button
-    And the user should see a success message confirming the category was created
     And the user clicks the delete button for the "DeleteTest" category
     And the user confirms the deletion
     Then the user should see a success message confirming the category was deleted

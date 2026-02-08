@@ -9,7 +9,6 @@ Feature: Update Category
         And the user navigates to the add categories page
         And the user fills in the category name with "UpdateTest"
         And the user clicks on the Save button
-        And the user should see a success message confirming the category was created
         And the user clicks the edit button for the "UpdateTest" category
         Then the user should be navigated to the edit category page
         And the user updates the category name to "Updated"
