@@ -38,3 +38,10 @@ Feature: Plant Management - UI Read Operations
     And the user selects the "Herbs" category from the filter
     And the user clicks the "Search" button
     Then the list updates to show only plants belonging to the "Herbs" category
+
+  @UI @Plant @UI_Plant_Read_005 @negative @215098G
+  Scenario: Verify user sees empty list message when no plants exist
+    Given the user is logged in as a user
+    And no plants exist in the database
+    When the user navigates to the Plants page
+    Then the message "No plants found" should be displayed
