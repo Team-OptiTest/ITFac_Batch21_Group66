@@ -461,10 +461,10 @@ public class PlantUiStepDefinitions {
                 plantActions.deleteAllPlants();
         }
 
-        @Then("the message {string} should be displayed")
-        public void theMessageShouldBeDisplayed(String expectedMessage) {
+        @Then("the message {string} should be displayed in the plants table")
+        public void theMessageShouldBeDisplayedInThePlantsTable(String expectedMessage) {
                 assertThat(plantsPage.isMessageDisplayedInTableBody(expectedMessage))
-                                .as("Expected message should be displayed: " + expectedMessage)
+                                .as("Expected message should be displayed in the plants table: " + expectedMessage)
                                 .isTrue();
         }
 

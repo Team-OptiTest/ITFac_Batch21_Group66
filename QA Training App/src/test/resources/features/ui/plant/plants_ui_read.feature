@@ -44,4 +44,4 @@ Feature: Plant Management - UI Read Operations
     Given no plants exist in the database
     And the user is logged in as a user
     When the user navigates to the Plants page
-    Then the message "No plants found" should be displayed
+    Then the message "No plants found" should be displayed in the plants table
