@@ -1,7 +1,7 @@
 @UI @Sales
 Feature: Sales Management - Delete
 
-  @UI @Sales @UI_Sales_Delete_001
+  @UI @Sales @UI_Sales_Delete_001 
   Scenario: Verify admin can cancel deletion of a sale
     Given the user is logged in as an admin
     And the user is on the Sales page

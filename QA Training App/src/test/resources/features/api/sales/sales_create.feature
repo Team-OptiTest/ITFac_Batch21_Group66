@@ -1,4 +1,5 @@
 Feature: Sales API - Create Sale
+  @215116M @API_Sales_Create_002 @Admin @Positive
 
   Scenario: Create Sale with Valid Quantity - Admin
     Given admin is authenticated
@@ -6,6 +7,7 @@ Feature: Sales API - Create Sale
     When admin creates a sale with valid quantity
     Then sale should be created successfully
 
+  @215116M @API_Sales_Create_003 @Admin @negative
 
   Scenario: Create Sale with Invalid Quantity (0) - Admin
     Given admin is authenticated
@@ -14,6 +16,7 @@ Feature: Sales API - Create Sale
     Then sale creation should fail with status 400
     And error message should be "Quantity must be greater than 0"
 
+  @215116M @API_Sales_Create_001 @Admin @Positive
 
   Scenario: Create Sale with Non-existent Plant ID - Admin
     Given admin is authenticated
