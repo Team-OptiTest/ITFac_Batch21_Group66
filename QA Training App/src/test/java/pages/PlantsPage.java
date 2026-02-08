@@ -1,11 +1,12 @@
 package pages;
 
-import net.serenitybdd.core.pages.PageObject;
-import net.serenitybdd.core.pages.WebElementFacade;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.util.List;
+import net.serenitybdd.core.pages.PageObject;
+import net.serenitybdd.core.pages.WebElementFacade;
 
 public class PlantsPage extends PageObject {
 
@@ -341,6 +342,15 @@ public class PlantsPage extends PageObject {
                         return rowText.contains(price) && rowText.contains(quantity);
                 } catch (Exception e) {
                         return false;
+                }
+        }
+
+        public String getPlantRowText(String plantName) {
+                try {
+                        By plantRow = By.xpath("//table//tr[td[contains(text(), '" + plantName + "')]]");
+                        return getDriver().findElement(plantRow).getText();
+                } catch (Exception e) {
+                        throw new RuntimeException("Plant row for '" + plantName + "' not found", e);
                 }
         }
 
