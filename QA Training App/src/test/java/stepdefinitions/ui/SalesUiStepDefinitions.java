@@ -14,6 +14,8 @@ import pages.LoginPage;
 import pages.SalesPage;
 import pages.SellPlantPage;
 
+
+
 public class SalesUiStepDefinitions {
 
     @Steps
@@ -220,5 +222,26 @@ public void the_delete_action_should_not_be_visible_for_any_sales_record() {
             .isFalse();
 }
 
+    @Then("the sales list page should be displayed")
+    public void the_sales_list_page_should_be_displayed() {
+        assertThat(salesPage.isSalesListPageDisplayed())
+                .as("Sales list page should be displayed")
+                .isTrue();
+    }
+
+    @Then("sales records should be listed with plant name, quantity, total price, and sold date")
+    public void sales_records_should_be_listed_with_columns_and_data() {
+        assertThat(salesPage.hasSalesTableColumns())
+                .as("Sales table should contain columns for plant, quantity, total price, and sold date")
+                .isTrue();
+
+        assertThat(salesPage.hasAtLeastOneSalesRecord())
+                .as("At least one sales record should exist")
+                .isTrue();
+
+        assertThat(salesPage.firstSalesRowHasValidData())
+                .as("First sales record row should contain valid non-empty data")
+                .isTrue();
+    }
 
 }
