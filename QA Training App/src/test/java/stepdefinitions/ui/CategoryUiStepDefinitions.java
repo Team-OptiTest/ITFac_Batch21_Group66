@@ -285,7 +285,7 @@ public class CategoryUiStepDefinitions {
     public void theUserLogsOut() {
         loginPage.logout();
     }
-}
+    
     @Then("the user is redirected from the category page")
     public void userIsRedirectedFromCategoryPage() {
         assertThat(categoryPage.isRedirectedFromAddCategoryPage()).isTrue();

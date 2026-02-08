@@ -204,7 +204,7 @@ public class CategoryPage extends PageObject {
             }
         }
     }
-}
+    
     public void navigateToAddCategoryPageDirectly() {
         String baseUrl = "http://localhost:8080"; // or get from environment
         getDriver().get(baseUrl + "/ui/categories/add");
