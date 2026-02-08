@@ -339,29 +339,29 @@ public class PlantActions {
                 .put(fullUrl);
     }
 
-        @Step("Update plant with name: {0}")
-        public void updatePlantName(String name) {
+    @Step("Update plant with name: {0}")
+    public void updatePlantName(String name) {
         if (this.createdPlantId == null) {
             throw new IllegalStateException(
-                "createdPlantId is null — plant creation failed; cannot proceed with name update");
+                    "createdPlantId is null — plant creation failed; cannot proceed with name update");
         }
 
         String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
-            .getProperty("api.base.url");
+                .getProperty("api.base.url");
 
         String fullUrl = baseUrl + "/api/plants/" + this.createdPlantId;
 
         Map<String, Object> completeBody = this.createdPlantData != null
-            ? new java.util.HashMap<>(this.createdPlantData)
-            : new java.util.HashMap<>();
+                ? new java.util.HashMap<>(this.createdPlantData)
+                : new java.util.HashMap<>();
         completeBody.put("name", name);
 
         getAuthenticatedRequest()
-            .contentType(ContentType.JSON)
-            .body(completeBody)
-            .when()
-            .put(fullUrl);
-        }
+                .contentType(ContentType.JSON)
+                .body(completeBody)
+                .when()
+                .put(fullUrl);
+    }
 
     @Step("Ensure at least one plant exists in the system")
     public void ensureAtLeastOnePlantExists() {
@@ -638,22 +638,22 @@ public class PlantActions {
 
     }
 
-            @Step("Send GET request for plants with non-existent category ID")
-            public void getPlantsByNonExistentCategoryId() {
-            java.util.List<Integer> existingCategoryIds = fetchExistingCategoryIds();
-            long nonExistentCategoryId = TestUtils.generateNonExistentId(existingCategoryIds);
-            String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+    @Step("Send GET request for plants with non-existent category ID")
+    public void getPlantsByNonExistentCategoryId() {
+        java.util.List<Integer> existingCategoryIds = fetchExistingCategoryIds();
+        long nonExistentCategoryId = TestUtils.generateNonExistentId(existingCategoryIds);
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.base.url");
-            String categoryEndpoint = EnvironmentSpecificConfiguration.from(environmentVariables)
+        String categoryEndpoint = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.endpoints.plants.category");
 
-            String viewUrl = baseUrl + categoryEndpoint + nonExistentCategoryId;
+        String viewUrl = baseUrl + categoryEndpoint + nonExistentCategoryId;
 
-            SerenityRest.given()
+        SerenityRest.given()
                 .header("Authorization", "Bearer " + getAuthToken())
                 .when()
                 .get(viewUrl);
-            }
+    }
 
     @Step("Ensure at least one plant with quantity less than 5 exists")
     public void ensureLowQuantityPlantExists() {
@@ -941,6 +941,19 @@ public class PlantActions {
 
         net.serenitybdd.rest.SerenityRest.restAssuredThat(response
                 -> response.body("$", org.hamcrest.Matchers.hasKey("totalPlants")));
+    }
+
+    @Step("Get plants summary: {0}")
+    public void getPlantsSummary(String endpoint) {
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+
+        String fullUrl = baseUrl + endpoint;
+
+        getAuthenticatedRequest()
+                .contentType(ContentType.JSON)
+                .when()
+                .get(fullUrl);
     }
 
 }

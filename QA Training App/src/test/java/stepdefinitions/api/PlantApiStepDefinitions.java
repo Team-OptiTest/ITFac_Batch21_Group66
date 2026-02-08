@@ -128,6 +128,11 @@ public class PlantApiStepDefinitions {
         plantActions.getPlantsByCategory(endpoint);
     }
 
+    @When("I GET to {string} for summary")
+    public void iGETToForSummary(String endpoint) {
+        plantActions.getPlantsSummary(endpoint);
+    }
+
     @Then("the response should contain an array of plants")
     public void theResponseShouldContainAnArrayOfPlants() {
         plantActions.verifyPlantsArrayExists();
