@@ -2,17 +2,17 @@ package stepdefinitions.ui;
 
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import actions.AuthenticationActions;
 import actions.CategoryActions;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import net.serenitybdd.annotations.Steps;
 import pages.AddCategoryPage;
 import pages.CategoryPage;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
-import io.cucumber.java.en.Then;
-import net.serenitybdd.annotations.Steps;
 import pages.LoginPage;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CategoryUiStepDefinitions {
 
@@ -158,11 +158,16 @@ public class CategoryUiStepDefinitions {
         categoryPage.searchCategory(searchTerm);
     }
 
+    @When("the user navigates directly to the add category page")
+    public void navigateToAddCategoryPageDirectly() {
+        categoryPage.navigateToAddCategoryPageDirectly();
+    }
+
     @Then("the message {string} should be displayed in the table body")
     public void theMessageShouldBeDisplayedInTheTableBody(String expectedMessage) {
         assertThat(categoryPage.isMessageDisplayedInTableBody(expectedMessage))
-            .as("Expected table body message should be displayed: " + expectedMessage)
-            .isTrue();
+                .as("Expected table body message should be displayed: " + expectedMessage)
+                .isTrue();
     }
 
     @Then("the user should see a success message confirming the category was created")
@@ -191,6 +196,16 @@ public class CategoryUiStepDefinitions {
         assertThat(categoryPage.isCategoryListDisplayed())
                 .as("Categories list should be displayed on the page")
                 .isTrue();
+    }
+
+    @Then("the user is redirected from the category page")
+    public void userIsRedirectedFromCategoryPage() {
+        assertThat(categoryPage.isRedirectedFromAddCategoryPage()).isTrue();
+    }
+
+    @Then("category access denied message is displayed")
+    public void categoryAccessDeniedMessageIsDisplayed() {
+        assertThat(categoryPage.isAccessDeniedMessageDisplayed()).isTrue();
     }
 
 }
