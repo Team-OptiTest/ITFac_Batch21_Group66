@@ -41,7 +41,7 @@ Feature: Plant Management - UI Read Operations
 
   @UI @Plant @UI_Plant_Read_005 @negative @215098G
   Scenario: Verify user sees empty list message when no plants exist
-    Given the user is logged in as a user
-    And no plants exist in the database
+    Given no plants exist in the database
+    And the user is logged in as a user
     When the user navigates to the Plants page
     Then the message "No plants found" should be displayed
