@@ -209,6 +209,11 @@ public class CategoryActions {
             throw new IllegalStateException("Sales deletion exceeded " + maxSalesDeletePasses + " passes");
         }
 
+        // --- BUG-007 Workaround: Delete all inventory records via JDBC ---
+        // No /api/inventory endpoint exists, so direct DB cleanup is required
+        // to avoid FK constraint violation (inventory.plant_id -> plants.id)
+        utils.DatabaseCleanupUtil.deleteAllInventory();
+
         // --- Delete all plants (with error handling and loop for pagination/partial deletes) ---
         int plantDeletePass = 0;
         final int maxPlantDeletePasses = 10;

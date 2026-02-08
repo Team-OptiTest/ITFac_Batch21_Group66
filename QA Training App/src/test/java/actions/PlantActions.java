@@ -655,6 +655,108 @@ public class PlantActions {
                 .get(viewUrl);
             }
 
+    @Step("Delete all plants via API")
+    public void deleteAllPlants() {
+        String token = getAuthToken();
+        if (token == null) {
+            throw new IllegalStateException("Auth token missing; cannot delete plants.");
+        }
+
+        // --- Delete all sales first (sales reference plants via FK) ---
+        int salesDeletePass = 0;
+        final int maxSalesDeletePasses = 10;
+        java.util.List<Integer> previousSalesIds = null;
+        while (salesDeletePass < maxSalesDeletePasses) {
+            salesDeletePass++;
+            io.restassured.response.Response salesResponse = SerenityRest.given()
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .get(getBaseUrl() + "/api/sales");
+
+            if (salesResponse.getStatusCode() != 200) {
+                throw new IllegalStateException("Failed to fetch sales. Status: " + salesResponse.getStatusCode());
+            }
+
+            java.util.List<Integer> salesIds = salesResponse.jsonPath().getList("id", Integer.class);
+            if (salesIds == null || salesIds.isEmpty()) {
+                System.out.println(salesDeletePass > 1 ? "All sales deleted after " + salesDeletePass + " passes." : "No sales to delete.");
+                break;
+            }
+            if (previousSalesIds != null && previousSalesIds.equals(salesIds)) {
+                throw new IllegalStateException("No progress deleting sales after pass " + salesDeletePass);
+            }
+            previousSalesIds = new java.util.ArrayList<>(salesIds);
+
+            for (Integer saleId : salesIds) {
+                io.restassured.response.Response deleteSaleResponse = SerenityRest.given()
+                        .header("Authorization", "Bearer " + token)
+                        .when()
+                        .delete(getBaseUrl() + "/api/sales/" + saleId);
+                if (deleteSaleResponse.getStatusCode() < 200 || deleteSaleResponse.getStatusCode() >= 300) {
+                    System.out.println("Failed to delete sale ID " + saleId + " - Status: " + deleteSaleResponse.getStatusCode());
+                } else {
+                    System.out.println("Deleted sale ID " + saleId);
+                }
+            }
+        }
+        if (salesDeletePass >= maxSalesDeletePasses) {
+            throw new IllegalStateException("Sales deletion exceeded " + maxSalesDeletePasses + " passes");
+        }
+
+        // --- BUG-007 Workaround: Delete all inventory records via JDBC ---
+        // No /api/inventory endpoint exists, so direct DB cleanup is required
+        // to avoid FK constraint violation (inventory.plant_id -> plants.id)
+        utils.DatabaseCleanupUtil.deleteAllInventory();
+
+        // --- Delete all plants ---
+        int plantDeletePass = 0;
+        final int maxPlantDeletePasses = 10;
+        java.util.List<Integer> previousPlantIds = null;
+        while (plantDeletePass < maxPlantDeletePasses) {
+            plantDeletePass++;
+            io.restassured.response.Response plantsResponse = SerenityRest.given()
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .get(getBaseUrl() + "/api/plants");
+
+            if (plantsResponse.getStatusCode() != 200) {
+                throw new IllegalStateException("Failed to fetch plants. Status: " + plantsResponse.getStatusCode());
+            }
+
+            java.util.List<Integer> plantIds = plantsResponse.jsonPath().getList("id", Integer.class);
+            if (plantIds == null || plantIds.isEmpty()) {
+                System.out.println(plantDeletePass > 1 ? "All plants deleted after " + plantDeletePass + " passes." : "No plants to delete.");
+                break;
+            }
+            if (previousPlantIds != null && previousPlantIds.equals(plantIds)) {
+                throw new IllegalStateException("No progress deleting plants after pass " + plantDeletePass);
+            }
+            previousPlantIds = new java.util.ArrayList<>(plantIds);
+
+            for (Integer plantId : plantIds) {
+                io.restassured.response.Response deletePlantResponse = SerenityRest.given()
+                        .header("Authorization", "Bearer " + token)
+                        .when()
+                        .delete(getBaseUrl() + "/api/plants/" + plantId);
+                if (deletePlantResponse.getStatusCode() < 200 || deletePlantResponse.getStatusCode() >= 300) {
+                    System.out.println("Failed to delete plant ID " + plantId + " - Status: " + deletePlantResponse.getStatusCode());
+                } else {
+                    System.out.println("Deleted plant ID " + plantId);
+                }
+            }
+        }
+        if (plantDeletePass >= maxPlantDeletePasses) {
+            throw new IllegalStateException("Plant deletion exceeded " + maxPlantDeletePasses + " passes");
+        }
+
+        System.out.println("All plants delete attempt complete.");
+    }
+
+    private String getBaseUrl() {
+        return EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+    }
+
     @Step("Verify read-only format")
     public void verifyReadOnlyFormat() {
         net.serenitybdd.rest.SerenityRest.restAssuredThat(response
