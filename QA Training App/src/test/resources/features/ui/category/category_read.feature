@@ -55,4 +55,3 @@ Feature: Read Category
         And the user navigates to the categories page
         When the user searches for a category that does not exist
         Then the message "No category found" should be displayed in the table body
-

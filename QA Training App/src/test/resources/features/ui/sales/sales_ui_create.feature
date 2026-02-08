@@ -32,6 +32,11 @@ Feature: Sales Management - Access Control
     And the plant dropdown should be visible
     And the quantity field should be visible
 
-
-    
-
+  @UI @Sales @UI_Sales_Create_002 @215098G
+  Scenario: Verify admin can cancel a sale without creating it
+    Given the user is logged in as an admin
+    When the user navigates directly to the sell plant page
+    And the user selects a plant from the dropdown
+    And the user enters a valid quantity
+    And the user clicks the Cancel button
+    Then the user should be redirected to the sales page

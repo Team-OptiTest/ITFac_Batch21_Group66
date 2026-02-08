@@ -8,7 +8,7 @@ import org.openqa.selenium.WebElement;
 import net.serenitybdd.core.pages.PageObject;
 
 public class CategoryPage extends PageObject {
-    
+
     // Locators based on actual HTML structure
     private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("//select");
     private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("//a[normalize-space()='Add A Category']");
@@ -24,7 +24,7 @@ public class CategoryPage extends PageObject {
     public void navigateToAddCategoryPage() {
         getDriver().get("http://localhost:8080/ui/categories/add");
     }
-    
+
     public boolean isAddCategoryButtonVisible() {
         return getDriver().findElement(ADD_CATEGORY_BUTTON_SELECTOR).isDisplayed();
     }
@@ -157,7 +157,7 @@ public class CategoryPage extends PageObject {
             return false;
         }
     }
-
+  
     public void clickDeleteButtonForCategory(String categoryName) {
         try {
             // Locate the delete button
@@ -205,4 +205,24 @@ public class CategoryPage extends PageObject {
         }
     }
 }
+    public void navigateToAddCategoryPageDirectly() {
+        String baseUrl = "http://localhost:8080"; // or get from environment
+        getDriver().get(baseUrl + "/ui/categories/add");
+    }
 
+    public boolean isRedirectedFromAddCategoryPage() {
+        String currentUrl = getDriver().getCurrentUrl();
+        boolean notOnAddPage = !currentUrl.contains("/ui/categories/add");
+        boolean onDashboard = currentUrl.contains("/ui/dashboard");
+        boolean onError = currentUrl.contains("403") || currentUrl.contains("forbidden");
+        return notOnAddPage && (onDashboard || onError);
+    }
+
+    public boolean isAccessDeniedMessageDisplayed() {
+        String pageSource = getDriver().getPageSource().toLowerCase();
+        boolean hasAccessText = pageSource.contains("access denied")
+                || pageSource.contains("forbidden")
+                || pageSource.contains("403");
+        return hasAccessText;
+    }
+}
