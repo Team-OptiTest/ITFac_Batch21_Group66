@@ -7,6 +7,7 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.JavascriptExecutor;
 
 
+
 import net.serenitybdd.core.pages.PageObject;
 
 public class SellPlantPage extends PageObject {
@@ -35,7 +36,7 @@ public class SellPlantPage extends PageObject {
     private static final By QUANTITY_ERROR_MESSAGE =
         By.xpath("//input[@id='quantity']/following-sibling::div[contains(@class,'text-danger')]");
 
-
+    
 
     public boolean isSellPlantPageDisplayed() {
         try {
@@ -127,6 +128,7 @@ public void leavePlantDropdownEmpty() {
     }
 }
 
+
 //  Set quantity using JS (so browser won't auto-correct)
 public void setQuantityUsingJs(String value) {
     waitForCondition().until(ExpectedConditions.presenceOfElementLocated(QUANTITY_FIELD));
@@ -140,6 +142,9 @@ public void submitSaleFormBypassingHtmlValidation() {
     js.executeScript("document.querySelector(\"form[action='/ui/sales']\").submit();");
 }
 
-
-
 }
+
+   
+
+
+

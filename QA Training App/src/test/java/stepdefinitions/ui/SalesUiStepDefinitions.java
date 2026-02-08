@@ -2,6 +2,9 @@ package stepdefinitions.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -209,6 +212,7 @@ public void the_user_sets_quantity_as_using_javascript(String qty) {
 public void the_user_submits_the_sale_form_bypassing_browser_validation() {
     sellPlantPage.submitSaleFormBypassingHtmlValidation();
 }
+
 
 
 }

@@ -59,3 +59,13 @@ Scenario: Quantity Greater Than Zero Validation - Admin
   And the user sets quantity as "0" using javascript
   And the user submits the sale form bypassing browser validation
   Then the user should see the quantity greater than zero validation message
+
+  @UI @Sales @UI_Sales_Create_011 @Admin @215116M
+Scenario: Quantity Negative Value Validation - Admin
+  Given the user is logged in as an admin
+  When the user navigates directly to the sell plant page
+  And the user selects a plant from the dropdown
+  And the user sets quantity as "-5" using javascript
+  And the user submits the sale form bypassing browser validation
+  Then the user should see the quantity greater than zero validation message
+
