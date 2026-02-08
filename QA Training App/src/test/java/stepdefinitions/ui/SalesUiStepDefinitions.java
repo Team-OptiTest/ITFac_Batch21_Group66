@@ -243,5 +243,29 @@ public void the_delete_action_should_not_be_visible_for_any_sales_record() {
                 .as("First sales record row should contain valid non-empty data")
                 .isTrue();
     }
+@Given("at least one sales record exists in the system")
+public void atLeastOneSalesRecordExistsInTheSystem() {
+
+    // Login as admin to create sale via UI
+    loginPage.loginAsAdmin();
+
+    // Go to sell plant page and create a sale
+    salesPage.navigateToSellPlantPage();
+    assertThat(sellPlantPage.isSellPlantPageDisplayed())
+            .as("Sell Plant page should be displayed for admin before creating a sale")
+            .isTrue();
+
+    sellPlantPage.selectFirstAvailablePlant();
+    sellPlantPage.enterQuantity("1");
+    sellPlantPage.clickSellButton();
+
+    // Back to sales page and confirm at least one record exists
+    salesPage.navigateToSalesPage();
+    assertThat(salesPage.hasAtLeastOneSalesRecord())
+            .as("At least one sales record should exist after creating a sale")
+            .isTrue();
+}
 
 }
+
+ 

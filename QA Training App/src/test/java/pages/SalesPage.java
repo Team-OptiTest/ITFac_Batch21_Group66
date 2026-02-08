@@ -251,7 +251,8 @@ public boolean firstSalesRowHasValidData() {
                 nonEmptyCount++;
             }
         }
-        return nonEmptyCount >= 4;
+         return nonEmptyCount >= 3;  // because first column might be actions
+
 
     } catch (Exception e) {
         return false;
