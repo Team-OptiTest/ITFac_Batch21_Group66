@@ -3,6 +3,7 @@ package pages;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import net.serenitybdd.core.pages.PageObject;
@@ -17,8 +18,12 @@ public class PlantsPage extends PageObject {
         private static final By CATEGORY_DROPDOWN = By.id("categoryId");
         private static final By PRICE_FIELD = By.id("price");
         private static final By QUANTITY_FIELD = By.id("quantity");
-        private static final By SAVE_BUTTON = By.xpath("//button[contains(text(), 'Save')] | //button[@type='submit']");
-        private static final By CANCEL_BUTTON = By.cssSelector("a.btn-secondary[href$='/ui/plants'], a.btn-outline-secondary[href$='/ui/plants'], a[href$='/ui/plants'][class*='btn']");
+        private static final By FALLBACK_SAVE_BUTTON = By
+                        .xpath("//button[contains(text(), 'Save')] | //button[@class='btn btn-primary']");
+        private static final By SAVE_BUTTON = By.cssSelector("button[type='submit'], button.btn-primary, form button");
+        private static final By CANCEL_BUTTON = By.cssSelector(
+                        "a.btn-secondary[href$='/ui/plants'], a.btn-outline-secondary[href$='/ui/plants'], a[href$='/ui/plants'][class*='btn']");
+
         private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
         private static final By PLANTS_TABLE = By.cssSelector("table, .plants-table, [class*='table']");
         private static final By PAGE_TITLE = By.xpath("//h1 | //h2");
@@ -28,7 +33,7 @@ public class PlantsPage extends PageObject {
                         .xpath("//input[@placeholder='Search plant' or @id='searchName' or @name='searchName']");
         private static final By SEARCH_BUTTON = By
                         .xpath("//button[contains(text(), 'Search')] | //button[@type='submit']");
-        private static final By FIRST_PLANT_NAME = By.xpath("//table//tbody//tr[1]//td[1]");
+        private static final By FIRST_PLANT_NAME = By.xpath("//table//tbody//tr[2]//td[2]");
         private static final By FILTER_CATEGORY_DROPDOWN = By.cssSelector(
                         "select#category, select#categoryId, select#categoryFilter, select[name='category']");
         private static final By PLANT_TABLE_BODY = By.cssSelector("table tbody");
@@ -70,6 +75,8 @@ public class PlantsPage extends PageObject {
                 try {
                         getDriver().findElement(ADD_PLANT_BUTTON).click();
                 } catch (Exception e) {
+                        getDriver().manage().window().maximize();
+                        getDriver().findElement(ADD_PLANT_BUTTON).click();
                         throw new RuntimeException("Add Plant button not found", e);
                 }
         }
@@ -78,6 +85,8 @@ public class PlantsPage extends PageObject {
                 try {
                         getDriver().findElement(SAVE_BUTTON).click();
                 } catch (Exception e) {
+                        getDriver().findElement(By.tagName("body")).sendKeys(Keys.PAGE_DOWN);
+                        getDriver().findElement(FALLBACK_SAVE_BUTTON).click();
                         throw new RuntimeException("Save button not found", e);
                 }
         }
@@ -394,7 +403,8 @@ public class PlantsPage extends PageObject {
         public java.util.List<String> getCategoryDropdownOptionTexts() {
                 try {
                         org.openqa.selenium.WebElement dropdown = getDriver().findElement(CATEGORY_DROPDOWN);
-                        org.openqa.selenium.support.ui.Select select = new org.openqa.selenium.support.ui.Select(dropdown);
+                        org.openqa.selenium.support.ui.Select select = new org.openqa.selenium.support.ui.Select(
+                                        dropdown);
                         java.util.List<String> optionTexts = new java.util.ArrayList<>();
                         for (org.openqa.selenium.WebElement option : select.getOptions()) {
                                 String text = option.getText().trim();

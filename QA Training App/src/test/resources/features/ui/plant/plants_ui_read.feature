@@ -5,7 +5,7 @@ Feature: Plant Management - UI Read Operations
 
   @UI @UI_Plant_Read_001 @215063V
   Scenario: Filter Plants by Name
-    Given the user is logged in as an admin user
+    Given the user is authenticate as an admin user
     When the user navigates to the Plants page
     And multiple plants with different names exist
     And the user enters "Rose" in the "Search plant" input box
@@ -15,14 +15,14 @@ Feature: Plant Management - UI Read Operations
 
   @UI @UI_Plant_Read_002 @215063V
   Scenario: View Plants List (Read-Only)
-    Given the user is logged in as a normal user
+    Given the user is authenticate as a normal user
     When the user navigates to the Plants page
     Then the list of plants is displayed with valid data
     And the "Add a Plant" button is not present
 
   @UI @UI_Plant_Read_003 @215063V
   Scenario: Filter Plants by Name - Normal User
-    Given the user is logged in as a normal user
+    Given the user is authenticate as a normal user
     When the user navigates to the Plants page
     And multiple plants with different names exist
     And the user enters "Rose" in the "Search plant" input box
@@ -32,7 +32,7 @@ Feature: Plant Management - UI Read Operations
 
   @UI @UI_Plant_Read_004 @215063V
   Scenario: Filter Plants by Category
-    Given the user is logged in as a normal user
+    Given the user is authenticate as a normal user
     When the user navigates to the Plants page
     And plants of different categories exist
     And the user selects the "Herbs" category from the filter

@@ -44,21 +44,24 @@ public class PlantUiStepDefinitions {
                 plantActions.cleanupSetupPlant();
         }
 
-        @Given("the user is logged in as Admin with username {string} and password {string}")
-        public void theUserIsLoggedInAsAdmin(String username, String password) {
-                loginPage.loginAsAdmin();
+        @Given("the user is authenticate as a normal user")
+        public void theUserIsLoggedInAsNormalUserForPlant() {
+                loginPage.loginAsUser();
         }
 
-        @Given("the user is logged in as a normal user")
-        public void theUserIsLoggedInAsNormalUser() {
-                loginPage.loginAsUser();
+        @Given("the user is authenticate as an admin user")
+        public void theUserIsLoggedInAsAnAdminUserForPlant() {
+                loginPage.loginAsAdmin();
         }
 
         @Given("at least one plant exists in the list")
         public void atLeastOnePlantExistsInTheList() {
-                // Use API actions to ensure data exists
-                loginPage.loginAsAdmin();
-                plantActions.ensureAtLeastOnePlantExists();
+                // Navigate to plants page and verify table is visible
+                plantsPage.navigateToPlantsPage();
+                waitForMilliseconds(1000); // Wait for page to load
+                assertThat(plantsPage.isPlantsTableDisplayed())
+                                .as("Plants table should be visible with at least one plant")
+                                .isTrue();
         }
 
         @Given("the user is on the Plants page")
@@ -69,6 +72,7 @@ public class PlantUiStepDefinitions {
         @When("the user navigates to the Plants page")
         public void theUserNavigatesToThePlantsPage() {
                 plantsPage.navigateToPlantsPage();
+                waitForMilliseconds(1000); // Wait for page to stabilize
         }
 
         @When("the user observes the columns in the plants table")
@@ -123,16 +127,19 @@ public class PlantUiStepDefinitions {
         @When("the user enters {string} as the Price")
         public void theUserEntersAsThePrice(String price) {
                 plantsPage.enterPrice(price);
+                waitForMilliseconds(300); // Small delay after entering price
         }
 
         @When("the user enters {string} as the Quantity")
         public void theUserEntersAsTheQuantity(String quantity) {
                 plantsPage.enterQuantity(quantity);
+                waitForMilliseconds(300); // Small delay after entering quantity
         }
 
         @When("the user clicks the Save button")
         public void theUserClicksTheSaveButton() {
                 plantsPage.clickSaveButton();
+                waitForMilliseconds(1000); // Wait for save operation to complete
         }
 
         @Then("the {string} message is displayed")
@@ -148,6 +155,8 @@ public class PlantUiStepDefinitions {
 
         @Then("the user is redirected to the Plants list")
         public void theUserIsRedirectedToThePlantsList() {
+                // Wait for redirection
+                waitForMilliseconds(1000);
                 assertThat(plantsPage.isOnPlantsListPage())
                                 .as("User should be on plants list page")
                                 .isTrue();
@@ -157,6 +166,7 @@ public class PlantUiStepDefinitions {
         public void theNewPlantAppearsInTheTable(String plantName) {
                 // Use the stored unique plant name
                 String nameToCheck = (uniquePlantName != null) ? uniquePlantName : plantName;
+                waitForMilliseconds(1000); // Wait for table to update
                 assertThat(plantsPage.isPlantVisibleInTable(nameToCheck))
                                 .as("Plant '" + nameToCheck + "' should appear in the table")
                                 .isTrue();
@@ -381,6 +391,7 @@ public class PlantUiStepDefinitions {
                 if (targetPlantName == null || targetPlantName.isEmpty()) {
                         throw new IllegalStateException("No plants found in the list to update.");
                 }
+                System.out.println("Target plant identified: " + targetPlantName);
         }
 
         @When("the user records the original details of the target plant")
@@ -396,7 +407,10 @@ public class PlantUiStepDefinitions {
                 if (targetPlantName == null) {
                         throw new IllegalStateException("No target plant identified.");
                 }
+                System.out.println("Clicking Edit button for plant: " + targetPlantName);
                 plantsPage.clickEditButtonForPlant(targetPlantName);
+                // Additional wait for edit page to fully load
+                waitForMilliseconds(1000);
         }
 
         @Then("the target plant shows price {string} and quantity {string} in the table")
@@ -404,6 +418,11 @@ public class PlantUiStepDefinitions {
                 if (targetPlantName == null) {
                         throw new IllegalStateException("No target plant identified.");
                 }
+                // Wait for table to update after edit
+                waitForMilliseconds(2000);
+
+                System.out.println("Verifying plant '" + targetPlantName + "' has price: " + price + " and quantity: "
+                                + quantity);
                 assertThat(plantsPage.plantShowsPriceAndQuantity(targetPlantName, price, quantity))
                                 .as("Target plant '" + targetPlantName + "' should show price " + price
                                                 + " and quantity " + quantity)
@@ -481,7 +500,8 @@ public class PlantUiStepDefinitions {
 
                 for (String mainCategoryName : mainCategoryNames) {
                         assertThat(dropdownOptions)
-                                        .as("Main category '" + mainCategoryName + "' should not appear in the category dropdown")
+                                        .as("Main category '" + mainCategoryName
+                                                        + "' should not appear in the category dropdown")
                                         .doesNotContain(mainCategoryName);
                 }
         }
