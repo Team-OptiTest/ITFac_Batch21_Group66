@@ -2,6 +2,7 @@ package stepdefinitions.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -170,5 +171,28 @@ public class SalesUiStepDefinitions {
                 .as("Sale with ID " + targetSaleId + " should still be visible after cancelling deletion")
                 .isTrue();
     }
+    
+       @And("the user leaves the plant dropdown empty")
+    public void the_user_leaves_the_plant_dropdown_empty() {
+        sellPlantPage.leavePlantDropdownEmpty();
+    }
+
+    @And("the user enters quantity {string}")
+    public void the_user_enters_quantity(String qty) {
+        sellPlantPage.enterQuantity(qty);
+    }
+
+    @And("the user clicks the Sell button")
+    public void the_user_clicks_the_sell_button() {
+        sellPlantPage.clickSellButton();
+    }
+
+    @Then("the user should see the plant required validation message")
+    public void the_user_should_see_the_plant_required_validation_message() {
+        assertThat(sellPlantPage.isPlantRequiredMessageDisplayed())
+                .as("Validation error 'Plant is required' should be displayed near plant field")
+                .isTrue();
+    }
+
 
 }

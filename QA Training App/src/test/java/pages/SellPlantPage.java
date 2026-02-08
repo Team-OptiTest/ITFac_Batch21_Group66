@@ -25,8 +25,10 @@ public class SellPlantPage extends PageObject {
             By.cssSelector("a.btn-secondary[href$='/ui/sales'], a.btn-outline-secondary[href$='/ui/sales']");
      // Submit button
     private static final By SELL_BUTTON =
-            By.xpath("/html/body/div/div/div[2]/div[2]/div/form/div[3]/button");
-
+            By.cssSelector("form[action='/ui/sales'] button.btn.btn-primary");
+    
+    // Plant error message: select + next sibling div.text-danger
+    private static final By PLANT_ERROR_MESSAGE = By.cssSelector("select#plantId + div.text-danger");
 
     public boolean isSellPlantPageDisplayed() {
         try {
@@ -34,6 +36,7 @@ public class SellPlantPage extends PageObject {
         } catch (Exception e) {
             return false;
         }
+    
     }
 
     public boolean isPlantDropdownDisplayed() {
@@ -89,5 +92,25 @@ public class SellPlantPage extends PageObject {
     waitForCondition().until(ExpectedConditions.elementToBeClickable(SELL_BUTTON));
     $(SELL_BUTTON).click();
 }
+
+public boolean isPlantRequiredMessageDisplayed() {
+        try {
+            waitForCondition().until(ExpectedConditions.visibilityOfElementLocated(PLANT_ERROR_MESSAGE));
+            String msg = $(PLANT_ERROR_MESSAGE).getText().trim();
+            return msg.equalsIgnoreCase("Plant is required");
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
+public void leavePlantDropdownEmpty() {
+        waitForCondition().until(ExpectedConditions.presenceOfElementLocated(PLANT_DROPDOWN));
+        WebElement dropdown = getDriver().findElement(PLANT_DROPDOWN);
+        Select select = new Select(dropdown);
+        select.selectByIndex(0); // "-- Select Plant --" (value="")
+    }
+
+   
+
 
 }
