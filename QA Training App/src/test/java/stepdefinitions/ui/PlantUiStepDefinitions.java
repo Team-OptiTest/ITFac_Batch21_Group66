@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import actions.AuthenticationActions;
 import actions.CategoryActions;
 import actions.PlantActions;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -35,6 +36,13 @@ public class PlantUiStepDefinitions {
 
         private String uniquePlantName;
         private String targetPlantName;
+        private String originalTargetPlantRowText;
+
+        @After("@UI_Plant_Update_003")
+        public void cleanupSetupPlantAfterScenario() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.cleanupSetupPlant();
+        }
 
         @Given("the user is logged in as Admin with username {string} and password {string}")
         public void theUserIsLoggedInAsAdmin(String username, String password) {
@@ -375,6 +383,14 @@ public class PlantUiStepDefinitions {
                 }
         }
 
+        @When("the user records the original details of the target plant")
+        public void theUserRecordsTheOriginalDetailsOfTheTargetPlant() {
+                if (targetPlantName == null) {
+                        throw new IllegalStateException("No target plant identified.");
+                }
+                originalTargetPlantRowText = plantsPage.getPlantRowText(targetPlantName);
+        }
+
         @When("the user clicks the Edit button for the target plant")
         public void theUserClicksTheEditButtonForTheTargetPlant() {
                 if (targetPlantName == null) {
@@ -392,6 +408,20 @@ public class PlantUiStepDefinitions {
                                 .as("Target plant '" + targetPlantName + "' should show price " + price
                                                 + " and quantity " + quantity)
                                 .isTrue();
+        }
+
+        @Then("the target plant still shows its original details")
+        public void theTargetPlantStillShowsItsOriginalDetails() {
+                if (targetPlantName == null) {
+                        throw new IllegalStateException("No target plant identified.");
+                }
+                if (originalTargetPlantRowText == null) {
+                        throw new IllegalStateException("Original plant details were not recorded.");
+                }
+                String currentRowText = plantsPage.getPlantRowText(targetPlantName);
+                assertThat(currentRowText)
+                                .as("Target plant '" + targetPlantName + "' details should remain unchanged after cancel")
+                                .isEqualTo(originalTargetPlantRowText);
         }
 
         @Given("plants of different categories exist")
@@ -486,6 +516,12 @@ public class PlantUiStepDefinitions {
                 assertThat(plantsPage.isLowBadgeDisplayed())
                                 .as("'" + badgeText + "' badge should be displayed for a low-quantity plant")
                                 .isTrue();
+        }
+
+        @Then("the setup test plant is cleaned up")
+        public void theSetupTestPlantIsCleanedUp() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.cleanupSetupPlant();
         }
 
         @Then("the low-stock test plant is cleaned up")

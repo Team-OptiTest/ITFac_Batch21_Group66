@@ -345,6 +345,15 @@ public class PlantsPage extends PageObject {
                 }
         }
 
+        public String getPlantRowText(String plantName) {
+                try {
+                        By plantRow = By.xpath("//table//tr[td[contains(text(), '" + plantName + "')]]");
+                        return getDriver().findElement(plantRow).getText();
+                } catch (Exception e) {
+                        throw new RuntimeException("Plant row for '" + plantName + "' not found", e);
+                }
+        }
+
         public boolean allVisiblePlantsMatch(String searchTerm) {
                 try {
                         List<WebElementFacade> rows = findAll(PLANT_ROWS);
