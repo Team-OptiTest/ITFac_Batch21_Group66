@@ -475,6 +475,19 @@ public class PlantUiStepDefinitions {
                 plantsPage.searchPlant(searchTerm);
         }
 
+        @Given("at least one plant with quantity less than 5 exists")
+        public void atLeastOnePlantWithQuantityLessThan5Exists() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.ensureLowQuantityPlantExists();
+        }
+
+        @Then("a {string} badge should be displayed for a plant with quantity less than 5")
+        public void aBadgeShouldBeDisplayedForAPlantWithQuantityLessThan5(String badgeText) {
+                assertThat(plantsPage.isLowBadgeDisplayed())
+                                .as("'" + badgeText + "' badge should be displayed for a low-quantity plant")
+                                .isTrue();
+        }
+
         // Helper method for wait
         private void waitForMilliseconds(long milliseconds) {
                 try {

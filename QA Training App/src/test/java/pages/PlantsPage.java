@@ -1,11 +1,12 @@
 package pages;
 
-import net.serenitybdd.core.pages.PageObject;
-import net.serenitybdd.core.pages.WebElementFacade;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.util.List;
+import net.serenitybdd.core.pages.PageObject;
+import net.serenitybdd.core.pages.WebElementFacade;
 
 public class PlantsPage extends PageObject {
 
@@ -410,6 +411,18 @@ public class PlantsPage extends PageObject {
         public boolean isPageTitleDisplayed() {
                 try {
                         return getDriver().findElement(PAGE_TITLE).isDisplayed();
+                } catch (Exception e) {
+                        return false;
+                }
+        }
+
+        // Low stock badge verification
+        public boolean isLowBadgeDisplayed() {
+                try {
+                        By lowBadge = By.xpath(
+                                        "//table//tbody//tr//span[contains(@class, 'badge') and contains(translate(text(), 'LOW', 'low'), 'low')]");
+                        return !getDriver().findElements(lowBadge).isEmpty()
+                                        && getDriver().findElements(lowBadge).get(0).isDisplayed();
                 } catch (Exception e) {
                         return false;
                 }
