@@ -2,9 +2,16 @@ Feature: Managing Plants Update Functionality
 
   @UI @UI_Plant_Update_001 @215063V
   Scenario: Edit Plant Details (Success)
-    Given the user is logged in as an admin user
+    Given the user is authenticate as an admin user
+    And the user navigates directly to the add plant page
+    And the user enters "UpdateMe" as the Plant Name
+    And the user selects the "ChildCat" category from the filter
+    And the user enters "10" as the Price
+    And the user enters "5" as the Quantity
+    And the user clicks the Save button
+    And the "Plant added successfully" message is displayed
+    And the user is redirected to the Plants list
     And at least one plant exists in the list
-    When the user navigates to the Plants page
     And the user identifies the first plant in the list as the target
     And the user clicks the Edit button for the target plant
     And the user enters "25.00" as the Price
@@ -16,9 +23,23 @@ Feature: Managing Plants Update Functionality
 
   @UI @UI_Plant_Update_002 @215063V
   Scenario: Restricted Actions - No Edit
-    Given the user is logged in as a normal user
+    Given the user is authenticate as a normal user
     And at least one plant exists in the list
     When the user navigates to the Plants page
     And the user observes the columns in the plants table
     Then there are no "Edit" or "Delete" buttons visible for any plant row
     And the "Actions" column is empty or not present
+
+  @UI @UI_Plant_Update_003 @215098G
+  Scenario: Cancel Plant Editing - Admin
+    Given the user is logged in as an admin user
+    And at least one plant exists in the list
+    When the user navigates to the Plants page
+    And the user identifies the first plant in the list as the target
+    And the user records the original details of the target plant
+    And the user clicks the Edit button for the target plant
+    And the user enters "999.99" as the Price
+    And the user enters "777" as the Quantity
+    And the user clicks Cancel to discard the plant
+    Then the user is redirected to the Plants list
+    And the target plant still shows its original details

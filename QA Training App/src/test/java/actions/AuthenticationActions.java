@@ -19,8 +19,23 @@ public class AuthenticationActions {
             .getProperty("api.base.url");
     }
 
+    /**
+     * Clear all session variables before authenticating
+     */
+    private void clearSession() {
+        try {
+            Serenity.getCurrentSession().clear();
+            authToken = null;
+            System.out.println("Session cleared before authentication");
+        } catch (Exception e) {
+            System.out.println("Warning: Could not clear session: " + e.getMessage());
+        }
+    }
+
     @Step("Authenticate user")
     public void authenticateUser() {
+        clearSession(); // Clear session before login
+        
         String username = EnvironmentSpecificConfiguration.from(environmentVariables)
             .getOptionalProperty("test.user.username")
             .orElseThrow(() -> new RuntimeException("test.user.username not configured in serenity.conf"));
@@ -33,6 +48,8 @@ public class AuthenticationActions {
 
     @Step("Authenticate as admin")
     public void authenticateAsAdmin() {
+        clearSession(); // Clear session before login
+        
         String username = EnvironmentSpecificConfiguration.from(environmentVariables)
             .getOptionalProperty("test.admin.username")
             .orElseThrow(() -> new RuntimeException("test.admin.username not configured in serenity.conf"));
@@ -73,12 +90,21 @@ public class AuthenticationActions {
     public String getAuthToken() {
         return authToken;
     }
+    
     @Step("Set invalid JWT token")
-public void setInvalidJWTToken() {
-    // Set an obviously invalid token
-    String invalidToken = "invalid.jwt.token.123";
-    authToken = invalidToken;
-    Serenity.setSessionVariable("authToken").to(invalidToken);
-    System.out.println("Set invalid JWT token for testing");
-}
+    public void setInvalidJWTToken() {
+        clearSession(); // Clear session before setting invalid token
+        
+        // Set an obviously invalid token
+        String invalidToken = "invalid.jwt.token.123";
+        authToken = invalidToken;
+        Serenity.setSessionVariable("authToken").to(invalidToken);
+        System.out.println("Set invalid JWT token for testing");
+    }
+    
+    @Step("Logout and clear session")
+    public void logout() {
+        clearSession();
+        System.out.println("User logged out and session cleared");
+    }
 }
