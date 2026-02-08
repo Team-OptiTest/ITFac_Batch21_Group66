@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import actions.AuthenticationActions;
 import actions.CategoryActions;
 import actions.PlantActions;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -36,6 +37,12 @@ public class PlantUiStepDefinitions {
         private String uniquePlantName;
         private String targetPlantName;
         private String originalTargetPlantRowText;
+
+        @After("@UI_Plant_Update_003")
+        public void cleanupSetupPlantAfterScenario() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.cleanupSetupPlant();
+        }
 
         @Given("the user is logged in as Admin with username {string} and password {string}")
         public void theUserIsLoggedInAsAdmin(String username, String password) {
@@ -509,6 +516,12 @@ public class PlantUiStepDefinitions {
                 assertThat(plantsPage.isLowBadgeDisplayed())
                                 .as("'" + badgeText + "' badge should be displayed for a low-quantity plant")
                                 .isTrue();
+        }
+
+        @Then("the setup test plant is cleaned up")
+        public void theSetupTestPlantIsCleanedUp() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.cleanupSetupPlant();
         }
 
         @Then("the low-stock test plant is cleaned up")
