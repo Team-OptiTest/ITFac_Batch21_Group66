@@ -30,7 +30,7 @@ public class PlantsPage extends PageObject {
                         .xpath("//input[@placeholder='Search plant' or @id='searchName' or @name='searchName']");
         private static final By SEARCH_BUTTON = By
                         .xpath("//button[contains(text(), 'Search')] | //button[@type='submit']");
-        private static final By FIRST_PLANT_NAME = By.xpath("//table//tbody//tr[1]//td[1]");
+        private static final By FIRST_PLANT_NAME = By.xpath("//table//tbody//tr[2]//td[2]");
         private static final By FILTER_CATEGORY_DROPDOWN = By.cssSelector(
                         "select#category, select#categoryId, select#categoryFilter, select[name='category']");
         private static final By PLANT_TABLE_BODY = By.cssSelector("table tbody");
