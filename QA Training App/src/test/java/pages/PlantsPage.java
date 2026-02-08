@@ -424,4 +424,16 @@ public class PlantsPage extends PageObject {
                         return false;
                 }
         }
+
+        // Low stock badge verification
+        public boolean isLowBadgeDisplayed() {
+                try {
+                        By lowBadge = By.xpath(
+                                        "//table//tbody//tr//span[contains(@class, 'badge') and contains(translate(text(), 'LOW', 'low'), 'low')]");
+                        return !getDriver().findElements(lowBadge).isEmpty()
+                                        && getDriver().findElements(lowBadge).get(0).isDisplayed();
+                } catch (Exception e) {
+                        return false;
+                }
+        }
 }

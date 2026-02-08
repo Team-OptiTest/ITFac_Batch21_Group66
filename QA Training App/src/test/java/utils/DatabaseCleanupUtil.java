@@ -2,6 +2,7 @@ package utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -44,6 +45,17 @@ public class DatabaseCleanupUtil {
             System.out.println("Deleted " + deleted + " inventory record(s) via JDBC.");
         } catch (SQLException e) {
             throw new RuntimeException("Failed to delete inventory records via JDBC - subsequent plant deletions will fail", e);
+        }
+    }
+
+    public static void deleteInventoryForPlant(int plantId) {
+        try (Connection conn = DriverManager.getConnection(getDbUrl(), getDbUser(), getDbPassword());
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM inventory WHERE plant_id = ?")) {
+            stmt.setInt(1, plantId);
+            int deleted = stmt.executeUpdate();
+            System.out.println("Deleted " + deleted + " inventory record(s) for plant ID " + plantId);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete inventory for plant " + plantId, e);
         }
     }
 }
