@@ -213,6 +213,12 @@ public void the_user_submits_the_sale_form_bypassing_browser_validation() {
     sellPlantPage.submitSaleFormBypassingHtmlValidation();
 }
 
+@Then("the delete action should not be visible for any sales record")
+public void the_delete_action_should_not_be_visible_for_any_sales_record() {
+    assertThat(salesPage.isDeleteActionVisibleForAnyRow())
+            .as("Delete action should not be visible for a regular user")
+            .isFalse();
+}
 
 
 }

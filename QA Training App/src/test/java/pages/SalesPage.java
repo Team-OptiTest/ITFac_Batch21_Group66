@@ -172,4 +172,15 @@ public boolean isSellPlantButtonNotVisible() {
             return false;
         }
     }
+
+    public boolean isDeleteActionVisibleForAnyRow() {
+    try {
+        return !getDriver()
+                .findElements(By.cssSelector("form[action^='/ui/sales/delete/'] button"))
+                .isEmpty();
+    } catch (Exception e) {
+        return false;
+    }
+}
+
 }
