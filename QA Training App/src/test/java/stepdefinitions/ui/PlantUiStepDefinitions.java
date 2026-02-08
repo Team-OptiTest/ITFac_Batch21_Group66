@@ -1,5 +1,11 @@
 package stepdefinitions.ui;
 
+import java.time.Duration;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 import actions.AuthenticationActions;
 import actions.CategoryActions;
 import actions.PlantActions;
@@ -7,13 +13,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.LoginPage;
 import pages.PlantsPage;
-
-import java.time.Duration;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class PlantUiStepDefinitions {
 
@@ -466,6 +467,12 @@ public class PlantUiStepDefinitions {
                 assertThat(plantsPage.isMessageDisplayedInTableBody(expectedMessage))
                                 .as("Expected message should be displayed in the plants table: " + expectedMessage)
                                 .isTrue();
+        }
+
+        @When("the user searches for a plant that does not exist")
+        public void theUserSearchesForAPlantThatDoesNotExist() {
+                String searchTerm = "NoMatch_" + UUID.randomUUID().toString().substring(0, 8);
+                plantsPage.searchPlant(searchTerm);
         }
 
         // Helper method for wait
