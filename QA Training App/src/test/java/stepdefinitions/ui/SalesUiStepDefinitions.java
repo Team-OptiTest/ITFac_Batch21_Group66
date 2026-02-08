@@ -10,9 +10,15 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
+import net.serenitybdd.core.Serenity;
 import pages.LoginPage;
 import pages.SalesPage;
 import pages.SellPlantPage;
+import actions.AuthenticationActions;
+import actions.SalesAction;
+
+
+
 
 
 
@@ -26,6 +32,14 @@ public class SalesUiStepDefinitions {
 
     @Steps
     SellPlantPage sellPlantPage;
+
+    @Steps
+    SalesAction salesAction;
+
+    @Steps
+AuthenticationActions authenticationActions;
+
+
 
 
     @Given("the user is logged in as an admin")
@@ -265,6 +279,28 @@ public void atLeastOneSalesRecordExistsInTheSystem() {
             .as("At least one sales record should exist after creating a sale")
             .isTrue();
 }
+@Then("the {string} message should be displayed in the sales table")
+public void the_message_should_be_displayed_in_the_sales_table(String message) {
+    boolean noRows = salesPage.isSalesTableEmpty();
+
+    if (noRows) {
+        assertThat(salesPage.isMessageDisplayedInSalesTableBody(message))
+                .as("Expected 'No sales found' message")
+                .isTrue();
+    }
+}
+
+
+
+@Given("no sales exist in the system")
+public void no_sales_exist_in_the_system() {
+    authenticationActions.authenticateAsAdmin();
+    String token = Serenity.sessionVariableCalled("authToken");
+    salesAction.setToken(token);
+
+    salesAction.deleteAllSales();
+}
+
 
 }
 

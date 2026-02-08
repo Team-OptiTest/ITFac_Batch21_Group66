@@ -9,6 +9,8 @@ import net.serenitybdd.core.Serenity;
 import io.restassured.http.ContentType;
 import static org.hamcrest.Matchers.*;
 import java.util.List;
+import static org.hamcrest.Matchers.*;
+
 import utils.TestUtils;
 
 public class SalesAction {
@@ -24,6 +26,27 @@ public class SalesAction {
     public void setToken(String token) {
         this.token = token;
     }
+
+    @Step("Delete all sales (cleanup)")
+public void deleteAllSales() {
+    // get all sales
+    getAllSales();
+    verifyStatusCode(200);
+
+    java.util.List<Integer> ids = SerenityRest.lastResponse()
+            .jsonPath()
+            .getList("id", Integer.class);
+
+    if (ids == null || ids.isEmpty()) return;
+
+    for (Integer id : ids) {
+        if (id != null) {
+            deleteSale(id);
+            // some APIs return 204 for delete, some 200
+            SerenityRest.then().statusCode(anyOf(is(200), is(204)));
+        }
+    }
+}
 
     @Step("Create a sale for a plant")
     public void createSale(int plantId, int quantity) {
@@ -181,4 +204,7 @@ public class SalesAction {
                     .get(fullUrl);
         }
     }
+
+  
+
 }
