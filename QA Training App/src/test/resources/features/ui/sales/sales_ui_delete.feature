@@ -10,3 +10,7 @@ Feature: Sales Management - Delete
     Then a confirmation prompt should be displayed
     When the admin clicks cancel on the confirmation prompt
     Then the sales record should still be visible on the page
+
+   
+
+

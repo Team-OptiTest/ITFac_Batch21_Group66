@@ -68,3 +68,4 @@ Feature: Plant Management - UI Create Operations
     And at least one main category exists
     When the user navigates directly to the add plant page
     Then main categories should not be displayed in the category dropdown
+

@@ -2,6 +2,10 @@ package stepdefinitions.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -9,6 +13,8 @@ import net.serenitybdd.annotations.Steps;
 import pages.LoginPage;
 import pages.SalesPage;
 import pages.SellPlantPage;
+
+
 
 public class SalesUiStepDefinitions {
 
@@ -170,5 +176,96 @@ public class SalesUiStepDefinitions {
                 .as("Sale with ID " + targetSaleId + " should still be visible after cancelling deletion")
                 .isTrue();
     }
+    
+       @And("the user leaves the plant dropdown empty")
+    public void the_user_leaves_the_plant_dropdown_empty() {
+        sellPlantPage.leavePlantDropdownEmpty();
+    }
+
+    @And("the user enters quantity {string}")
+    public void the_user_enters_quantity(String qty) {
+        sellPlantPage.enterQuantity(qty);
+    }
+
+    @And("the user clicks the Sell button")
+    public void the_user_clicks_the_sell_button() {
+        sellPlantPage.clickSellButton();
+    }
+
+    @Then("the user should see the plant required validation message")
+    public void the_user_should_see_the_plant_required_validation_message() {
+        assertThat(sellPlantPage.isPlantRequiredMessageDisplayed())
+                .as("Validation error 'Plant is required' should be displayed near plant field")
+                .isTrue();
+    }
+    
+    @Then("the user should see the quantity greater than zero validation message")
+   public void the_user_should_see_the_quantity_greater_than_zero_validation_message() {
+    assertThat(sellPlantPage.isQuantityGreaterThanZeroMessageDisplayed())
+            .as("Validation error 'Quantity must be greater than 0' should be displayed near quantity field")
+            .isTrue();
+}
+@And("the user sets quantity as {string} using javascript")
+public void the_user_sets_quantity_as_using_javascript(String qty) {
+    sellPlantPage.setQuantityUsingJs(qty);
+}
+
+@And("the user submits the sale form bypassing browser validation")
+public void the_user_submits_the_sale_form_bypassing_browser_validation() {
+    sellPlantPage.submitSaleFormBypassingHtmlValidation();
+}
+
+@Then("the delete action should not be visible for any sales record")
+public void the_delete_action_should_not_be_visible_for_any_sales_record() {
+    assertThat(salesPage.isDeleteActionVisibleForAnyRow())
+            .as("Delete action should not be visible for a regular user")
+            .isFalse();
+}
+
+    @Then("the sales list page should be displayed")
+    public void the_sales_list_page_should_be_displayed() {
+        assertThat(salesPage.isSalesListPageDisplayed())
+                .as("Sales list page should be displayed")
+                .isTrue();
+    }
+
+    @Then("sales records should be listed with plant name, quantity, total price, and sold date")
+    public void sales_records_should_be_listed_with_columns_and_data() {
+        assertThat(salesPage.hasSalesTableColumns())
+                .as("Sales table should contain columns for plant, quantity, total price, and sold date")
+                .isTrue();
+
+        assertThat(salesPage.hasAtLeastOneSalesRecord())
+                .as("At least one sales record should exist")
+                .isTrue();
+
+        assertThat(salesPage.firstSalesRowHasValidData())
+                .as("First sales record row should contain valid non-empty data")
+                .isTrue();
+    }
+@Given("at least one sales record exists in the system")
+public void atLeastOneSalesRecordExistsInTheSystem() {
+
+    // Login as admin to create sale via UI
+    loginPage.loginAsAdmin();
+
+    // Go to sell plant page and create a sale
+    salesPage.navigateToSellPlantPage();
+    assertThat(sellPlantPage.isSellPlantPageDisplayed())
+            .as("Sell Plant page should be displayed for admin before creating a sale")
+            .isTrue();
+
+    sellPlantPage.selectFirstAvailablePlant();
+    sellPlantPage.enterQuantity("1");
+    sellPlantPage.clickSellButton();
+
+    // Back to sales page and confirm at least one record exists
+    salesPage.navigateToSalesPage();
+    assertThat(salesPage.hasAtLeastOneSalesRecord())
+            .as("At least one sales record should exist after creating a sale")
+            .isTrue();
+}
 
 }
+
+ 

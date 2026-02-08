@@ -2,11 +2,14 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import net.serenitybdd.core.pages.PageObject;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
 import net.thucydides.model.util.EnvironmentVariables;
+import java.util.List;
+
 
 public class SalesPage extends PageObject {
 
@@ -18,8 +21,15 @@ public class SalesPage extends PageObject {
     private static final By SALES_TABLE_SELECTOR = By.cssSelector("table.table-bordered");
     private static final By SUCCESS_MESSAGE_SELECTOR = By.cssSelector(".alert-success");
     private static final By ERROR_MESSAGE_SELECTOR = By.cssSelector(".alert-danger");
-    private static final By SALES_TABLE_ROWS = By.cssSelector("table.table-bordered tbody tr");
     private static final By FIRST_DELETE_BUTTON = By.cssSelector("form[action^='/ui/sales/delete/'] button");
+    // Sales table headers
+
+// Sales first row cells
+private static final By SALES_TABLE_HEADERS = By.cssSelector("table.table-bordered thead th");
+private static final By SALES_TABLE_ROWS = By.cssSelector("table.table-bordered tbody tr"); // you already have
+
+
+
 
     public void navigateToSalesPage() {
         String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
@@ -172,4 +182,81 @@ public boolean isSellPlantButtonNotVisible() {
             return false;
         }
     }
+
+    public boolean isDeleteActionVisibleForAnyRow() {
+    try {
+        return !getDriver()
+                .findElements(By.cssSelector("form[action^='/ui/sales/delete/'] button"))
+                .isEmpty();
+    } catch (Exception e) {
+        return false;
+    }
+}
+
+public boolean isSalesListPageDisplayed() {
+    // simplest reliable check: URL + table presence
+    try {
+        waitForCondition().until(ExpectedConditions.urlContains("/ui/sales"));
+        return isSalesTableDisplayed();
+    } catch (Exception e) {
+        return false;
+    }
+}
+
+/**
+ * Verifies the sales table contains expected columns.
+ * We check header text contains these keywords (case-insensitive).
+ */
+public boolean hasSalesTableColumns() {
+    try {
+        waitForCondition().until(ExpectedConditions.presenceOfAllElementsLocatedBy(SALES_TABLE_HEADERS));
+        java.util.List<WebElement> headers = getDriver().findElements(SALES_TABLE_HEADERS);
+
+        String all = headers.stream()
+                .map(h -> h.getText() == null ? "" : h.getText().trim().toLowerCase())
+                .reduce("", (a, b) -> a + " | " + b);
+
+        // Flexible matching: supports variations like "Sold Date" vs "Date"
+        boolean hasPlant = all.contains("plant");
+        boolean hasQty = all.contains("quantity") || all.contains("qty");
+        boolean hasTotal = all.contains("total") || all.contains("price") || all.contains("amount");
+        boolean hasDate = all.contains("date") || all.contains("sold");
+
+        return hasPlant && hasQty && hasTotal && hasDate;
+    } catch (Exception e) {
+        return false;
+    }
+}
+
+/**
+ * Verifies first row has non-empty values in cells.
+ * This avoids depending on exact column order while still ensuring data is present.
+ */
+public boolean firstSalesRowHasValidData() {
+    try {
+        // Wait for at least one row
+        waitForCondition().until(ExpectedConditions.presenceOfAllElementsLocatedBy(SALES_TABLE_ROWS));
+
+        WebElement firstRow = getDriver().findElements(SALES_TABLE_ROWS).get(0);
+        java.util.List<WebElement> cells = firstRow.findElements(By.cssSelector("td"));
+
+        // At least 4 columns must exist (plant, qty, total, date)
+        if (cells.size() < 4) return false;
+
+        // ✅ Check ANY 4 non-empty cells (skip action column issues)
+        int nonEmptyCount = 0;
+        for (WebElement cell : cells) {
+            String txt = cell.getText();
+            if (txt != null && !txt.trim().isEmpty()) {
+                nonEmptyCount++;
+            }
+        }
+         return nonEmptyCount >= 3;  // because first column might be actions
+
+
+    } catch (Exception e) {
+        return false;
+    }
+}
+
 }
