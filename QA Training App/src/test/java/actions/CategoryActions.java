@@ -209,6 +209,11 @@ public class CategoryActions {
             throw new IllegalStateException("Sales deletion exceeded " + maxSalesDeletePasses + " passes");
         }
 
+        // --- BUG-007 Workaround: Delete all inventory records via JDBC ---
+        // No /api/inventory endpoint exists, so direct DB cleanup is required
+        // to avoid FK constraint violation (inventory.plant_id -> plants.id)
+        utils.DatabaseCleanupUtil.deleteAllInventory();
+
         // --- Delete all plants (with error handling and loop for pagination/partial deletes) ---
         int plantDeletePass = 0;
         final int maxPlantDeletePasses = 10;
@@ -501,6 +506,51 @@ public class CategoryActions {
         } else {
             // Request failed - don't try to extract ID
             System.out.println("Category creation failed with status: " + lastResponse.getStatusCode());
+        }
+    }
+
+    @Step("Get main category names")
+    public java.util.List<String> getMainCategoryNames() {
+        String token = getAuthToken();
+        String mainCategoriesUrl = getBaseUrl() + "/api/categories/main";
+
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(mainCategoriesUrl);
+
+        if (response.getStatusCode() == 200) {
+            try {
+                return response.jsonPath().getList("name", String.class);
+            } catch (Exception e) {
+                return java.util.Collections.emptyList();
+            }
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    @Step("Ensure at least one main category exists")
+    public void ensureAtLeastOneMainCategoryExists() {
+        String token = getAuthToken();
+        String mainCategoriesUrl = getBaseUrl() + "/api/categories/main";
+
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(mainCategoriesUrl);
+
+        if (response.getStatusCode() == 200) {
+            List<?> categories = response.jsonPath().getList("$");
+            if (categories != null && !categories.isEmpty()) {
+                return; // Main category already exists
+            }
+        }
+
+        // Create a main category if none exists
+        createCategory("MainCatTest");
+        if (lastResponse == null || (lastResponse.getStatusCode() != 200 && lastResponse.getStatusCode() != 201)) {
+            System.out.println("Warning: Failed to create main category. Status: "
+                    + (lastResponse != null ? lastResponse.getStatusCode() : "null"));
         }
     }
 

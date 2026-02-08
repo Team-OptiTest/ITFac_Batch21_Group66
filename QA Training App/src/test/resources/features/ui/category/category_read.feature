@@ -52,8 +52,8 @@ Feature: Read Category
 
   @UI @Category @UI_Category_Read_005 @negative
   Scenario: Verify user sees empty message when no categories exist
-    Given the user is logged in as a user
-    And no categories exist in the database
+    Given no categories exist in the database
+    And the user is logged in as a user
     When the user navigates to the categories page
     Then the message "No category found" should be displayed in the table body
 
