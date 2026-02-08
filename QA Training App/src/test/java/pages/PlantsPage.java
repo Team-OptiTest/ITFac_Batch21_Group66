@@ -3,6 +3,7 @@ package pages;
 import net.serenitybdd.core.pages.PageObject;
 import net.serenitybdd.core.pages.WebElementFacade;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
@@ -16,7 +17,10 @@ public class PlantsPage extends PageObject {
         private static final By CATEGORY_DROPDOWN = By.id("categoryId");
         private static final By PRICE_FIELD = By.id("price");
         private static final By QUANTITY_FIELD = By.id("quantity");
-        private static final By SAVE_BUTTON = By.xpath("//button[contains(text(), 'Save')] | //button[@type='submit']");
+        private static final By FALLBACK_SAVE_BUTTON = By
+                        .xpath("//button[contains(text(), 'Save')] | //button[@class='btn btn-primary']");
+        private static final By SAVE_BUTTON = By.cssSelector("button[type='submit'], button.btn-primary, form button");
+
         private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
         private static final By PLANTS_TABLE = By.cssSelector("table, .plants-table, [class*='table']");
         private static final By PAGE_TITLE = By.xpath("//h1 | //h2");
@@ -68,6 +72,8 @@ public class PlantsPage extends PageObject {
                 try {
                         getDriver().findElement(ADD_PLANT_BUTTON).click();
                 } catch (Exception e) {
+                        getDriver().manage().window().maximize();
+                        getDriver().findElement(ADD_PLANT_BUTTON).click();
                         throw new RuntimeException("Add Plant button not found", e);
                 }
         }
@@ -76,6 +82,8 @@ public class PlantsPage extends PageObject {
                 try {
                         getDriver().findElement(SAVE_BUTTON).click();
                 } catch (Exception e) {
+                        getDriver().findElement(By.tagName("body")).sendKeys(Keys.PAGE_DOWN);
+                        getDriver().findElement(FALLBACK_SAVE_BUTTON).click();
                         throw new RuntimeException("Save button not found", e);
                 }
         }

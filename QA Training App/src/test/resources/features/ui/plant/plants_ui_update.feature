@@ -2,7 +2,7 @@ Feature: Managing Plants Update Functionality
 
   @UI @UI_Plant_Update_001 @215063V
   Scenario: Edit Plant Details (Success)
-    Given the user is logged in as an admin user
+    Given the user is authenticate as an admin user
     And at least one plant exists in the list
     When the user navigates to the Plants page
     And the user identifies the first plant in the list as the target
@@ -16,7 +16,7 @@ Feature: Managing Plants Update Functionality
 
   @UI @UI_Plant_Update_002 @215063V
   Scenario: Restricted Actions - No Edit
-    Given the user is logged in as a normal user
+    Given the user is authenticate as a normal user
     And at least one plant exists in the list
     When the user navigates to the Plants page
     And the user observes the columns in the plants table
