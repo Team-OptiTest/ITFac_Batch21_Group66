@@ -785,8 +785,8 @@ public class PlantActions {
         String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
                 .getProperty("api.base.url");
 
-        // Delete inventory records first (BUG-007 workaround)
-        utils.DatabaseCleanupUtil.deleteAllInventory();
+        // Delete inventory records for this plant first (BUG-007 workaround)
+        utils.DatabaseCleanupUtil.deleteInventoryForPlant(plantId);
 
         io.restassured.response.Response response = getAuthenticatedRequest()
                 .when()
