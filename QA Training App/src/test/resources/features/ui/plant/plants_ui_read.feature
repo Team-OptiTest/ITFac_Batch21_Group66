@@ -46,4 +46,9 @@ Feature: Plant Management - UI Read Operations
     When the user navigates to the Plants page
     Then the message "No plants found" should be displayed in the plants table
 
- 
+  @UI @Plant @UI_Plant_Read_006 @negative @215098G
+  Scenario: Verify user sees empty message when plant search returns no results
+    Given the user is logged in as a user
+    When the user navigates to the Plants page
+    And the user searches for a plant that does not exist
+    Then the message "No plants found" should be displayed in the plants table
