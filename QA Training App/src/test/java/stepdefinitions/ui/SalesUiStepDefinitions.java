@@ -193,6 +193,22 @@ public class SalesUiStepDefinitions {
                 .as("Validation error 'Plant is required' should be displayed near plant field")
                 .isTrue();
     }
+    
+    @Then("the user should see the quantity greater than zero validation message")
+   public void the_user_should_see_the_quantity_greater_than_zero_validation_message() {
+    assertThat(sellPlantPage.isQuantityGreaterThanZeroMessageDisplayed())
+            .as("Validation error 'Quantity must be greater than 0' should be displayed near quantity field")
+            .isTrue();
+}
+@And("the user sets quantity as {string} using javascript")
+public void the_user_sets_quantity_as_using_javascript(String qty) {
+    sellPlantPage.setQuantityUsingJs(qty);
+}
+
+@And("the user submits the sale form bypassing browser validation")
+public void the_user_submits_the_sale_form_bypassing_browser_validation() {
+    sellPlantPage.submitSaleFormBypassingHtmlValidation();
+}
 
 
 }

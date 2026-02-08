@@ -40,3 +40,22 @@ Feature: Sales Management - Access Control
     And the user enters a valid quantity
     And the user clicks the Cancel button
     Then the user should be redirected to the sales page
+
+  @UI @Sales @UI_Sales_Create_009 @Admin @215116M
+  Scenario: Plant Required Validation - Admin
+    Given the user is logged in as an admin
+    When the user navigates directly to the sell plant page
+    And the user leaves the plant dropdown empty
+    And the user enters quantity "1"
+    And the user clicks the Sell button
+    Then the user should see the plant required validation message
+
+
+    @UI @Sales @UI_Sales_Create_010 @Admin @215116M
+Scenario: Quantity Greater Than Zero Validation - Admin
+  Given the user is logged in as an admin
+  When the user navigates directly to the sell plant page
+  And the user selects a plant from the dropdown
+  And the user sets quantity as "0" using javascript
+  And the user submits the sale form bypassing browser validation
+  Then the user should see the quantity greater than zero validation message

@@ -4,6 +4,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.JavascriptExecutor;
+
 
 import net.serenitybdd.core.pages.PageObject;
 
@@ -29,6 +31,11 @@ public class SellPlantPage extends PageObject {
     
     // Plant error message: select + next sibling div.text-danger
     private static final By PLANT_ERROR_MESSAGE = By.cssSelector("select#plantId + div.text-danger");
+
+    private static final By QUANTITY_ERROR_MESSAGE =
+        By.xpath("//input[@id='quantity']/following-sibling::div[contains(@class,'text-danger')]");
+
+
 
     public boolean isSellPlantPageDisplayed() {
         try {
@@ -110,7 +117,29 @@ public void leavePlantDropdownEmpty() {
         select.selectByIndex(0); // "-- Select Plant --" (value="")
     }
 
-   
+   public boolean isQuantityGreaterThanZeroMessageDisplayed() {
+    try {
+        waitForCondition().until(ExpectedConditions.visibilityOfElementLocated(QUANTITY_ERROR_MESSAGE));
+        String message = $(QUANTITY_ERROR_MESSAGE).getText().trim().toLowerCase();
+        return message.contains("quantity") && message.contains("greater") && message.contains("0");
+    } catch (Exception e) {
+        return false;
+    }
+}
+
+//  Set quantity using JS (so browser won't auto-correct)
+public void setQuantityUsingJs(String value) {
+    waitForCondition().until(ExpectedConditions.presenceOfElementLocated(QUANTITY_FIELD));
+    JavascriptExecutor js = (JavascriptExecutor) getDriver();
+    js.executeScript("arguments[0].value = arguments[1];", getDriver().findElement(QUANTITY_FIELD), value);
+}
+
+//  Submit form using JS (bypasses HTML5 validation)
+public void submitSaleFormBypassingHtmlValidation() {
+    JavascriptExecutor js = (JavascriptExecutor) getDriver();
+    js.executeScript("document.querySelector(\"form[action='/ui/sales']\").submit();");
+}
+
 
 
 }

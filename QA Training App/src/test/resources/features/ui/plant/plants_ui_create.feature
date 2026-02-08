@@ -69,11 +69,3 @@ Feature: Plant Management - UI Create Operations
     When the user navigates directly to the add plant page
     Then main categories should not be displayed in the category dropdown
 
-  @UI @Sales @UI_Sales_Create_009 @Admin @215116M
-  Scenario: Plant Required Validation - Admin
-    Given the user is logged in as an admin
-    When the user navigates directly to the sell plant page
-    And the user leaves the plant dropdown empty
-    And the user enters quantity "1"
-    And the user clicks the Sell button
-    Then the user should see the plant required validation message
