@@ -1,5 +1,7 @@
 package pages;
 
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
@@ -56,7 +58,11 @@ public class CategoryPage extends PageObject {
 
     public void selectFromDropdown(String optionText) {
         try {
-            getDriver().findElement(PARENT_CATEGORY_DROPDOWN).sendKeys(optionText);
+            WebElement dropdown = getDriver().findElement(PARENT_CATEGORY_DROPDOWN);
+            dropdown.click();
+            waitABit(300);
+            dropdown.sendKeys(optionText);
+            waitABit(500); // Add this wait for filtering to complete
         } catch (Exception e) {
             throw new RuntimeException("Parent category dropdown not found", e);
         }
