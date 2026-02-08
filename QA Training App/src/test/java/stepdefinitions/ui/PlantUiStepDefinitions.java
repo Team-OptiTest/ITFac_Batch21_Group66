@@ -455,6 +455,19 @@ public class PlantUiStepDefinitions {
                 }
         }
 
+        @Given("no plants exist in the database")
+        public void noPlantsExistInTheDatabase() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.deleteAllPlants();
+        }
+
+        @Then("the message {string} should be displayed in the plants table")
+        public void theMessageShouldBeDisplayedInThePlantsTable(String expectedMessage) {
+                assertThat(plantsPage.isMessageDisplayedInTableBody(expectedMessage))
+                                .as("Expected message should be displayed in the plants table: " + expectedMessage)
+                                .isTrue();
+        }
+
         // Helper method for wait
         private void waitForMilliseconds(long milliseconds) {
                 try {
