@@ -1,16 +1,20 @@
 package stepdefinitions.ui;
 
+import java.time.Duration;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import actions.AuthenticationActions;
+import actions.CategoryActions;
+import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.LoginPage;
 import pages.PlantsPage;
-
-import java.time.Duration;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class PlantUiStepDefinitions {
 
@@ -19,6 +23,15 @@ public class PlantUiStepDefinitions {
 
         @Steps
         PlantsPage plantsPage;
+
+        @Steps
+        PlantActions plantActions;
+
+        @Steps
+        AuthenticationActions authenticationActions;
+
+        @Steps
+        CategoryActions categoryActions;
 
         private String uniquePlantName;
         private String targetPlantName;
@@ -148,6 +161,13 @@ public class PlantUiStepDefinitions {
                 waitForMilliseconds(1000); // Wait for table to update
                 assertThat(plantsPage.isPlantVisibleInTable(nameToCheck))
                                 .as("Plant '" + nameToCheck + "' should appear in the table")
+                                .isTrue();
+        }
+
+        @Then("the new plant {string} should not appear in the table")
+        public void theNewPlantShouldNotAppearInTheTable(String plantName) {
+                assertThat(plantsPage.isPlantNotVisibleInTable(plantName))
+                                .as("Plant '" + plantName + "' should not appear in the table")
                                 .isTrue();
         }
 
@@ -429,6 +449,69 @@ public class PlantUiStepDefinitions {
                 } else {
                         throw new IllegalArgumentException("Unsupported button check: " + buttonName);
                 }
+        }
+
+        @When("the user clicks Cancel to discard the plant")
+        public void theUserClicksCancelToDiscardThePlant() {
+                plantsPage.clickCancelButton();
+        }
+
+        @Given("at least one main category exists")
+        public void atLeastOneMainCategoryExists() {
+                authenticationActions.authenticateAsAdmin();
+                categoryActions.ensureAtLeastOneMainCategoryExists();
+        }
+
+        @Then("main categories should not be displayed in the category dropdown")
+        public void mainCategoriesShouldNotBeDisplayedInTheCategoryDropdown() {
+                java.util.List<String> dropdownOptions = plantsPage.getCategoryDropdownOptionTexts();
+                authenticationActions.authenticateAsAdmin();
+                java.util.List<String> mainCategoryNames = categoryActions.getMainCategoryNames();
+
+                for (String mainCategoryName : mainCategoryNames) {
+                        assertThat(dropdownOptions)
+                                        .as("Main category '" + mainCategoryName
+                                                        + "' should not appear in the category dropdown")
+                                        .doesNotContain(mainCategoryName);
+                }
+        }
+
+        @Given("no plants exist in the database")
+        public void noPlantsExistInTheDatabase() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.deleteAllPlants();
+        }
+
+        @Then("the message {string} should be displayed in the plants table")
+        public void theMessageShouldBeDisplayedInThePlantsTable(String expectedMessage) {
+                assertThat(plantsPage.isMessageDisplayedInTableBody(expectedMessage))
+                                .as("Expected message should be displayed in the plants table: " + expectedMessage)
+                                .isTrue();
+        }
+
+        @When("the user searches for a plant that does not exist")
+        public void theUserSearchesForAPlantThatDoesNotExist() {
+                String searchTerm = "NoMatch_" + UUID.randomUUID().toString().substring(0, 8);
+                plantsPage.searchPlant(searchTerm);
+        }
+
+        @Given("at least one plant with quantity less than 5 exists")
+        public void atLeastOnePlantWithQuantityLessThan5Exists() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.ensureLowQuantityPlantExists();
+        }
+
+        @Then("a {string} badge should be displayed for a plant with quantity less than 5")
+        public void aBadgeShouldBeDisplayedForAPlantWithQuantityLessThan5(String badgeText) {
+                assertThat(plantsPage.isLowBadgeDisplayed())
+                                .as("'" + badgeText + "' badge should be displayed for a low-quantity plant")
+                                .isTrue();
+        }
+
+        @Then("the low-stock test plant is cleaned up")
+        public void theLowStockTestPlantIsCleanedUp() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.cleanupLowStockPlant();
         }
 
         // Helper method for wait

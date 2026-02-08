@@ -1,12 +1,13 @@
 package pages;
 
-import net.serenitybdd.core.pages.PageObject;
-import net.serenitybdd.core.pages.WebElementFacade;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.util.List;
+import net.serenitybdd.core.pages.PageObject;
+import net.serenitybdd.core.pages.WebElementFacade;
 
 public class PlantsPage extends PageObject {
 
@@ -20,6 +21,8 @@ public class PlantsPage extends PageObject {
         private static final By FALLBACK_SAVE_BUTTON = By
                         .xpath("//button[contains(text(), 'Save')] | //button[@class='btn btn-primary']");
         private static final By SAVE_BUTTON = By.cssSelector("button[type='submit'], button.btn-primary, form button");
+        private static final By CANCEL_BUTTON = By.cssSelector(
+                        "a.btn-secondary[href$='/ui/plants'], a.btn-outline-secondary[href$='/ui/plants'], a[href$='/ui/plants'][class*='btn']");
 
         private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
         private static final By PLANTS_TABLE = By.cssSelector("table, .plants-table, [class*='table']");
@@ -85,6 +88,14 @@ public class PlantsPage extends PageObject {
                         getDriver().findElement(By.tagName("body")).sendKeys(Keys.PAGE_DOWN);
                         getDriver().findElement(FALLBACK_SAVE_BUTTON).click();
                         throw new RuntimeException("Save button not found", e);
+                }
+        }
+
+        public void clickCancelButton() {
+                try {
+                        getDriver().findElement(CANCEL_BUTTON).click();
+                } catch (Exception e) {
+                        throw new RuntimeException("Cancel button not found", e);
                 }
         }
 
@@ -379,6 +390,25 @@ public class PlantsPage extends PageObject {
                 }
         }
 
+        // Category dropdown option methods
+        public java.util.List<String> getCategoryDropdownOptionTexts() {
+                try {
+                        org.openqa.selenium.WebElement dropdown = getDriver().findElement(CATEGORY_DROPDOWN);
+                        org.openqa.selenium.support.ui.Select select = new org.openqa.selenium.support.ui.Select(
+                                        dropdown);
+                        java.util.List<String> optionTexts = new java.util.ArrayList<>();
+                        for (org.openqa.selenium.WebElement option : select.getOptions()) {
+                                String text = option.getText().trim();
+                                if (!text.isEmpty() && !text.equals("Select a category") && !text.startsWith("--")) {
+                                        optionTexts.add(text);
+                                }
+                        }
+                        return optionTexts;
+                } catch (Exception e) {
+                        return java.util.Collections.emptyList();
+                }
+        }
+
         // Page title verification
         public String getPageTitle() {
                 try {
@@ -391,6 +421,18 @@ public class PlantsPage extends PageObject {
         public boolean isPageTitleDisplayed() {
                 try {
                         return getDriver().findElement(PAGE_TITLE).isDisplayed();
+                } catch (Exception e) {
+                        return false;
+                }
+        }
+
+        // Low stock badge verification
+        public boolean isLowBadgeDisplayed() {
+                try {
+                        By lowBadge = By.xpath(
+                                        "//table//tbody//tr//span[contains(@class, 'badge') and contains(translate(text(), 'LOW', 'low'), 'low')]");
+                        return !getDriver().findElements(lowBadge).isEmpty()
+                                        && getDriver().findElements(lowBadge).get(0).isDisplayed();
                 } catch (Exception e) {
                         return false;
                 }

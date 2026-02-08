@@ -31,3 +31,20 @@ Feature: Dashboard Summary Verification
     Given Valid credentials available
     When Login successfully
     Then Dashboard page loads immediately with summary information
+
+  @UI @Dashboard @Summary @215027P
+  Scenario: Dashboard summary card "Categories" shows number of "main" and "sub" categories
+    Given User logged in
+    And Database has 3 main categories and 8 sub-categories
+    When Navigate to dashboard page
+    And Check "Main" and "Sub" in "Categories" card
+    Then Summary card "Categories" shows correct main categories count
+    And Summary card "Categories" shows correct sub categories count
+  
+  @UI @Dashboard @Summary @215027P
+  Scenario: Dashboard summary card "Sales" shows number of Sales and Revenue
+    Given User logged in
+    And Database has sales 10 sales and Rs. 10000 revenue
+    When Navigate to dashboard page
+    And Check "Revenue" and "Sales" in "Sales" card
+    Then Summary card "Sales" shows "10000" Revenue and "10" Sales

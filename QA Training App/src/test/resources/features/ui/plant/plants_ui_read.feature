@@ -38,3 +38,25 @@ Feature: Plant Management - UI Read Operations
     And the user selects the "Herbs" category from the filter
     And the user clicks the "Search" button
     Then the list updates to show only plants belonging to the "Herbs" category
+
+  @UI @Plant @UI_Plant_Read_005 @negative @215098G
+  Scenario: Verify user sees empty list message when no plants exist
+    Given no plants exist in the database
+    And the user is logged in as a user
+    When the user navigates to the Plants page
+    Then the message "No plants found" should be displayed in the plants table
+
+  @UI @Plant @UI_Plant_Read_006 @negative @215098G
+  Scenario: Verify user sees empty message when plant search returns no results
+    Given the user is logged in as a user
+    When the user navigates to the Plants page
+    And the user searches for a plant that does not exist
+    Then the message "No plants found" should be displayed in the plants table
+
+  @UI @Plant @UI_Plant_Read_007 @215098G
+  Scenario: Display "Low" badge when plant quantity is below 5
+    Given at least one plant with quantity less than 5 exists
+    And the user is logged in as a user
+    When the user navigates to the Plants page
+    Then a "Low" badge should be displayed for a plant with quantity less than 5
+    And the low-stock test plant is cleaned up
