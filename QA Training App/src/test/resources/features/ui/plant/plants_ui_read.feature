@@ -59,3 +59,4 @@ Feature: Plant Management - UI Read Operations
     And the user is logged in as a user
     When the user navigates to the Plants page
     Then a "Low" badge should be displayed for a plant with quantity less than 5
+    And the low-stock test plant is cleaned up

@@ -766,7 +766,37 @@ public class PlantActions {
                     "Failed to create low-quantity plant. Status: " + status
                             + " Body: " + createResponse.getBody().asString());
         }
-        System.out.println("Created low-quantity plant. Status: " + status);
+        try {
+            int plantId = createResponse.jsonPath().getInt("id");
+            Serenity.setSessionVariable("lowStockPlantId").to(plantId);
+            System.out.println("Created low-quantity plant ID " + plantId + ". Status: " + status);
+        } catch (Exception e) {
+            System.out.println("Created low-quantity plant but could not extract ID. Status: " + status);
+        }
+    }
+
+    @Step("Clean up the low-stock test plant")
+    public void cleanupLowStockPlant() {
+        Integer plantId = Serenity.sessionVariableCalled("lowStockPlantId");
+        if (plantId == null) {
+            System.out.println("No low-stock plant to clean up (was pre-existing or ID not stored).");
+            return;
+        }
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+
+        // Delete inventory records first (BUG-007 workaround)
+        utils.DatabaseCleanupUtil.deleteAllInventory();
+
+        io.restassured.response.Response response = getAuthenticatedRequest()
+                .when()
+                .delete(baseUrl + "/api/plants/" + plantId);
+        if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+            System.out.println("Cleaned up low-stock plant ID " + plantId);
+        } else {
+            System.out.println("Warning: Failed to clean up plant ID " + plantId
+                    + " - Status: " + response.getStatusCode());
+        }
     }
 
     @Step("Delete all plants via API")

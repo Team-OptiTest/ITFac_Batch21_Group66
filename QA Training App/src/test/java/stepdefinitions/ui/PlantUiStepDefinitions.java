@@ -488,6 +488,12 @@ public class PlantUiStepDefinitions {
                                 .isTrue();
         }
 
+        @Then("the low-stock test plant is cleaned up")
+        public void theLowStockTestPlantIsCleanedUp() {
+                authenticationActions.authenticateAsAdmin();
+                plantActions.cleanupLowStockPlant();
+        }
+
         // Helper method for wait
         private void waitForMilliseconds(long milliseconds) {
                 try {
