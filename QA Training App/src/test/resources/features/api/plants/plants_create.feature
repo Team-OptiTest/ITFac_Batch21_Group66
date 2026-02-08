@@ -46,3 +46,9 @@ Feature: Plant Management API
     When the admin creates a plant with a non-existent category ID
     Then the response status should be 404
     And the error message should contain "Category not found"
+
+  @UI @Sales @UI_Sales_Create_008 @215116M
+  Scenario: Sell Plant Button Hidden - User
+    Given the user is logged in as regular user
+    When the user navigates to the sales page
+    Then the Sell Plant button should not be visible

@@ -9,10 +9,14 @@ Feature: Sales Management - Read
     Then the sales list page should be displayed
     And sales records should be listed with plant name, quantity, total price, and sold date
 
-  @UI @Sales @UI_Sales_Read_004
+  @UI @Sales @UI_Sales_Read_004 @User @215116M
 Scenario: No Sales Found Message - User
   Given the user is logged in as regular user
   When the user navigates to the sales page
   Then the "No sales found" message should be displayed in the sales table
 
-  
+  @UI @Sales @UI_Sales_Read_005 @User @215116M
+  Scenario: Pagination Controls Visible (User)
+    Given the user is logged in as regular user
+    When the user navigates to the sales page
+    Then the pagination controls should be visible on the sales list
