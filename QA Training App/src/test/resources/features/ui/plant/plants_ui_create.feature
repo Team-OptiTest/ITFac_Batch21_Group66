@@ -5,7 +5,7 @@ Feature: Plant Management - UI Create Operations
 
   @UI @UI_Plant_Create_002 @215063V
   Scenario: Add New Plant (Success)
-    Given the user is logged in as an admin user
+    Given the user is authenticate as an admin user
     When the user navigates to the categories page
     And the user clicks the Add a category button
     And the user fills in the category name with "SimpleCat"
@@ -31,7 +31,7 @@ Feature: Plant Management - UI Create Operations
 
   @UI @UI_Plant_Create_003 @215063V
   Scenario: Add New Plant Validation (Failure)
-    Given the user is logged in as an admin user
+    Given the user is authenticate as an admin user
     When the user navigates to the Plants page
     And the user clicks on the "Add a Plant" button
     And the user leaves the "Plant Name" empty
@@ -46,7 +46,7 @@ Feature: Plant Management - UI Create Operations
 
   @UI @UI_Plant_Create_004 @215063V
   Scenario: Access Control - Normal User cannot add plant (Direct URL)
-    Given the user is logged in as a user
+    Given the user is authenticate as a normal user
     When the user navigates directly to the add plant page
     Then the user is redirected to the dashboard or sees access denied
 

@@ -5,7 +5,7 @@ Feature: Management of Plants - Delete
 
   @UI @UI_Plant_Delete_001 @215063V
   Scenario: Delete Plant (Success)
-    Given the user is logged in as an admin user
+    Given the user is authenticate as an admin user
     And the user is on the Plants page
     When the user clicks on the "Add a Plant" button
     And the user enters "DeleteMe" as the Plant Name
