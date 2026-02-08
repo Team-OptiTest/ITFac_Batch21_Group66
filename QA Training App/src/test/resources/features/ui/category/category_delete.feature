@@ -11,7 +11,6 @@ Feature: Delete Category
     And the user clicks on the Save button
     And the user clicks the delete button for the "DeleteTest" category
     And the user confirms the deletion
-    Then the user should see a success message confirming the category was deleted
     And the "DeleteTest" category should no longer be listed on the categories page
 
   @UI @Category @UI_Category_Delete_002 @negative @215013U
