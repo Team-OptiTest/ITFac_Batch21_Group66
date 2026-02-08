@@ -92,6 +92,6 @@ Feature: Plant Retrieval API
   @API @Plant_Read_001 @215027P
   Scenario: Plants summary API returns inventory statistics
     Given the user is authenticated with ROLE_USER
-    When I GET to "/api/plants/summary"
+    When I GET to "/api/plants/summary" for summary
     Then the response status should be 200
     And the response should be in read-only format
