@@ -1,19 +1,22 @@
 package pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 
 import net.serenitybdd.core.pages.PageObject;
 
 public class CategoryPage extends PageObject {
 
     // Locators based on actual HTML structure
-    private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("//select[@name='parentId'] | //select[@id='parentId'] | //form//select");
-    private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("//a[contains(text(),'Add A Category')] | //a[contains(@href,'/categories/add')]");
-    private static final By SUCCESS_MESSAGE = By.cssSelector(".alert-success");
-    private static final By SEARCH_INPUT_FIELD = By.name("name");
-    private static final By SEARCH_BUTTON = By.cssSelector("button.btn-primary[type='submit']");
-    private static final By CATEGORY_TABLE_BODY = By.cssSelector("table tbody");
-
+    private static final By PARENT_CATEGORY_DROPDOWN = By.xpath("//select");
+    private static final By ADD_CATEGORY_BUTTON_SELECTOR = By.xpath("//a[normalize-space()='Add A Category']");
+    private static final By SUCCESS_MESSAGE = By.xpath("//div[contains(@class, 'alert-success')]");
+    private static final By SEARCH_INPUT_FIELD = By.xpath("//input[@name='name']");
+    private static final By SEARCH_BUTTON = By.xpath("//button[contains(@class,'btn-primary')][@type='submit'] | //button[@type='submit']");
+    private static final By CATEGORY_TABLE_BODY = By.xpath("//table//tbody");
+    
     public void navigateToCategoriesPage() {
         getDriver().get("http://localhost:8080/ui/categories");
     }
@@ -67,9 +70,29 @@ public class CategoryPage extends PageObject {
         }
     }
 
+    public boolean categoryDeleteButtonsDisabledForUser() {
+        try {
+            return getDriver().findElements(By.xpath("//table//button[contains(@class, 'delete')]")).stream()
+                    .allMatch(button -> !button.isEnabled());
+        } catch (Exception e) {
+            // If delete buttons are not found, we can consider them as disabled for the user
+            return true;
+        }
+    }
+
+    public boolean categoryEditButtonsDisabledForUser() {
+        try {
+            return getDriver().findElements(By.xpath("//table//a[contains(@href, 'edit')]")).stream()
+                    .allMatch(button -> !button.isEnabled());
+        } catch (Exception e) {
+            // If edit buttons are not found, we can consider them as disabled for the user
+            return true;
+        }
+    }
+
     public boolean isCategoryVisibleInList(String categoryName) {
         try {
-            return getDriver().findElement(By.xpath("//table//td[contains(text(), '" + categoryName + "')]")).isDisplayed();
+            return getDriver().findElement(By.xpath("//table//td[text()='" + categoryName + "']")).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -77,7 +100,7 @@ public class CategoryPage extends PageObject {
 
     public boolean isCategoryListDisplayed() {
         try {
-            return getDriver().findElement(By.xpath("//table | //div[contains(@class, 'category')]")).isDisplayed();
+            return getDriver().findElement(By.xpath("//table")).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -134,7 +157,54 @@ public class CategoryPage extends PageObject {
             return false;
         }
     }
+  
+    public void clickDeleteButtonForCategory(String categoryName) {
+        try {
+            // Locate the delete button
+            WebElement deleteButton = getDriver().findElement(
+                By.xpath("//table//tr[td[normalize-space()='" + categoryName + "']]//form[contains(@action,'/ui/categories/delete')]//button")
+            );
+            
+            // Scroll the element into view
+            ((JavascriptExecutor) getDriver()).executeScript("arguments[0].scrollIntoView({block: 'center'});", deleteButton);
+            
+            // Wait a bit for any animations
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            
+            // Try normal click first
+            try {
+                deleteButton.click();
+            } catch (ElementClickInterceptedException e) {
+                // If intercepted, use JavaScript click
+                ((JavascriptExecutor) getDriver()).executeScript("arguments[0].click();", deleteButton);
+            }
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Delete button for category '" + categoryName + "' not found or not clickable", e);
+        }
+    }
 
+    public void confirmDeletion() {
+        try {
+            // Wait for alert and accept it
+            waitABit(500); // Wait for dialog to appear
+            getDriver().switchTo().alert().accept();
+        } catch (Exception e) {
+            // If it's not a browser alert, it might be a modal dialog
+            try {
+                // Click OK button in the modal
+                WebElement okButton = getDriver().findElement(By.xpath("//button[text()='OK' or contains(text(), 'OK')]"));
+                ((JavascriptExecutor) getDriver()).executeScript("arguments[0].click();", okButton);
+            } catch (Exception ex) {
+                throw new RuntimeException("Could not confirm deletion dialog", ex);
+            }
+        }
+    }
+}
     public void navigateToAddCategoryPageDirectly() {
         String baseUrl = "http://localhost:8080"; // or get from environment
         getDriver().get(baseUrl + "/ui/categories/add");
