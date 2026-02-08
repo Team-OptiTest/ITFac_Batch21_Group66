@@ -3,16 +3,25 @@ package stepdefinitions.api;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 import actions.AuthenticationActions;
 import actions.CategoryActions;
 import actions.PlantActions;
 import actions.SalesAction;
-import io.cucumber.java.en.*;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import net.serenitybdd.annotations.Steps;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.model.util.EnvironmentVariables;
 
-import static org.hamcrest.Matchers.equalTo;
+
+
+
+
+
 
 public class SalesApiStepDefinitions {
 
@@ -35,8 +44,7 @@ public class SalesApiStepDefinitions {
     private int currentQuantityBeforeSale;
     private int categoryId;
     private int saleId;
-        private int initialQuantity;
-
+    private int initialQuantity;
 
     @Given("admin is authenticated")
     public void admin_is_authenticated() {
@@ -74,8 +82,7 @@ public class SalesApiStepDefinitions {
             body.put("price", 20.0);
             body.put("quantity", initialStock);
 
-
-plantActions.createPlantAndStoreId(categoryId, body);
+            plantActions.createPlantAndStoreId(categoryId, body);
             plantId = plantActions.getLastCreatedPlantId();
 
             if (plantId == 0) {
@@ -209,8 +216,8 @@ plantActions.createPlantAndStoreId(categoryId, body);
 
         if (currentQuantity != expectedQuantity) {
             throw new AssertionError(
-                    "Expected plant quantity: " + expectedQuantity +
-                            ", but got: " + currentQuantity
+                    "Expected plant quantity: " + expectedQuantity
+                    + ", but got: " + currentQuantity
             );
         }
 
@@ -277,8 +284,18 @@ plantActions.createPlantAndStoreId(categoryId, body);
     }
 
     @When("user attempts to retrieve a sale with non-existent ID")
-    public void user_attempts_to_retrieve_sale_with_non_existent_id() {
+    public void user_attempts_to_retrieve_a_sale_with_non_existent_id() {
         salesAction.getSaleWithNonExistentId();
+    }
+
+    @Then("the API should return code {int} Not Found")
+    public void the_api_should_return_code_not_found(int expectedStatusCode) {
+        salesAction.verifyStatusCode(expectedStatusCode);
+    }
+
+    @Then("the response should contain message {string}")
+    public void the_response_should_contain_message(String expectedMessage) {
+        salesAction.verifyErrorMessageContains(expectedMessage);
     }
 
     @Then("the API should return {int} Not Found with message {string}")
@@ -317,4 +334,172 @@ plantActions.createPlantAndStoreId(categoryId, body);
             categoryId = 0;
         }
     }
+
+    @Given("multiple sales exist in the system")
+    public void multiple_sales_exist_in_the_system() {
+        // Authenticate as admin to create sales
+        authenticationActions.authenticateAsAdmin();
+        String adminToken = Serenity.sessionVariableCalled("authToken");
+        salesAction.setToken(adminToken);
+
+        // Ensure at least one plant exists (reuses existing action)
+        plantActions.ensureAtLeastOnePlantExists();
+
+        // Fetch available plants and build a list of IDs (handle paged and non-paged responses)
+        String baseUrl = net.serenitybdd.model.environment.EnvironmentSpecificConfiguration
+                .from(net.thucydides.model.environment.SystemEnvironmentVariables.createEnvironmentVariables())
+                .getProperty("api.base.url");
+
+        io.restassured.response.Response response = net.serenitybdd.rest.SerenityRest.given()
+                .header("Authorization", "Bearer " + adminToken)
+                .when()
+                .get(baseUrl + "/api/plants");
+
+        java.util.List<Integer> plantIds = response.jsonPath().getList("content.id", Integer.class);
+        if (plantIds == null || plantIds.isEmpty()) {
+            plantIds = response.jsonPath().getList("id", Integer.class);
+        }
+        if (plantIds == null || plantIds.isEmpty()) {
+            // fallback: extract ids from root objects
+            java.util.List<java.util.Map<String, Object>> plants = response.jsonPath().getList("$");
+            plantIds = new java.util.ArrayList<>();
+            if (plants != null) {
+                for (java.util.Map<String, Object> p : plants) {
+                    Object idObj = p.get("id");
+                    if (idObj instanceof Number) {
+                        plantIds.add(((Number) idObj).intValue());
+                    } else if (idObj instanceof String) {
+                        try {
+                            plantIds.add(Integer.parseInt((String) idObj));
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                }
+            }
+        }
+
+        if (plantIds == null || plantIds.isEmpty()) {
+            throw new IllegalStateException("No plants available to create sales against");
+        }
+
+        // Create at least 8 sales using round-robin across available plants.
+        // Create small quantity (1) per sale to avoid depleting stock.
+        int required = 8;
+        int created = 0;
+        int idx = 0;
+        int safety = 0;
+        while (created < required && safety < plantIds.size() * 20) {
+            int pid = plantIds.get(idx % plantIds.size());
+            int available = plantActions.getPlantQuantity(pid);
+            if (available >= 1) {
+                salesAction.createSale(pid, 1);
+                // Verify creation succeeded
+                salesAction.verifyStatusCode(201);
+                created++;
+            }
+            idx++;
+            safety++;
+        }
+
+        if (created < required) {
+            // Provision a fallback plant with sufficient stock, then finish seeding.
+            plant_exists_with_sufficient_stock();
+            int fallbackId = plantId;
+            while (created < required && plantActions.getPlantQuantity(fallbackId) > 0) {
+                salesAction.createSale(fallbackId, 1);
+                salesAction.verifyStatusCode(201);
+                created++;
+            }
+        }
+        if (created < required) {
+            throw new IllegalStateException("Could not create required number of sales; created=" + created);
+        }
+
+        // Switch to user for retrieval actions
+        authenticationActions.authenticateUser();
+        String userToken = Serenity.sessionVariableCalled("authToken");
+        salesAction.setToken(userToken);
+    }
+
+    @When("user retrieves sales page with params {string}")
+    public void user_retrieves_sales_page_with_params(String queryParams) {
+        salesAction.getSalesWithPagination("/api/sales/page", queryParams);
+    }
+
+    @Then("the response should contain pagination metadata for page {int} and size {int}")
+    public void the_response_should_contain_pagination_metadata_for_page_and_size(int page, int size) {
+        // Status 200
+        salesAction.verifyStatusCode(200);
+
+        // Reuse generic pagination verifications from PlantActions
+        plantActions.verifyPaginationMetadata();
+        plantActions.verifyPageNumber(page);
+        plantActions.verifyPageSize(size);
+        plantActions.verifyResponseHasContentArray();
+    }
+
+    @Then("the response content should be sorted by {string} {string}")
+    public void the_response_content_should_be_sorted_by(String field, String direction) {
+        java.util.List<String> values = net.serenitybdd.rest.SerenityRest.lastResponse()
+                .jsonPath()
+                .getList("content." + field, String.class);
+
+        if (values == null || values.size() <= 1) {
+            return; // nothing to verify
+        }
+
+        boolean descending = "desc".equalsIgnoreCase(direction);
+
+        for (int i = 0; i < values.size() - 1; i++) {
+            String a = values.get(i);
+            String b = values.get(i + 1);
+
+            // Skip comparison if either value is null
+            if (a == null || b == null) {
+                continue;
+            }
+
+            // Try parse as ISO dates first, fallback to string compare
+            try {
+                java.time.Instant ia = java.time.Instant.parse(a);
+                java.time.Instant ib = java.time.Instant.parse(b);
+                if (descending && ia.isBefore(ib)) {
+                    throw new AssertionError("List is not sorted desc by " + field);
+                }
+                if (!descending && ia.isAfter(ib)) {
+                    throw new AssertionError("List is not sorted asc by " + field);
+                }
+            } catch (Exception ex) {
+                int cmp = a.compareTo(b);
+                if (descending && cmp < 0) {
+                    throw new AssertionError("List is not sorted desc by " + field);
+                }
+                if (!descending && cmp > 0) {
+                    throw new AssertionError("List is not sorted asc by " + field);
+                }
+            }
+        }
+    }
+
+    @Then("verify plant quantity decreased by sale quantity")
+    public void verify_plant_quantity_decreased_by_sale_quantity() {
+        quantitySold = 1;
+        int currentQuantity = plantActions.getPlantQuantity(plantId);
+        int expectedQuantity = initialStock - quantitySold;
+        // Verify the quantity decreased correctly
+        if (currentQuantity != expectedQuantity) {
+            throw new AssertionError(
+                    "Plant quantity did not decrease correctly. "
+                    + "Initial: " + initialStock
+                    + ", Sold: " + quantitySold
+                    + ", Expected: " + expectedQuantity
+                    + ", Actual: " + currentQuantity
+            );
+        }
+    }
+
+
 }
+
+
+

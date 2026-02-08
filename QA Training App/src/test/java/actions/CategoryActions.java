@@ -1,5 +1,6 @@
 package actions;
 
+import java.util.Collections;
 import java.util.List;
 
 import io.restassured.response.Response;
@@ -153,6 +154,148 @@ public class CategoryActions {
                 .delete(deleteUrl);
 
         System.out.println("Status Code: " + lastResponse.getStatusCode());
+    }
+
+    @Step("Delete all categories via API")
+    public void deleteAllCategories() {
+        String token = getAuthToken();
+        if (token == null) {
+            throw new IllegalStateException("Auth token missing; cannot delete categories.");
+        }
+
+        // --- Delete all sales first (sales reference plants via FK) ---
+        int salesDeletePass = 0;
+        final int maxSalesDeletePasses = 10;
+        List<Integer> previousSalesIds = null;
+        while (salesDeletePass < maxSalesDeletePasses) {
+            salesDeletePass++;
+            Response salesResponse = SerenityRest.given()
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .get(getBaseUrl() + "/api/sales");
+
+            if (salesResponse.getStatusCode() != 200) {
+                throw new IllegalStateException("Failed to fetch sales. Status: " + salesResponse.getStatusCode());
+            }
+
+            List<Integer> salesIds = salesResponse.jsonPath().getList("id", Integer.class);
+            if (salesIds == null || salesIds.isEmpty()) {
+                if (salesDeletePass > 1) {
+                    System.out.println("All sales deleted after " + salesDeletePass + " passes.");
+                } else {
+                    System.out.println("No sales to delete.");
+                }
+                break;
+            }
+            if (previousSalesIds != null && previousSalesIds.equals(salesIds)) {
+                throw new IllegalStateException("No progress deleting sales after pass " + salesDeletePass);
+            }
+            previousSalesIds = new java.util.ArrayList<>(salesIds);
+
+            for (Integer saleId : salesIds) {
+                Response deleteSaleResponse = SerenityRest.given()
+                        .header("Authorization", "Bearer " + token)
+                        .when()
+                        .delete(getBaseUrl() + "/api/sales/" + saleId);
+                if (deleteSaleResponse.getStatusCode() < 200 || deleteSaleResponse.getStatusCode() >= 300) {
+                    System.out.println("Failed to delete sale ID " + saleId + " - Status: " + deleteSaleResponse.getStatusCode());
+                    System.out.println("Response: " + deleteSaleResponse.getBody().asString());
+                } else {
+                    System.out.println("Deleted sale ID " + saleId + " - Status: " + deleteSaleResponse.getStatusCode());
+                }
+            }
+        }
+        if (salesDeletePass >= maxSalesDeletePasses) {
+            throw new IllegalStateException("Sales deletion exceeded " + maxSalesDeletePasses + " passes");
+        }
+
+        // --- BUG-007 Workaround: Delete all inventory records via JDBC ---
+        // No /api/inventory endpoint exists, so direct DB cleanup is required
+        // to avoid FK constraint violation (inventory.plant_id -> plants.id)
+        utils.DatabaseCleanupUtil.deleteAllInventory();
+
+        // --- Delete all plants (with error handling and loop for pagination/partial deletes) ---
+        int plantDeletePass = 0;
+        final int maxPlantDeletePasses = 10;
+        List<Integer> previousPlantIds = null;
+        while (plantDeletePass < maxPlantDeletePasses) {
+            plantDeletePass++;
+            Response plantsResponse = SerenityRest.given()
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .get(getBaseUrl() + "/api/plants");
+
+            if (plantsResponse.getStatusCode() != 200) {
+                throw new IllegalStateException("Failed to fetch plants. Status: " + plantsResponse.getStatusCode());
+            }
+
+            List<Integer> plantIds = plantsResponse.jsonPath().getList("id", Integer.class);
+            if (plantIds == null || plantIds.isEmpty()) {
+                if (plantDeletePass > 1) {
+                    System.out.println("All plants deleted after " + plantDeletePass + " passes.");
+                } else {
+                    System.out.println("No plants to delete.");
+                }
+                break;
+            }
+            if (previousPlantIds != null && previousPlantIds.equals(plantIds)) {
+                throw new IllegalStateException("No progress deleting plants after pass " + plantDeletePass);
+            }
+            previousPlantIds = new java.util.ArrayList<>(plantIds);
+
+            for (Integer plantId : plantIds) {
+                Response deletePlantResponse = SerenityRest.given()
+                        .header("Authorization", "Bearer " + token)
+                        .when()
+                        .delete(getBaseUrl() + "/api/plants/" + plantId);
+                if (deletePlantResponse.getStatusCode() < 200 || deletePlantResponse.getStatusCode() >= 300) {
+                    System.out.println("Failed to delete plant ID " + plantId + " - Status: " + deletePlantResponse.getStatusCode());
+                    System.out.println("Response: " + deletePlantResponse.getBody().asString());
+                } else {
+                    System.out.println("Deleted plant ID " + plantId + " - Status: " + deletePlantResponse.getStatusCode());
+                }
+            }
+            // Loop again in case more plants remain (pagination or partial delete)
+        }
+        if (plantDeletePass >= maxPlantDeletePasses) {
+            throw new IllegalStateException("Plant deletion exceeded " + maxPlantDeletePasses + " passes");
+        }
+
+        // --- Now delete all categories (with error handling) ---
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(getBaseUrl() + "/api/categories");
+
+        if (response.getStatusCode() != 200) {
+            throw new IllegalStateException("Failed to fetch categories. Status: " + response.getStatusCode());
+        }
+
+        List<Integer> categoryIds = response.jsonPath().getList("id", Integer.class);
+
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            System.out.println("No categories to delete.");
+            return;
+        }
+
+        // Copy into a mutable list, then delete in reverse order so children are removed before parents
+        categoryIds = new java.util.ArrayList<>(categoryIds);
+        Collections.sort(categoryIds, Collections.reverseOrder());
+
+        for (Integer id : categoryIds) {
+            Response deleteResponse = SerenityRest.given()
+                    .header("Authorization", "Bearer " + token)
+                    .when()
+                    .delete(getBaseUrl() + "/api/categories/" + id);
+            if (deleteResponse.getStatusCode() < 200 || deleteResponse.getStatusCode() >= 300) {
+                System.out.println("Failed to delete category ID " + id + " - Status: " + deleteResponse.getStatusCode());
+                System.out.println("Response: " + deleteResponse.getBody().asString());
+            } else {
+                System.out.println("Deleted category ID " + id + " - Status: " + deleteResponse.getStatusCode());
+            }
+        }
+
+        System.out.println("All categories delete attempt complete.");
     }
 
     @Step("Get categories summary")
@@ -327,5 +470,101 @@ public class CategoryActions {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Step("Create category and a parent category with name: {0} and parentName {1}")
+    public void createCategoryAndSubCategory(String categoryName, String parentCategory){
+        String requestBody = String.format("{\"name\":\"%s\"}", parentCategory);
+        String token = getAuthToken();
+
+        lastResponse = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(requestBody)
+                .when()
+                .post(getBaseUrl() + "/api/categories");
+
+        // Only try to extract ID if the request was successful
+        if (lastResponse.getStatusCode() == 201 || lastResponse.getStatusCode() == 200) {
+            try {
+                int parentId = lastResponse.jsonPath().getInt("id");
+                String createUrl = getBaseUrl() + "/api/categories";
+                String categoryRequestBody = String.format("{\"name\":\"%s\",\"parent\": { \"name\": \"%s\", \"id\": \"%d\"}}", categoryName, parentCategory, parentId);
+
+                Response categeoryResponse = SerenityRest.given()
+                        .header("Authorization", "Bearer " + token)
+                        .header("Content-Type", "application/json")
+                        .body(categoryRequestBody)
+                        .when()
+                        .post(createUrl);
+
+                Serenity.setSessionVariable("childCatIdForPlantRead").to(categeoryResponse.jsonPath().getInt("id"));
+
+            } catch (Exception e) {
+                System.out.println("Could not extract category ID: " + e.getMessage());
+            }
+        } else {
+            // Request failed - don't try to extract ID
+            System.out.println("Category creation failed with status: " + lastResponse.getStatusCode());
+        }
+    }
+
+    @Step("Get main category names")
+    public java.util.List<String> getMainCategoryNames() {
+        String token = getAuthToken();
+        String mainCategoriesUrl = getBaseUrl() + "/api/categories/main";
+
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(mainCategoriesUrl);
+
+        if (response.getStatusCode() == 200) {
+            try {
+                return response.jsonPath().getList("name", String.class);
+            } catch (Exception e) {
+                return java.util.Collections.emptyList();
+            }
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    @Step("Ensure at least one main category exists")
+    public void ensureAtLeastOneMainCategoryExists() {
+        String token = getAuthToken();
+        String mainCategoriesUrl = getBaseUrl() + "/api/categories/main";
+
+        Response response = SerenityRest.given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(mainCategoriesUrl);
+
+        if (response.getStatusCode() == 200) {
+            List<?> categories = response.jsonPath().getList("$");
+            if (categories != null && !categories.isEmpty()) {
+                return; // Main category already exists
+            }
+        }
+
+        // Create a main category if none exists
+        createCategory("MainCatTest");
+        if (lastResponse == null || (lastResponse.getStatusCode() != 200 && lastResponse.getStatusCode() != 201)) {
+            System.out.println("Warning: Failed to create main category. Status: "
+                    + (lastResponse != null ? lastResponse.getStatusCode() : "null"));
+        }
+    }
+
+    @Step("Search categories with name: {0}")
+    public int searchAndGetCategoryIdFromName(String categoryName) {
+        String token = getAuthToken();
+        String searchUrl = getBaseUrl() + "/api/categories";
+
+        var request = SerenityRest.given()
+                .header("Authorization", "Bearer " + token);
+        if (categoryName != null) {
+            request = request.queryParam("name", categoryName);
+        }
+        lastResponse = request.when().get(searchUrl);
+        return lastResponse.getBody().jsonPath().getList("id", Integer.class).getFirst();
     }
 }

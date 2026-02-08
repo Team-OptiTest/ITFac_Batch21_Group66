@@ -3,6 +3,7 @@ package stepdefinitions.api;
 import java.util.Map;
 
 import actions.AuthenticationActions;
+import actions.CategoryActions;
 import actions.PlantActions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -17,6 +18,9 @@ public class PlantApiStepDefinitions {
     PlantActions plantActions;
 
     @Steps
+    CategoryActions categoryActions;
+
+    @Steps
     AuthenticationActions authenticationActions;
 
     @Given("the admin is authenticated")
@@ -29,25 +33,39 @@ public class PlantApiStepDefinitions {
         authenticationActions.authenticateUser();
     }
 
-    @Given("a valid category with ID {int} exists")
-    public void aValidCategoryWithIDExists(Integer categoryId) {
-        // This is a precondition step - we assume the category exists in the test
-        // environment
-        // No action needed as this is just documenting the test precondition
+    @Given("the user has an invalid JWT token")
+    public void theUserHasAnInvalidJWTToken() {
+        authenticationActions.setInvalidJWTToken();
+    }
+
+    @Given("a category is created with name {string} and parent {string}")
+    public void aValidCategoryWithIDExists(String categoryName, String parentName) {
+        categoryActions.createCategoryAndSubCategory(categoryName, parentName);
+    }
+
+    @When("I POST to {string} with category {string} and following data:")
+    public void iPOSTToWithFollowingData(String endpoint, String categoryName, io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> data = dataTable.asMaps().getFirst();
+        Map<String, Object> body = new java.util.HashMap<>();
+        String plantName = data.get("name");
+        body.put("name", plantName);
+        body.put("price", Double.parseDouble(data.get("price")));
+        body.put("quantity", Integer.parseInt(data.get("quantity")));
+        String[] parts = endpoint.split("/");
+        int categoryId = categoryActions.searchAndGetCategoryIdFromName(categoryName);
+        plantActions.createPlant(categoryId, body);
     }
 
     @When("I POST to {string} with following data:")
-    public void iPOSTToWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
-        Map<String, String> data = dataTable.asMaps().get(0);
-
+    public void iPOSTWithFollowingData(String endpoint, io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> data = dataTable.asMaps().getFirst();
         Map<String, Object> body = new java.util.HashMap<>();
-        String plantName = data.get("name") + "_" + System.currentTimeMillis();
+        String plantName = data.get("name");
         body.put("name", plantName);
         body.put("price", Double.parseDouble(data.get("price")));
         body.put("quantity", Integer.parseInt(data.get("quantity")));
         String[] parts = endpoint.split("/");
         int categoryId = Integer.parseInt(parts[parts.length - 1]);
-
         plantActions.createPlant(categoryId, body);
     }
 
@@ -110,6 +128,11 @@ public class PlantApiStepDefinitions {
         plantActions.getPlantsByCategory(endpoint);
     }
 
+    @When("I GET to {string} for summary")
+    public void iGETToForSummary(String endpoint) {
+        plantActions.getPlantsSummary(endpoint);
+    }
+
     @Then("the response should contain an array of plants")
     public void theResponseShouldContainAnArrayOfPlants() {
         plantActions.verifyPlantsArrayExists();
@@ -118,10 +141,12 @@ public class PlantApiStepDefinitions {
     @Given("a plant with ID exists in the system")
     public void aPlantWithIDExistsInTheSystem() {
         Map<String, Object> body = new java.util.HashMap<>();
-        body.put("name", "TestPlant_" + System.currentTimeMillis());
+        body.put("name", "PlantForDelete");
         body.put("price", 25.00);
         body.put("quantity", 100);
-        plantActions.createPlantAndStoreId(5, body);
+        categoryActions.createCategoryAndSubCategory("ChildCat4", "ParentCat4");
+        var categoryId = categoryActions.searchAndGetCategoryIdFromName("ChildCat4");
+        plantActions.createPlantAndStoreId(categoryId, body);
     }
 
     @When("I DELETE to {string}")
@@ -151,6 +176,11 @@ public class PlantApiStepDefinitions {
         Map<String, Object> body = new java.util.HashMap<>();
         body.put("quantity", Integer.parseInt(newQuantity));
         plantActions.updatePlantQuantity(endpoint, body);
+    }
+
+    @When("the admin updates a plant with name {string}")
+    public void theAdminUpdatesPlantWithName(String name) {
+        plantActions.updatePlantName(name);
     }
 
     @Given("at least one plant exists in the system")
@@ -201,5 +231,15 @@ public class PlantApiStepDefinitions {
     @When("the admin creates a plant with a non-existent category ID")
     public void theAdminCreatesPlantWithNonExistentCategoryId() {
         plantActions.createPlantWithNonExistentCategory();
+    }
+
+    @When("the user attempts to get plants by a non-existent category ID")
+    public void theUserAttemptsToGetPlantsByNonExistentCategoryId() {
+        plantActions.getPlantsByNonExistentCategoryId();
+    }
+
+    @Then("the response should be in read-only format")
+    public void theResponseShouldBeInReadOnlyFormat() {
+        plantActions.verifyReadOnlyFormat();
     }
 }

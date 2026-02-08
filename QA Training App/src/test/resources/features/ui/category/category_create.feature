@@ -23,7 +23,7 @@ Feature: Create Category
   Scenario: Validation error when creating a category with an empty name
     Given the user is logged in as an admin user
     When the user navigates to the categories page
-    And the user clicks the Add a category button
+    And the user navigates to the add categories page
     And the user leaves the category name field empty
     And the user clicks on the Save button
     Then the user should see a validation error message indicating that the category name is required
@@ -33,3 +33,10 @@ Feature: Create Category
     Given the user is logged in as a user
     When the user navigates to the categories page
     Then the user should not see the "Add a category" button
+  
+  @UI @AccessControl @215027P @UI_Category_Create_005
+  Scenario: User cannot access Add Category page
+    Given the user is logged in as a user
+    When the user navigates directly to the add category page
+    Then the user is redirected from the category page
+    And category access denied message is displayed

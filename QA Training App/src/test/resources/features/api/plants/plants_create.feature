@@ -6,8 +6,8 @@ Feature: Plant Management API
   @API @Plant @215063V
   Scenario: Create Plant with Valid Data
     Given the admin is authenticated
-    And a valid category with ID 5 exists
-    When I POST to "/api/plants/category/5" with following data:
+    And a category is created with name "ChildCat1" and parent "ParentCat1"
+    When I POST to "/api/plants/category/" with category "ChildCat1" and following data:
       | name    | price | quantity |
       | Sunrose | 15.50 |      100 |
     Then the response status should be 201
@@ -17,7 +17,6 @@ Feature: Plant Management API
   @API @Plant @Authorization @215063V
   Scenario: Unauthorized Create Attempt
     Given the user is authenticated with ROLE_USER
-    And a valid category with ID 5 exists
     When I POST to "/api/plants/category/5" with following data:
       | name      | price | quantity |
       | TestPlant | 20.00 |       50 |
@@ -26,8 +25,8 @@ Feature: Plant Management API
   @API @Plant @Validation @215063V
   Scenario: Plant Name Length Validation
     Given the admin is authenticated
-    And a valid category with ID 5 exists
-    When I POST to "/api/plants/category/5" with invalid data:
+    And a category is created with name "ChildCat3" and parent "ParentCat3"
+    When I POST to "/api/plants/category/" with category "ChildCat3" and following data:
       | name | price | quantity |
       | Ab   | 10.00 |       50 |
     Then the response status should be 400
@@ -47,3 +46,9 @@ Feature: Plant Management API
     When the admin creates a plant with a non-existent category ID
     Then the response status should be 404
     And the error message should contain "Category not found"
+
+  @UI @Sales @UI_Sales_Create_008 @215116M
+  Scenario: Sell Plant Button Hidden - User
+    Given the user is logged in as regular user
+    When the user navigates to the sales page
+    Then the Sell Plant button should not be visible

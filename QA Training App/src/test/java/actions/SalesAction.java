@@ -1,13 +1,17 @@
 package actions;
 
 import net.serenitybdd.annotations.Step;
-import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.rest.SerenityRest;
 import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.thucydides.model.environment.SystemEnvironmentVariables;
 import net.thucydides.model.util.EnvironmentVariables;
+import net.serenitybdd.core.Serenity;
+import io.restassured.http.ContentType;
 import static org.hamcrest.Matchers.*;
 import java.util.List;
+import static org.hamcrest.Matchers.*;
+
+import utils.TestUtils;
 
 public class SalesAction {
 
@@ -22,6 +26,27 @@ public class SalesAction {
     public void setToken(String token) {
         this.token = token;
     }
+
+    @Step("Delete all sales (cleanup)")
+public void deleteAllSales() {
+    // get all sales
+    getAllSales();
+    verifyStatusCode(200);
+
+    java.util.List<Integer> ids = SerenityRest.lastResponse()
+            .jsonPath()
+            .getList("id", Integer.class);
+
+    if (ids == null || ids.isEmpty()) return;
+
+    for (Integer id : ids) {
+        if (id != null) {
+            deleteSale(id);
+            // some APIs return 204 for delete, some 200
+            SerenityRest.then().statusCode(anyOf(is(200), is(204)));
+        }
+    }
+}
 
     @Step("Create a sale for a plant")
     public void createSale(int plantId, int quantity) {
@@ -51,6 +76,12 @@ public class SalesAction {
     public void verifyErrorMessage(String expectedMessage) {
         SerenityRest.then()
                 .body("message", equalTo(expectedMessage));
+    }
+
+    @Step("Verify error message contains")
+    public void verifyErrorMessageContains(String expectedMessage) {
+        SerenityRest.then()
+                .body("message", containsString(expectedMessage));
     }
 
     @Step("Retrieve all sales")
@@ -109,7 +140,7 @@ public class SalesAction {
     @Step("Get a sale with non-existent ID")
     public void getSaleWithNonExistentId() {
         // Use a non-existent ID generated from existing sale IDs
-        int nonExistentId = (int) utils.TestUtils.generateNonExistentId(getAllSaleIds());
+        int nonExistentId = (int) TestUtils.generateNonExistentId(getAllSaleIds());
         SerenityRest.given()
                 .header("Authorization", "Bearer " + token)
                 .when()
@@ -149,4 +180,31 @@ public class SalesAction {
         SerenityRest.then()
                 .statusCode(401);
     }
+
+    @Step("Get sales page with pagination: {0}?{1}")
+    public void getSalesWithPagination(String endpoint, String queryParams) {
+        String baseUrl = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("api.base.url");
+
+        String fullUrl = baseUrl + endpoint + "?" + queryParams;
+
+        String tokenFromSession = Serenity.sessionVariableCalled("authToken");
+
+        if (tokenFromSession != null) {
+            SerenityRest.given()
+                    .header("Authorization", "Bearer " + tokenFromSession)
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .get(fullUrl);
+        } else {
+            // No auth header
+            SerenityRest.given()
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .get(fullUrl);
+        }
+    }
+
+  
+
 }

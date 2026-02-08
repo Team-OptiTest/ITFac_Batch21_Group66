@@ -1,7 +1,7 @@
 @sales @delete
 Feature: Sales API - Delete Sale
 
-  @API_Sales_Delete_001
+  @215116M @API_Sales_Delete_001 @Admin @Positive
   Scenario: Delete Sale by Valid ID - Admin
     Given admin is authenticated
     And a sale exists with a known valid saleId
