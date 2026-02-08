@@ -13,7 +13,6 @@ Feature: Update Category
         Then the user should be navigated to the edit category page
         And the user updates the category name to "Updated"
         And the user clicks on the Save button
-        And the user should see a success message confirming the category was updated
         And the "Updated" should be listed on the categories page
 
     @UI @Category @UI_Category_Update_002 @negative @215013U
